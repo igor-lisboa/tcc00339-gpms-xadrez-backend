@@ -1,0 +1,20 @@
+{
+    "jogos": [],
+    "pecas": [
+        "Rei",
+        "Rainha",
+        "Bispo",
+        "Cavalo",
+        "Torre",
+        "Peão"
+    ],
+    "lados": [
+        "Branco",
+        "Preto"
+    ],
+    "tiposJogo": [
+        "Humano X Humano",
+        "Humano X I.A.",
+        "I.A. X I.A."
+    ]
+}
