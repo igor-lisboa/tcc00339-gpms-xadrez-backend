@@ -21,7 +21,7 @@ module.exports = class Peca {
         this.passosHabilitados = passosHabilitados;
     }
 
-    movimentoEspecial() {
+    movimentosEspeciais() {
         // substituido nas classes de validação concretas
         // onde uma lógica especial eh necessária
     }

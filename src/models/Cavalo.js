@@ -6,7 +6,7 @@ module.exports = class Cavalo extends Peca {
         super(lado, "Cavalo", false, false, false, false, 1);
     }
 
-    movimentoEspecial(xAtual, yAtual) {
+    movimentosEspeciais(xAtual, yAtual) {
         return [
             new MovimentoDestino(xAtual + 3, yAtual + 1),
             new MovimentoDestino(xAtual + 3, yAtual - 1),
