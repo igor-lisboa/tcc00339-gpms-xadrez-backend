@@ -5,9 +5,22 @@ module.exports = {
     index() {
         return db.jogos;
     }, find(index) {
-        return db.jogos[index];
+        const jogo = db.jogos[index];
+        if (jogo === undefined) {
+            throw 'Jogo não encontrado!';
+        }
+        return jogo;
     }, create() {
-        db.jogos.push(new Jogo());
-        return this.index();
+        const tamanhoAntesPush = db.jogos.length;
+        const novoJogo = new Jogo();
+        const tamanhoDepoisPush = db.jogos.push(novoJogo);
+        if (tamanhoAntesPush >= tamanhoDepoisPush) {
+            throw 'Falha ao incluir Jogo!';
+        }
+        const ultimoIndex = db.jogos.lastIndexOf(novoJogo);
+        return {
+            index: ultimoIndex,
+            jogo: db.jogos[ultimoIndex]
+        };
     }
 };
