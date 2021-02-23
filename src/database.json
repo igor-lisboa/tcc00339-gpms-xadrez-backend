@@ -1,20 +1,27 @@
 {
     "jogos": [],
-    "pecas": [
-        "Rei",
-        "Rainha",
-        "Bispo",
-        "Cavalo",
-        "Torre",
-        "Peão"
-    ],
     "lados": [
-        "Branco",
-        "Preto"
+        {
+            "id": 0,
+            "nome": "Branco"
+        },
+        {
+            "id": 1,
+            "nome": "Preto"
+        }
     ],
     "tiposJogo": [
-        "Humano X Humano",
-        "Humano X I.A.",
-        "I.A. X I.A."
+        {
+            "id": 0,
+            "nome": "Humano X Humano"
+        },
+        {
+            "id": 1,
+            "nome": "Humano X I.A."
+        },
+        {
+            "id": 2,
+            "nome": "I.A. X I.A."
+        }
     ]
 }

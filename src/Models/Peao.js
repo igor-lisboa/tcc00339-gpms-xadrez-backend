@@ -1,0 +1,21 @@
+const MovimentoDestino = require("./MovimentoDestino");
+const Peca = require("./Peca");
+
+module.exports = class Peao extends Peca {
+    constructor(lado) {
+        super(lado, "Peão", false, false, true, false, 1);
+    }
+
+    // retorna possiveis posicoes de movimento
+    movimentoEspecial(xAtual, yAtual) {
+        if (this.lado.cabecaPraBaixo) {
+            yDaCaptura = yAtual - 1;
+        } else {
+            yDaCaptura = yAtual + 1;
+        }
+        return [
+            new MovimentoDestino(xAtual + 1, yDaCaptura, true),
+            new MovimentoDestino(xAtual - 1, yDaCaptura, true)
+        ];
+    }
+}

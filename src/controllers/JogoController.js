@@ -1,4 +1,4 @@
-const JogoService = require('../services/JogosService');
+const JogoService = require('../services/JogoService');
 
 module.exports = {
     index(req, res) {
