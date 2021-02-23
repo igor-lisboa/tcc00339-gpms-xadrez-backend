@@ -1,5 +1,5 @@
 const db = require('../database.json');
-const Jogo = require('../Models/Jogo');
+const Jogo = require('../models/Jogo');
 
 module.exports = {
     index() {
