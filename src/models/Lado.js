@@ -3,6 +3,7 @@ module.exports = class Lado {
         this.id = lado.id;
         this.lado = lado.nome;
         this.cabecaPraBaixo = false;
+        this.movimentosRealizados = [];
         if (lado.id === 1) {
             this.cabecaPraBaixo = true;
         }

@@ -9,9 +9,9 @@ module.exports = class Peao extends Peca {
     // retorna possiveis posicoes de movimento
     movimentosEspeciais(xAtual, yAtual) {
         if (this.lado.cabecaPraBaixo) {
-            yDaCaptura = yAtual - 1;
-        } else {
             yDaCaptura = yAtual + 1;
+        } else {
+            yDaCaptura = yAtual - 1;
         }
         return [
             new MovimentoDestino(xAtual + 1, yDaCaptura, true),
