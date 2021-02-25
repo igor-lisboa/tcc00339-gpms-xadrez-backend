@@ -25,9 +25,27 @@ module.exports = class Jogo {
 
         this.defineLadoIdAtual(this.ladoBranco.id);
 
+        /**
+         * O REI do lado atual tem pessas q podem captura-lo mas ainda
+         * possui modos de se defender obstruindo o ataque em questao
+         * com outra peca ou se movendo
+         */
         this.cheque = false;
+
+        /**
+         * O REI do lado atual nao consegue obstruir os ataques direcionados
+         * a ele e nem consegue se mover para escapar do ataque dando a vitoria
+         * para o outro lado
+         */
         this.chequeMate = false;
-        this.enPassantCasa = null;
+
+        /**
+         * A casa de captura do enPassant so eh valida por 1 jogada
+         * nessa jogada em questao o jogador adversario caso tenha
+         * alguma peca q pode ir ate a casa armazenada nessa variavel
+         * ira realizar a captura do PEÃO que executou o enPassant
+         */
+        this.enPassantCasaCaptura = null;
 
         this.atualizaPecasDosLados();
     }
