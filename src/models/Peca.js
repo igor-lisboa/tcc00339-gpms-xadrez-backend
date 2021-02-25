@@ -1,6 +1,6 @@
 module.exports = class Peca {
     constructor(
-        lado,
+        ladoId,
         tipo,
         permitirJogadaParaTras = false,
         permitirJogadaDiagonal = false,
@@ -10,7 +10,7 @@ module.exports = class Peca {
     ) {
         this.movimentosRealizados = [];
 
-        this.lado = lado;
+        this.ladoId = ladoId;
         this.tipo = tipo;
 
         this.permitirJogadaParaTras = permitirJogadaParaTras;

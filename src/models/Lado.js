@@ -2,10 +2,15 @@ module.exports = class Lado {
     constructor(lado) {
         this.id = lado.id;
         this.lado = lado.nome;
-        this.cabecaPraBaixo = false;
+        this.cabecaPraBaixo = lado.cabecaPraBaixo;
         this.movimentosRealizados = [];
-        if (lado.id === 1) {
-            this.cabecaPraBaixo = true;
-        }
+    }
+
+    fazNovoMovimento(movimento) {
+        this.movimentosRealizados.push(movimento);
+    }
+
+    definePecas(pecas) {
+        this.pecas = pecas;
     }
 }

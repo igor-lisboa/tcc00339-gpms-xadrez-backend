@@ -2,8 +2,8 @@ const MovimentoDestino = require("./MovimentoDestino");
 const Peca = require("./Peca");
 
 module.exports = class Cavalo extends Peca {
-    constructor(lado) {
-        super(lado, "Cavalo", false, false, false, false, 1);
+    constructor(ladoId) {
+        super(ladoId, "Cavalo", false, false, false, false, 1);
     }
 
     movimentosEspeciais(xAtual, yAtual) {

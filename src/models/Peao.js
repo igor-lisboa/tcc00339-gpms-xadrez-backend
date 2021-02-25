@@ -2,8 +2,8 @@ const MovimentoDestino = require("./MovimentoDestino");
 const Peca = require("./Peca");
 
 module.exports = class Peao extends Peca {
-    constructor(lado) {
-        super(lado, "Peão", false, false, true, false, 1);
+    constructor(ladoId) {
+        super(ladoId, "Peão", false, false, true, false, 1);
     }
 
     // retorna possiveis posicoes de movimento
