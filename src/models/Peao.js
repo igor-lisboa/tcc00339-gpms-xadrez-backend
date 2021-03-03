@@ -13,9 +13,15 @@ module.exports = class Peao extends Peca {
         } else {
             yDaCaptura = yAtual - 1;
         }
-        return [
+        let movimentosPossiveis = [
             new MovimentoDestino(xAtual + 1, yDaCaptura, true),
             new MovimentoDestino(xAtual - 1, yDaCaptura, true)
         ];
+
+        if (this.movimentosRealizados.length === 0) {
+            movimentosPossiveis.push(new MovimentoDestino(xAtual, yAtual + 1));
+        }
+
+        return movimentosPossiveis;
     }
 }

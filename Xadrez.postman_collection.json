@@ -83,6 +83,28 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Tipos de Jogo",
+			"item": [
+				{
+					"name": "Index",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API_XADREZ_URL}}/tipos-de-jogo",
+							"host": [
+								"{{API_XADREZ_URL}}"
+							],
+							"path": [
+								"tipos-de-jogo"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	]
 }
