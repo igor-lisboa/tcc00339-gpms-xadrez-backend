@@ -31,13 +31,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{API_XADREZ_URL}}/jogos/1",
+							"raw": "{{API_XADREZ_URL}}/jogos/0",
 							"host": [
 								"{{API_XADREZ_URL}}"
 							],
 							"path": [
 								"jogos",
-								"1"
+								"0"
 							]
 						}
 					},
@@ -55,6 +55,50 @@
 							],
 							"path": [
 								"jogos"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Tabela Equivalência",
+			"item": [
+				{
+					"name": "Index",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API_XADREZ_URL}}/tabela-equivalencia",
+							"host": [
+								"{{API_XADREZ_URL}}"
+							],
+							"path": [
+								"tabela-equivalencia"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Tipos de Jogo",
+			"item": [
+				{
+					"name": "Index",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API_XADREZ_URL}}/tipos-de-jogo",
+							"host": [
+								"{{API_XADREZ_URL}}"
+							],
+							"path": [
+								"tipos-de-jogo"
 							]
 						}
 					},

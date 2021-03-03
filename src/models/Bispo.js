@@ -2,6 +2,6 @@ const Peca = require('./Peca');
 
 module.exports = class Bispo extends Peca {
     constructor(ladoId) {
-        super(ladoId, "Bispo", false, true, false, false, 8);
+        super(ladoId, "Bispo", false, true, false, false, true, 8);
     }
 }

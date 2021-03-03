@@ -6,7 +6,8 @@ module.exports = class Peca {
         permitirJogadaDiagonal = false,
         permitirJogadaFrente = false,
         permitirJogadaHorizontal = false,
-        passosHabilitados = 0
+        permitirCaptura = true,
+        passosHabilitados = 1,
     ) {
         this.movimentosRealizados = [];
 

@@ -3,7 +3,7 @@ const Peca = require("./Peca");
 
 module.exports = class Peao extends Peca {
     constructor(ladoId) {
-        super(ladoId, "Peão", false, false, true, false, 1);
+        super(ladoId, "Peão", false, false, true, false, false);
     }
 
     // retorna possiveis posicoes de movimento
@@ -13,9 +13,16 @@ module.exports = class Peao extends Peca {
         } else {
             yDaCaptura = yAtual - 1;
         }
-        return [
+
+        let movimentosPossiveis = [
             new MovimentoDestino(xAtual + 1, yDaCaptura, true),
             new MovimentoDestino(xAtual - 1, yDaCaptura, true)
         ];
+
+        if (this.movimentosRealizados.length === 0) {
+            movimentosPossiveis.push(new MovimentoDestino(xAtual, yAtual + 1));
+        }
+
+        return movimentosPossiveis;
     }
 }
