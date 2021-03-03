@@ -50,6 +50,10 @@ module.exports = class Jogo {
         this.atualizaPecasDosLados();
     }
 
+    move(casaDe, casaPara) {
+
+    }
+
     atualizaPecasDosLados() {
         this.ladoBranco.definePecas(this.recuperaPecasDeUmLado(this.ladoBranco.id));
         this.ladoPreto.definePecas(this.recuperaPecasDeUmLado(this.ladoPreto.id));
