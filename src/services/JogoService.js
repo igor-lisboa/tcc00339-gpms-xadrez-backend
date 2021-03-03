@@ -5,11 +5,7 @@ module.exports = {
     index() {
         return db.jogos;
     }, find(index) {
-        const jogo = db.jogos[index];
-        if (jogo === undefined) {
-            throw 'Jogo não encontrado!';
-        }
-        return jogo;
+        return new Jogo().find(index);
     }, create() {
         const tamanhoAntesPush = db.jogos.length;
         const novoJogo = new Jogo();

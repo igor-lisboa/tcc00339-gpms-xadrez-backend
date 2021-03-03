@@ -50,8 +50,55 @@ module.exports = class Jogo {
         this.atualizaPecasDosLados();
     }
 
-    move(casaDe, casaPara) {
+    find(jogoId) {
+        const jogo = db.jogos[jogoId];
+        if (jogo === undefined) {
+            throw 'Jogo não encontrado!';
+        }
 
+        this.ladoBranco = jogo.ladoBranco;
+        this.ladoPreto = jogo.ladoPreto;
+        this.tabuleiro = jogo.tabuleiro;
+        this.cheque = jogo.cheque;
+        this.chequeMate = jogo.chequeMate;
+        this.enPassantCasaCaptura = jogo.enPassantCasaCaptura;
+
+        return this;
+    }
+
+    move(casaDe, casaPara) {
+        if (typeof casaDe === "string") {
+            casaDe = this.pegaLinhaColunaDeUmaCasa(casaDe);
+        }
+
+        if (typeof casaPara === "string") {
+            casaPara = this.pegaLinhaColunaDeUmaCasa(casaPara);
+        }
+
+        // verifica linhas e colunas de destino e origem
+        if (casaDe.linha > 7 || casaDe.linha < 0 || casaPara.linha > 7 || casaPara.linha < 0) {
+            throw "Dados inválidos para realizar esse movimento";
+        }
+
+        // verificacoes casa origem
+        const casaOrigem = this.tabuleiro[casaDe.linha][casaDe.coluna];
+        if (casaOrigem === null) {
+            throw "Não foi possível encontrar uma peça na casa de origem do movimento";
+        }
+
+        if (casaOrigem.ladoId !== this.ladoIdAtual) {
+            throw "A peça escolhida para o movimento pertence ao adversário, escolha outra peça";
+        }
+
+        // verificacoes casa destino
+        const casaDestino = this.tabuleiro[casaPara.linha][casaPara.coluna];
+        if (casaDestino.ladoId === this.ladoIdAtual) {
+            throw "Não é possível capturar uma peça que te pertence";
+        }
+
+        // caso passou pelos ifs executa movimento mas primeiro limpando a casa de origem e a casa de destino
+        this.tabuleiro[casaDe.linha][casaDe.coluna] = null;
+        this.tabuleiro[casaPara.linha][casaPara.coluna] = casaOrigem;
     }
 
     atualizaPecasDosLados() {
