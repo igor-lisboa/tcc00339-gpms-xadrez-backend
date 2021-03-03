@@ -4,12 +4,12 @@
         {
             "id": 0,
             "nome": "Branco",
-            "cabecaPraBaixo": false
+            "cabecaPraBaixo": true
         },
         {
             "id": 1,
             "nome": "Preto",
-            "cabecaPraBaixo": true
+            "cabecaPraBaixo": false
         }
     ],
     "tiposJogo": [

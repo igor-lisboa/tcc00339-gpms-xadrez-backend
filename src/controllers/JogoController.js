@@ -10,6 +10,7 @@ module.exports = {
                 success: true
             });
         } catch (e) {
+            console.log(e);
             return res.status(500).json({
                 message: e,
                 data: null,
@@ -27,6 +28,7 @@ module.exports = {
                 success: true
             });
         } catch (e) {
+            console.log(e);
             return res.status(500).json({
                 message: e,
                 data: null,
@@ -43,6 +45,7 @@ module.exports = {
                 success: true
             });
         } catch (e) {
+            console.log(e);
             return res.status(500).json({
                 message: e,
                 data: null,

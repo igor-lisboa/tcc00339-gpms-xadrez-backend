@@ -20,6 +20,8 @@ module.exports = class Peca {
         this.permitirJogadaHorizontal = permitirJogadaHorizontal;
 
         this.passosHabilitados = passosHabilitados;
+
+        this.permitirCaptura = permitirCaptura;
     }
 
     movimentosEspeciais() {

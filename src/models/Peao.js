@@ -1,6 +1,8 @@
 const MovimentoDestino = require("./MovimentoDestino");
 const Peca = require("./Peca");
 
+const db = require('../database.json');
+
 module.exports = class Peao extends Peca {
     constructor(ladoId) {
         super(ladoId, "Peão", false, false, true, false, false);
@@ -8,10 +10,10 @@ module.exports = class Peao extends Peca {
 
     // retorna possiveis posicoes de movimento
     movimentosEspeciais(xAtual, yAtual) {
-        if (this.lado.cabecaPraBaixo) {
-            yDaCaptura = yAtual + 1;
-        } else {
+        if (db.lados[this.ladoId].cabecaPraBaixo) {
             yDaCaptura = yAtual - 1;
+        } else {
+            yDaCaptura = yAtual + 1;
         }
 
         let movimentosPossiveis = [
