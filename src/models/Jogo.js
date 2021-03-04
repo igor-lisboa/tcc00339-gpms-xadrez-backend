@@ -2,11 +2,11 @@ const Lado = require("./Lado");
 const Torre = require("./Torre");
 const Peao = require("./Peao");
 const Cavalo = require("./Cavalo");
-const Bispo = require('./Bispo');
-const Rei = require('./Rei');
-const Rainha = require('./Rainha');
+const Bispo = require("./Bispo");
+const Rei = require("./Rei");
+const Rainha = require("./Rainha");
 
-const db = require('../database.json');
+const db = require("../database.json");
 
 module.exports = class Jogo {
     constructor() {
@@ -53,7 +53,7 @@ module.exports = class Jogo {
     find(jogoId) {
         const jogo = db.jogos[jogoId];
         if (jogo === undefined) {
-            throw 'Jogo não encontrado!';
+            throw "Jogo não encontrado!";
         }
 
         this.ladoBranco = jogo.ladoBranco;
@@ -69,11 +69,6 @@ module.exports = class Jogo {
     move(casaDe, casaPara) {
         casaDe = this.recuperaCasaLinhaColuna(casaDe);
         casaPara = this.recuperaCasaLinhaColuna(casaPara);
-
-        // verifica linhas e colunas de destino e origem
-        if (casaDe.linha > 7 || casaDe.linha < 0 || casaPara.linha > 7 || casaPara.linha < 0) {
-            throw "Dados inválidos para realizar esse movimento";
-        }
 
         // verificacoes casa origem
         const casaOrigem = this.tabuleiro[casaDe.linha][casaDe.coluna];
@@ -94,6 +89,8 @@ module.exports = class Jogo {
         // caso passou pelos ifs executa movimento mas primeiro limpando a casa de origem e a casa de destino
         this.tabuleiro[casaDe.linha][casaDe.coluna] = null;
         this.tabuleiro[casaPara.linha][casaPara.coluna] = casaOrigem;
+
+        return this.tabuleiro;
     }
 
     recuperaLadoPeloId(ladoId) {
@@ -110,23 +107,87 @@ module.exports = class Jogo {
         let casasVizinhas = [];
 
         if (ladoAtual.cabecaPraBaixo) {
-            casasVizinhas['frente'] = { linha: casa.linha - 1, coluna: casa.coluna };
-            casasVizinhas['tras'] = { linha: casa.linha + 1, coluna: casa.coluna };
-            casasVizinhas['esquerda'] = { linha: casa.linha, coluna: casa.coluna - 1 };
-            casasVizinhas['direita'] = { linha: casa.linha, coluna: casa.coluna + 1 };
-            casasVizinhas['frenteEsquerda'] = { linha: casa.linha - 1, coluna: casa.coluna - 1 };
-            casasVizinhas['frenteDireita'] = { linha: casa.linha - 1, coluna: casa.coluna + 1 };
-            casasVizinhas['trasEsquerda'] = { linha: casa.linha + 1, coluna: casa.coluna - 1 };
-            casasVizinhas['trasDireita'] = { linha: casa.linha + 1, coluna: casa.coluna + 1 };
+            try {
+                casasVizinhas["frente"] = this.recuperaCasaLinhaColuna({ linha: casa.linha - 1, coluna: casa.coluna });
+            } catch (ex) {
+                casasVizinhas["frente"] = null;
+            }
+            try {
+                casasVizinhas["tras"] = this.recuperaCasaLinhaColuna({ linha: casa.linha + 1, coluna: casa.coluna });
+            } catch (ex) {
+                casasVizinhas["tras"] = null;
+            }
+            try {
+                casasVizinhas["esquerda"] = this.recuperaCasaLinhaColuna({ linha: casa.linha, coluna: casa.coluna - 1 });
+            } catch (ex) {
+                casasVizinhas["esquerda"] = null;
+            }
+            try {
+                casasVizinhas["direita"] = this.recuperaCasaLinhaColuna({ linha: casa.linha, coluna: casa.coluna + 1 });
+            } catch (ex) {
+                casasVizinhas["direita"] = null;
+            }
+            try {
+                casasVizinhas["frenteEsquerda"] = this.recuperaCasaLinhaColuna({ linha: casa.linha - 1, coluna: casa.coluna - 1 });
+            } catch (ex) {
+                casasVizinhas["frenteEsquerda"] = null;
+            }
+            try {
+                casasVizinhas["frenteDireita"] = this.recuperaCasaLinhaColuna({ linha: casa.linha - 1, coluna: casa.coluna + 1 });
+            } catch (ex) {
+                casasVizinhas["frenteDireita"] = null;
+            }
+            try {
+                casasVizinhas["trasEsquerda"] = this.recuperaCasaLinhaColuna({ linha: casa.linha + 1, coluna: casa.coluna - 1 });
+            } catch (ex) {
+                casasVizinhas["trasEsquerda"] = null;
+            }
+            try {
+                casasVizinhas["trasDireita"] = this.recuperaCasaLinhaColuna({ linha: casa.linha + 1, coluna: casa.coluna + 1 });
+            } catch (ex) {
+                casasVizinhas["trasDireita"] = null;
+            }
         } else {
-            casasVizinhas['frente'] = { linha: casa.linha + 1, coluna: casa.coluna };
-            casasVizinhas['tras'] = { linha: casa.linha - 1, coluna: casa.coluna };
-            casasVizinhas['esquerda'] = { linha: casa.linha, coluna: casa.coluna + 1 };
-            casasVizinhas['direita'] = { linha: casa.linha, coluna: casa.coluna - 1 };
-            casasVizinhas['frenteEsquerda'] = { linha: casa.linha + 1, coluna: casa.coluna + 1 };
-            casasVizinhas['frenteDireita'] = { linha: casa.linha + 1, coluna: casa.coluna - 1 };
-            casasVizinhas['trasEsquerda'] = { linha: casa.linha - 1, coluna: casa.coluna + 1 };
-            casasVizinhas['trasDireita'] = { linha: casa.linha - 1, coluna: casa.coluna - 1 };
+            try {
+                casasVizinhas["frente"] = this.recuperaCasaLinhaColuna({ linha: casa.linha + 1, coluna: casa.coluna });
+            } catch (ex) {
+                casasVizinhas["frente"] = null;
+            }
+            try {
+                casasVizinhas["tras"] = this.recuperaCasaLinhaColuna({ linha: casa.linha - 1, coluna: casa.coluna });
+            } catch (ex) {
+                casasVizinhas["tras"] = null;
+            }
+            try {
+                casasVizinhas["esquerda"] = this.recuperaCasaLinhaColuna({ linha: casa.linha, coluna: casa.coluna + 1 });
+            } catch (ex) {
+                casasVizinhas["esquerda"] = null;
+            }
+            try {
+                casasVizinhas["direita"] = this.recuperaCasaLinhaColuna({ linha: casa.linha, coluna: casa.coluna - 1 });
+            } catch (ex) {
+                casasVizinhas["direita"] = null;
+            }
+            try {
+                casasVizinhas["frenteEsquerda"] = this.recuperaCasaLinhaColuna({ linha: casa.linha + 1, coluna: casa.coluna + 1 });
+            } catch (ex) {
+                casasVizinhas["frenteEsquerda"] = null;
+            }
+            try {
+                casasVizinhas["frenteDireita"] = this.recuperaCasaLinhaColuna({ linha: casa.linha + 1, coluna: casa.coluna - 1 });
+            } catch (ex) {
+                casasVizinhas["frenteDireita"] = null;
+            }
+            try {
+                casasVizinhas["trasEsquerda"] = this.recuperaCasaLinhaColuna({ linha: casa.linha - 1, coluna: casa.coluna + 1 });
+            } catch (ex) {
+                casasVizinhas["trasEsquerda"] = null;
+            }
+            try {
+                casasVizinhas["trasDireita"] = this.recuperaCasaLinhaColuna({ linha: casa.linha - 1, coluna: casa.coluna - 1 });
+            } catch (ex) {
+                casasVizinhas["trasDireita"] = null;
+            }
         }
 
         return casasVizinhas;
@@ -151,10 +212,7 @@ module.exports = class Jogo {
                     // se o id do lado da peca q esta na casa for igual ao id do lado informado insere na lista de pecas
                     if (coluna.ladoId === ladoId) {
 
-                        let casa = this.recuperaCasaLinhaColuna({
-                            "linha": linhaIndex,
-                            "coluna": colunaIndex
-                        });
+                        let casa = this.recuperaCasaLinhaColuna({ "linha": linhaIndex, "coluna": colunaIndex });
 
                         let peca = {
                             "casa": casa.casa,
@@ -184,20 +242,21 @@ module.exports = class Jogo {
         if (typeof casa === "string") {
             return this.pegaLinhaColunaDeUmaCasa(casa);
         }
+
         return this.pegaCasaDeUmaLinhaColuna(casa);
     }
 
     pegaLinhaColunaDeUmaCasa(casa) {
-        let casaEncontrada = db.tabelaEquivalencia.find(element => element.casa.trim().toUpperCase() === casa.trim().toUpperCase());
-        if (typeof (casaEncontrada) === undefined) {
+        const casaEncontrada = db.tabelaEquivalencia.find(element => element.casa.trim().toUpperCase() === casa.trim().toUpperCase());
+        if (typeof (casaEncontrada) === "undefined") {
             throw "Não foi possível encontrar a casa desejada";
         }
         return casaEncontrada;
     }
 
     pegaCasaDeUmaLinhaColuna(casa) {
-        let casaEncontrada = db.tabelaEquivalencia.find(element => element.linha == casa.linha && element.coluna == casa.coluna);
-        if (typeof (casaEncontrada) === undefined) {
+        const casaEncontrada = db.tabelaEquivalencia.find(element => element.linha == casa.linha && element.coluna == casa.coluna);
+        if (typeof (casaEncontrada) === "undefined") {
             throw "Não foi possível encontrar a casa desejada";
         }
         return casaEncontrada;

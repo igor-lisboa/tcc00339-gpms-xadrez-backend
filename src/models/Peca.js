@@ -6,7 +6,7 @@ module.exports = class Peca {
         permitirJogadaDiagonal = false,
         permitirJogadaFrente = false,
         permitirJogadaHorizontal = false,
-        permitirCaptura = true,
+        permitirJogadaCaptura = true,
         passosHabilitados = 1,
     ) {
         this.movimentosRealizados = [];
@@ -21,7 +21,7 @@ module.exports = class Peca {
 
         this.passosHabilitados = passosHabilitados;
 
-        this.permitirCaptura = permitirCaptura;
+        this.permitirJogadaCaptura = permitirJogadaCaptura;
     }
 
     movimentosEspeciais() {

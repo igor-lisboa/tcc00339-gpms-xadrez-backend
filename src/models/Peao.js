@@ -1,7 +1,7 @@
 const MovimentoDestino = require("./MovimentoDestino");
 const Peca = require("./Peca");
 
-const db = require('../database.json');
+const db = require("../database.json");
 
 module.exports = class Peao extends Peca {
     constructor(ladoId) {

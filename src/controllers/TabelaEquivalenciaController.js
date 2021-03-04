@@ -1,10 +1,10 @@
-const db = require('../database.json');
+const db = require("../database.json");
 
 module.exports = {
     index(req, res) {
         try {
             return res.json({
-                message: 'Tabela de equivalência retornada com sucesso!',
+                message: "Tabela de equivalência retornada com sucesso!",
                 data: db.tabelaEquivalencia,
                 success: true
             });
