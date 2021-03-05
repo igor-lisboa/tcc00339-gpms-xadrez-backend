@@ -1,5 +1,5 @@
-const db = require('../database.json');
-const Jogo = require('../models/Jogo');
+const db = require("../database.json");
+const Jogo = require("../models/Jogo");
 
 module.exports = {
     index() {
@@ -11,7 +11,7 @@ module.exports = {
         const novoJogo = new Jogo();
         const tamanhoDepoisPush = db.jogos.push(novoJogo);
         if (tamanhoAntesPush >= tamanhoDepoisPush) {
-            throw 'Falha ao incluir Jogo!';
+            throw "Falha ao incluir Jogo!";
         }
         const ultimoIndex = db.jogos.lastIndexOf(novoJogo);
         return {

@@ -2,11 +2,12 @@ const Lado = require("./Lado");
 const Torre = require("./Torre");
 const Peao = require("./Peao");
 const Cavalo = require("./Cavalo");
-const Bispo = require('./Bispo');
-const Rei = require('./Rei');
-const Rainha = require('./Rainha');
+const Bispo = require("./Bispo");
+const Rei = require("./Rei");
+const Rainha = require("./Rainha");
 
-const db = require('../database.json');
+const db = require("../database.json");
+const PossivelJogada = require("./PossivelJogada");
 
 module.exports = class Jogo {
     constructor() {
@@ -53,7 +54,7 @@ module.exports = class Jogo {
     find(jogoId) {
         const jogo = db.jogos[jogoId];
         if (jogo === undefined) {
-            throw 'Jogo não encontrado!';
+            throw "Jogo não encontrado!";
         }
 
         this.ladoBranco = jogo.ladoBranco;
@@ -67,18 +68,8 @@ module.exports = class Jogo {
     }
 
     move(casaDe, casaPara) {
-        if (typeof casaDe === "string") {
-            casaDe = this.pegaLinhaColunaDeUmaCasa(casaDe);
-        }
-
-        if (typeof casaPara === "string") {
-            casaPara = this.pegaLinhaColunaDeUmaCasa(casaPara);
-        }
-
-        // verifica linhas e colunas de destino e origem
-        if (casaDe.linha > 7 || casaDe.linha < 0 || casaPara.linha > 7 || casaPara.linha < 0) {
-            throw "Dados inválidos para realizar esse movimento";
-        }
+        casaDe = this.recuperaCasaLinhaColuna(casaDe);
+        casaPara = this.recuperaCasaLinhaColuna(casaPara);
 
         // verificacoes casa origem
         const casaOrigem = this.tabuleiro[casaDe.linha][casaDe.coluna];
@@ -99,6 +90,66 @@ module.exports = class Jogo {
         // caso passou pelos ifs executa movimento mas primeiro limpando a casa de origem e a casa de destino
         this.tabuleiro[casaDe.linha][casaDe.coluna] = null;
         this.tabuleiro[casaPara.linha][casaPara.coluna] = casaOrigem;
+
+        return this.tabuleiro;
+    }
+
+    recuperaLadoPeloId(ladoId) {
+        if (this.ladoBranco.id == ladoId) {
+            return this.ladoBranco;
+        }
+        return this.ladoPreto;
+    }
+
+    encontraCasasVizinhas(casa) {
+        casa = this.recuperaCasaLinhaColuna(casa);
+
+        let ladoAtual = this.recuperaLadoPeloId(this.ladoIdAtual);
+
+        let casasVizinhas = [];
+
+        try {
+            casasVizinhas["frente"] = this.recuperaCasaLinhaColuna({ linha: casa.linha + (1 * (ladoAtual.cabecaPraBaixo ? -1 : 1)), coluna: casa.coluna });
+        } catch (ex) {
+            casasVizinhas["frente"] = null;
+        }
+        try {
+            casasVizinhas["tras"] = this.recuperaCasaLinhaColuna({ linha: casa.linha + (1 * (ladoAtual.cabecaPraBaixo ? 1 : -1)), coluna: casa.coluna });
+        } catch (ex) {
+            casasVizinhas["tras"] = null;
+        }
+        try {
+            casasVizinhas["esquerda"] = this.recuperaCasaLinhaColuna({ linha: casa.linha, coluna: casa.coluna + (1 * (ladoAtual.cabecaPraBaixo ? -1 : 1)) });
+        } catch (ex) {
+            casasVizinhas["esquerda"] = null;
+        }
+        try {
+            casasVizinhas["direita"] = this.recuperaCasaLinhaColuna({ linha: casa.linha, coluna: casa.coluna + (1 * (ladoAtual.cabecaPraBaixo ? 1 : -1)) });
+        } catch (ex) {
+            casasVizinhas["direita"] = null;
+        }
+        try {
+            casasVizinhas["frenteEsquerda"] = this.recuperaCasaLinhaColuna({ linha: casa.linha + (1 * (ladoAtual.cabecaPraBaixo ? -1 : 1)), coluna: casa.coluna + (1 * (ladoAtual.cabecaPraBaixo ? -1 : 1)) });
+        } catch (ex) {
+            casasVizinhas["frenteEsquerda"] = null;
+        }
+        try {
+            casasVizinhas["frenteDireita"] = this.recuperaCasaLinhaColuna({ linha: casa.linha + (1 * (ladoAtual.cabecaPraBaixo ? -1 : 1)), coluna: casa.coluna + (1 * (ladoAtual.cabecaPraBaixo ? 1 : -1)) });
+        } catch (ex) {
+            casasVizinhas["frenteDireita"] = null;
+        }
+        try {
+            casasVizinhas["trasEsquerda"] = this.recuperaCasaLinhaColuna({ linha: casa.linha + (1 * (ladoAtual.cabecaPraBaixo ? 1 : -1)), coluna: casa.coluna + (1 * (ladoAtual.cabecaPraBaixo ? -1 : 1)) });
+        } catch (ex) {
+            casasVizinhas["trasEsquerda"] = null;
+        }
+        try {
+            casasVizinhas["trasDireita"] = this.recuperaCasaLinhaColuna({ linha: casa.linha + (1 * (ladoAtual.cabecaPraBaixo ? 1 : -1)), coluna: casa.coluna + (1 * (ladoAtual.cabecaPraBaixo ? 1 : -1)) });
+        } catch (ex) {
+            casasVizinhas["trasDireita"] = null;
+        }
+
+        return casasVizinhas;
     }
 
     atualizaPecasDosLados() {
@@ -119,10 +170,15 @@ module.exports = class Jogo {
                 if (coluna !== null) {
                     // se o id do lado da peca q esta na casa for igual ao id do lado informado insere na lista de pecas
                     if (coluna.ladoId === ladoId) {
+
+                        let casa = this.recuperaCasaLinhaColuna({ "linha": linhaIndex, "coluna": colunaIndex });
+
                         let peca = {
-                            "linha": linhaIndex,
-                            "coluna": colunaIndex,
-                            "peca": coluna
+                            "casa": casa.casa,
+                            "linha": casa.linha,
+                            "coluna": casa.coluna,
+                            "peca": coluna,
+                            "possiveisJogadas": this.recuperaMovimentosPossiveisDaPecaDaCasa(casa)
                         };
 
                         pecas.push(peca);
@@ -142,10 +198,126 @@ module.exports = class Jogo {
         };
     }
 
+    recuperaPossiveisJogadasEmCasasVizinhas(casaAtual, vizinhoDesejado, repeticoesHabilitadas, capturaHabilitada, pecaLadoId, casasEncontradas = []) {
+        // verifica se ainda tem repeticoesHabilitadas
+        if (repeticoesHabilitadas === 0) {
+            return casasEncontradas;
+        }
+
+        // recupera casas vizinhas
+        const casasVizinhas = this.encontraCasasVizinhas(casaAtual);
+
+        // recupera o vizinho desejado
+        const vizinho = casasVizinhas[vizinhoDesejado];
+
+        // se vizinho eh null casa nao existe
+        if (vizinho === null) {
+            return casasEncontradas;
+        }
+
+        // pega o item q ta na casa vizinha
+        const itemCasa = this.tabuleiro[vizinho.linha][vizinho.coluna];
+
+        // se item casa ta vazio, adiciona na lista casasEncontradas e encontra proximo 
+        if (itemCasa === null) {
+            casasEncontradas.push(new PossivelJogada(vizinho));
+            return this.recuperaPossiveisJogadasEmCasasVizinhas(vizinho, vizinhoDesejado, repeticoesHabilitadas - 1, capturaHabilitada, pecaLadoId, casasEncontradas);
+        } else {
+            // so adiciona possivel jogada se a peca for do adversario
+            if (itemCasa.ladoId !== pecaLadoId && capturaHabilitada) {
+                casasEncontradas.push(new PossivelJogada(vizinho, true));
+            }
+            return casasEncontradas;
+        }
+
+    }
+
+    recuperaMovimentosPossiveisDaPecaDaCasa(casa) {
+        casa = this.recuperaCasaLinhaColuna(casa);
+
+        const peca = this.tabuleiro[casa.linha][casa.coluna];
+
+        if (peca === null) {
+            throw "Não foi possível encontrar a peça desejada";
+        }
+
+        let movimentosPossiveis = [];
+
+        if (peca.permitirJogadaDiagonal) {
+            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, 'frenteEsquerda', peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
+            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, 'frenteDireita', peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
+            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, 'trasEsquerda', peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
+            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, 'trasDireita', peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
+        }
+
+        if (peca.permitirJogadaFrente) {
+            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, 'frente', peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
+        }
+
+        if (peca.permitirJogadaHorizontal) {
+            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, 'esquerda', peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
+            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, 'direita', peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
+        }
+
+        if (peca.permitirJogadaParaTras) {
+            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, 'tras', peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
+        }
+
+        // recupera movimentos especiais da peca
+        const movimentosEspeciais = peca.movimentosEspeciais(casa.linha, casa.coluna);
+
+        // faz veirificacoes p cada movimento especial
+        movimentosEspeciais.forEach((movimentoDestino) => {
+            let casaRecuperada = undefined;
+            try {
+                casaRecuperada = this.recuperaCasaLinhaColuna(movimentoDestino.casa);
+            } catch (ex) {
+                casaRecuperada = null;
+            }
+
+            if (casaRecuperada === null) {
+                return;
+            }
+
+            const itemCasa = this.tabuleiro[casaRecuperada.linha][casaRecuperada.coluna];
+
+            // casa vazia
+            if (itemCasa === null) {
+                // se o movimento n for apenas de captura, inclui possivel jogada
+                if (!movimentoDestino.somenteCaptura) {
+                    movimentosPossiveis.push(new PossivelJogada(casaRecuperada));
+                }
+            } else {
+                // so adiciona possivel jogada se a peca for do adversario
+                if (itemCasa.ladoId !== peca.ladoId) {
+                    movimentosPossiveis.push(new PossivelJogada(casaRecuperada, true));
+                }
+            }
+        });
+
+        return movimentosPossiveis;
+    }
+
+    recuperaCasaLinhaColuna(casa) {
+        if (typeof casa === "string") {
+            return this.pegaLinhaColunaDeUmaCasa(casa);
+        }
+
+        return this.pegaCasaDeUmaLinhaColuna(casa);
+    }
+
     pegaLinhaColunaDeUmaCasa(casa) {
-        let casaEncontrada = db.tabelaEquivalencia.find(element => element.casa.trim().toUpperCase() === casa.trim().toUpperCase());
-        if (typeof (casaEncontrada) === undefined) {
-            throw "Não foi possível encontrar a casa desejada";
+        const casaEncontrada = db.tabelaEquivalencia.find(element => element.casa.trim().toUpperCase() === casa.trim().toUpperCase());
+        if (typeof (casaEncontrada) === "undefined") {
+            throw "Não foi possível encontrar a casa desejada buscando pelo nome da casa";
+        }
+        return casaEncontrada;
+    }
+
+    pegaCasaDeUmaLinhaColuna(casa) {
+        const casaEncontrada = db.tabelaEquivalencia.find(element => element.linha == casa.linha && element.coluna == casa.coluna);
+        if (typeof (casaEncontrada) === "undefined") {
+            throw "Não foi possível encontrar a casa desejada buscando pela linha e coluna";
         }
         return casaEncontrada;
     }

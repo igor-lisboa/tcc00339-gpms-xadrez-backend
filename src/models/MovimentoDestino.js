@@ -1,11 +1,9 @@
 module.exports = class MovimentoDestino {
     constructor(
-        x,
-        y,
+        casa,
         somenteCaptura = false
     ) {
-        this.x = x;
-        this.y = y;
+        this.casa = casa;
         this.somenteCaptura = somenteCaptura;
     }
 }

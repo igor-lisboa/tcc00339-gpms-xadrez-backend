@@ -6,8 +6,8 @@ module.exports = class Peca {
         permitirJogadaDiagonal = false,
         permitirJogadaFrente = false,
         permitirJogadaHorizontal = false,
-        permitirCaptura = true,
-        passosHabilitados = 1,
+        permitirJogadaCaptura = true,
+        passosHabilitados = 8,
     ) {
         this.movimentosRealizados = [];
 
@@ -20,10 +20,11 @@ module.exports = class Peca {
         this.permitirJogadaHorizontal = permitirJogadaHorizontal;
 
         this.passosHabilitados = passosHabilitados;
+
+        this.permitirJogadaCaptura = permitirJogadaCaptura;
     }
 
-    movimentosEspeciais() {
-        // substituido nas classes de validação concretas
-        // onde uma lógica especial eh necessária
+    movimentosEspeciais(linha, coluna) {
+        return [];
     }
 }
