@@ -3,19 +3,19 @@ const Peca = require("./Peca");
 
 module.exports = class Cavalo extends Peca {
     constructor(ladoId) {
-        super(ladoId, "Cavalo", false, false, false, false, true);
+        super(ladoId, "Cavalo", false, false, false, false, true, 1);
     }
 
-    movimentosEspeciais(xAtual, yAtual) {
+    movimentosEspeciais(linha, coluna) {
         return [
-            new MovimentoDestino(xAtual + 3, yAtual + 1),
-            new MovimentoDestino(xAtual + 3, yAtual - 1),
-            new MovimentoDestino(xAtual - 3, yAtual + 1),
-            new MovimentoDestino(xAtual - 3, yAtual - 1),
-            new MovimentoDestino(xAtual + 1, yAtual + 3),
-            new MovimentoDestino(xAtual + 1, yAtual - 3),
-            new MovimentoDestino(xAtual - 1, yAtual + 3),
-            new MovimentoDestino(xAtual - 1, yAtual - 3)
+            new MovimentoDestino({ "linha": linha + 3, "coluna": coluna + 1 }),
+            new MovimentoDestino({ "linha": linha + 3, "coluna": coluna - 1 }),
+            new MovimentoDestino({ "linha": linha - 3, "coluna": coluna + 1 }),
+            new MovimentoDestino({ "linha": linha - 3, "coluna": coluna - 1 }),
+            new MovimentoDestino({ "linha": linha + 1, "coluna": coluna + 3 }),
+            new MovimentoDestino({ "linha": linha + 1, "coluna": coluna - 3 }),
+            new MovimentoDestino({ "linha": linha - 1, "coluna": coluna + 3 }),
+            new MovimentoDestino({ "linha": linha - 1, "coluna": coluna - 3 })
         ];
     }
 }
