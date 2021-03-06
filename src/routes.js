@@ -1,6 +1,7 @@
 const express = require("express");
 
 const JogoController = require("./controllers/JogoController");
+const JogoPecaController = require("./controllers/JogoPecaController");
 const TabelaEquivalenciaController = require("./controllers/TabelaEquivalenciaController");
 const TiposJogoController = require("./controllers/TiposJogoController");
 
@@ -26,6 +27,9 @@ routes.get("/", (req, res) => {
 routes.get("/jogos", JogoController.index);
 routes.get("/jogos/:id", JogoController.find);
 routes.post("/jogos", JogoController.create);
+
+routes.get("/jogos/:jogoId/pecas/:casaNome/possiveis-jogadas", JogoPecaController.possiveisJogadas);
+
 
 routes.get("/tabela-equivalencia", TabelaEquivalenciaController.index);
 

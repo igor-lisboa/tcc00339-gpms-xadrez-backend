@@ -91,7 +91,7 @@ module.exports = class Jogo {
         this.tabuleiro[casaDe.linha][casaDe.coluna] = null;
         this.tabuleiro[casaPara.linha][casaPara.coluna] = casaOrigem;
 
-        return this.tabuleiro;
+        return true;
     }
 
     recuperaLadoPeloId(ladoId) {
