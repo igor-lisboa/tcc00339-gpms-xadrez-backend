@@ -285,12 +285,12 @@ module.exports = class Jogo {
             if (itemCasa === null) {
                 // se o movimento n for apenas de captura, inclui possivel jogada
                 if (!movimentoDestino.somenteCaptura) {
-                    movimentosPossiveis.push(new PossivelJogada(casaRecuperada));
+                    movimentosPossiveis.push(new PossivelJogada(casaRecuperada, false, movimentoDestino.movimentoEspecialNome));
                 }
             } else {
                 // so adiciona possivel jogada se a peca for do adversario
                 if (itemCasa.ladoId !== peca.ladoId) {
-                    movimentosPossiveis.push(new PossivelJogada(casaRecuperada, true));
+                    movimentosPossiveis.push(new PossivelJogada(casaRecuperada, true, movimentoDestino.movimentoEspecialNome));
                 }
             }
         });

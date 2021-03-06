@@ -1,9 +1,11 @@
 module.exports = class PossivelJogada {
     constructor(
         casa,
-        captura = false
+        captura = false,
+        nomeJogada = null
     ) {
         this.casa = casa;
         this.captura = captura;
+        this.nomeJogada = nomeJogada;
     }
 }
