@@ -326,26 +326,26 @@ module.exports = class Jogo {
 
     //Roque Menor
     //Verifica lado
-    if (ladoId === this.ladoBranco.id) {
-        //Verifica peça e casa (Branca)
-        if (peca === "Rei" && this.tabuleiro[casa.linha][casa.coluna] === this.tabuleiro[7][4]) {
-            if (this.tabuleiro[7][5] === null && this.tabuleiro[7][6] === null) {
-                if (this.tabuleiro[7][7] === "Torre") {
-                    //if se o jogador mover para tabuleiro[7][6]
-                        //verificar se tem algum peça do oponente nas proximidas e/ou vai deixar o rei desprotegido
-                }
-            }
-        }
-  
-    } else {
-        //Verifica peça e casa (Preta)
-        if (peca === "Rei" && this.tabuleiro[casa.linha][casa.coluna] === this.tabuleiro[0][4]) {
-            if (this.tabuleiro[0][5] === null && this.tabuleiro[0][6] === null) {
-                if (this.tabuleiro[0][7] === "Torre") {
-                    //if se o jogador mover para tabuleiro[0][6]
-                        //verificar se tem algum peça do oponente nas proximidas e/ou vai deixar o rei desprotegido
-                }
-            }
-        }
-  }
+    // if(ladoId === this.ladoBranco.id) {
+    //     //Verifica peça e casa (Branca)
+    //     if (peca === "Rei" && this.tabuleiro[casa.linha][casa.coluna] === this.tabuleiro[7][4]) {
+    //         if (this.tabuleiro[7][5] === null && this.tabuleiro[7][6] === null) {
+    //             if (this.tabuleiro[7][7] === "Torre") {
+    //                 //if se o jogador mover para tabuleiro[7][6]
+    //                 //verificar se tem algum peça do oponente nas proximidas e/ou vai deixar o rei desprotegido
+    //             }
+    //         }
+    //     }
+
+    // } else {
+    //     //Verifica peça e casa (Preta)
+    //     if (peca === "Rei" && this.tabuleiro[casa.linha][casa.coluna] === this.tabuleiro[0][4]) {
+    //         if (this.tabuleiro[0][5] === null && this.tabuleiro[0][6] === null) {
+    //             if (this.tabuleiro[0][7] === "Torre") {
+    //                 //if se o jogador mover para tabuleiro[0][6]
+    //                 //verificar se tem algum peça do oponente nas proximidas e/ou vai deixar o rei desprotegido
+    //             }
+    //         }
+    //     }
+    // }
 }
