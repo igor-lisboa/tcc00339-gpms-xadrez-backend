@@ -18,7 +18,8 @@ routes.get("/", (req, res) => {
                 "Victor Matheus",
                 "Milena Verissimo",
                 "Matheus Baldas"
-            ].sort()
+            ].sort(),
+            documentacao: "https://documenter.getpostman.com/view/13081554/Tz5m8KPR"
         },
         success: true
     });
