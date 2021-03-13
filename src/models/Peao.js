@@ -5,7 +5,7 @@ const db = require("../database.json");
 
 module.exports = class Peao extends Peca {
     constructor(ladoId) {
-        super(ladoId, "Peão", false, false, true, false, false, 1);
+        super(ladoId, "Peão", false, false, true, false, false, 1, 1);
     }
 
     // retorna possiveis posicoes de movimento

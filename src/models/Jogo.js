@@ -71,8 +71,58 @@ module.exports = class Jogo {
         casaDe = this.recuperaCasaLinhaColuna(casaDe);
         casaPara = this.recuperaCasaLinhaColuna(casaPara);
 
+        this.verificaJogadaPossivel(casaDe, casaPara);
+
+        const peca = this.tabuleiro[casaDe.linha][casaDe.coluna];
+        const casaDestino = this.tabuleiro[casaPara.linha][casaPara.coluna];
+
+        try {
+            // realiza movimento
+            this.tabuleiro[casaDe.linha][casaDe.coluna] = null;
+            this.tabuleiro[casaPara.linha][casaPara.coluna] = peca;
+
+            // verifica se a jogada colocou o rei em cheque
+            const reiEmCheque = this.verificaReiLadoAtualCheque();
+
+            if (reiEmCheque) {
+                throw "A jogada não pode ser realizada pois coloca sei rei em cheque";
+            }
+        } catch (e) {
+            // desfaz movimento
+            this.tabuleiro[casaDe.linha][casaDe.coluna] = peca;
+            this.tabuleiro[casaPara.linha][casaPara.coluna] = casaDestino;
+
+            throw e;
+        }
+    }
+
+    verificaReiLadoAtualCheque() {
+        this.atualizaPecasDosLados();
+
+        const ladoAtual = this.recuperaLadoPeloId(this.ladoIdAtual);
+        const ladoAdversario = this.recuperaLadoAdversarioPeloId(this.ladoIdAtual);
+
+        const reiLadoAtual = ladoAtual.pecas.rei;
+
+        let reiEmPerigo = false;
+        ladoAdversario.pecas.todas.forEach((peca) => {
+            try {
+                this.verificaJogadaPossivel(peca.casa, reiLadoAtual.casa);
+                reiEmPerigo = true;
+            } catch (e) {
+                // se deu excecao eh pq o rei nao esta em cheque
+            }
+        });
+
+        return reiEmPerigo;
+    }
+
+    verificaJogadaPossivel(casaOrigemPeca, casaDestino) {
+        casaOrigemPeca = this.recuperaCasaLinhaColuna(casaOrigemPeca);
+        casaDestino = this.recuperaCasaLinhaColuna(casaDestino);
+
         // verificacoes casa origem
-        const casaOrigem = this.tabuleiro[casaDe.linha][casaDe.coluna];
+        const casaOrigem = this.tabuleiro[casaOrigemPeca.linha][casaOrigemPeca.coluna];
         if (casaOrigem === null) {
             throw "Não foi possível encontrar uma peça na casa de origem do movimento";
         }
@@ -81,17 +131,23 @@ module.exports = class Jogo {
             throw "A peça escolhida para o movimento pertence ao adversário, escolha outra peça";
         }
 
-        // verificacoes casa destino
-        const casaDestino = this.tabuleiro[casaPara.linha][casaPara.coluna];
-        if (casaDestino.ladoId === this.ladoIdAtual) {
+        // verificacoes casa destino p ver se tem peca nela
+        const casaPecaDestino = this.tabuleiro[casaDestino.linha][casaDestino.coluna];
+        if (casaPecaDestino.ladoId === this.ladoIdAtual) {
             throw "Não é possível capturar uma peça que te pertence";
         }
 
-        // caso passou pelos ifs executa movimento mas primeiro limpando a casa de origem e a casa de destino
-        this.tabuleiro[casaDe.linha][casaDe.coluna] = null;
-        this.tabuleiro[casaPara.linha][casaPara.coluna] = casaOrigem;
+        const possiveisMovimentosDaPeca = this.recuperaMovimentosPossiveisDaPecaDaCasa(casaOrigem);
+        let casaDestinoEhUmDestino = false;
+        possiveisMovimentosDaPeca.forEach((movimentoDestino) => {
+            if (movimentoDestino.casa.casa === casaDestino.casa) {
+                casaDestinoEhUmDestino = true;
+            }
+        });
 
-        return true;
+        if (casaDestinoEhUmDestino === false) {
+            throw "A casa de destino da jogada escolhida não pode ser realizada pela peça escolhida";
+        }
     }
 
     recuperaLadoPeloId(ladoId) {
@@ -99,6 +155,13 @@ module.exports = class Jogo {
             return this.ladoBranco;
         }
         return this.ladoPreto;
+    }
+
+    recuperaLadoAdversarioPeloId(ladoId) {
+        if (this.ladoBranco.id == ladoId) {
+            return this.ladoPreto;
+        }
+        return this.ladoBranco;
     }
 
     encontraCasasVizinhas(casa) {

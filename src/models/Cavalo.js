@@ -3,7 +3,7 @@ const Peca = require("./Peca");
 
 module.exports = class Cavalo extends Peca {
     constructor(ladoId) {
-        super(ladoId, "Cavalo", false, false, false, false, true, 1);
+        super(ladoId, "Cavalo", false, false, false, false, true, 1, 3);
     }
 
     movimentosEspeciais(linha, coluna) {

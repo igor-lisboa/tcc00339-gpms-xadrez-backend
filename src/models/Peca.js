@@ -8,6 +8,7 @@ module.exports = class Peca {
         permitirJogadaHorizontal = false,
         permitirJogadaCaptura = true,
         passosHabilitados = 8,
+        valor = 0
     ) {
         this.movimentosRealizados = [];
 
@@ -22,6 +23,8 @@ module.exports = class Peca {
         this.passosHabilitados = passosHabilitados;
 
         this.permitirJogadaCaptura = permitirJogadaCaptura;
+
+        this.valor = valor;
     }
 
     movimentosEspeciais(linha, coluna) {
