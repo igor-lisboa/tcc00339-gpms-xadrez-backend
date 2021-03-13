@@ -3,10 +3,9 @@ const JogoService = require("../services/JogoService");
 module.exports = {
     index(req, res) {
         try {
-            const jogos = JogoService.index();
             return res.json({
                 message: "Jogos retornados com sucesso!",
-                data: jogos,
+                data: JogoService.index(),
                 success: true
             });
         } catch (e) {
@@ -21,10 +20,9 @@ module.exports = {
     find(req, res) {
         try {
             const { id } = req.params;
-            const jogo = JogoService.find(id);
             return res.json({
                 message: "Jogo retornado com sucesso!",
-                data: jogo,
+                data: JogoService.find(id),
                 success: true
             });
         } catch (e) {
@@ -38,10 +36,9 @@ module.exports = {
     },
     create(req, res) {
         try {
-            const jogo = JogoService.create();
             return res.json({
                 message: "Jogo incluído com sucesso!",
-                data: jogo,
+                data: JogoService.create(),
                 success: true
             });
         } catch (e) {

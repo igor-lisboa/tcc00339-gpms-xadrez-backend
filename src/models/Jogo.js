@@ -74,7 +74,7 @@ module.exports = class Jogo {
     find(jogoId) {
         const jogo = db.jogos[jogoId];
         if (jogo === undefined) {
-            throw "Jogo não encontrado!";
+            throw "Jogo não encontrado";
         }
 
         this.ladoBranco = jogo.ladoBranco;
@@ -83,6 +83,7 @@ module.exports = class Jogo {
         this.cheque = jogo.cheque;
         this.chequeMate = jogo.chequeMate;
         this.enPassantCasaCaptura = jogo.enPassantCasaCaptura;
+        this.ladoIdAtual = jogo.ladoIdAtual;
 
         return this;
     }
@@ -165,11 +166,15 @@ module.exports = class Jogo {
 
         // verificacoes casa destino p ver se tem peca nela
         const casaPecaDestino = this.tabuleiro[casaDestino.linha][casaDestino.coluna];
-        if (casaPecaDestino.ladoId === this.ladoIdAtual) {
-            throw "Não é possível capturar uma peça que te pertence";
+
+        // se tiver peca
+        if (casaPecaDestino != null) {
+            if (casaPecaDestino.ladoId === this.ladoIdAtual) {
+                throw "Não é possível capturar uma peça que te pertence";
+            }
         }
 
-        const possiveisMovimentosDaPeca = this.recuperaMovimentosPossiveisDaPecaDaCasa(casaOrigem);
+        const possiveisMovimentosDaPeca = this.recuperaMovimentosPossiveisDaPecaDaCasa(casaOrigemPeca);
         let casaDestinoEhUmDestino = false;
         let movimentoDestinoEscolhido = null;
 

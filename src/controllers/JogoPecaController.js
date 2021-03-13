@@ -22,11 +22,10 @@ module.exports = {
     realizaJogada(req, res) {
         try {
             const { jogoId, casaOrigem, casaDestino } = req.params;
-            const ladoId = req.headers.ladoId;
-            const jogo = JogoService.find(jogoId);
+            const ladoId = req.headers.lado;
             return res.json({
                 message: "Jogada realizada com sucesso!",
-                data: jogo.realizaJogada(ladoId, casaOrigem, casaDestino),
+                data: JogoService.realizaJogada(jogoId, ladoId, casaOrigem, casaDestino),
                 success: true
             });
         } catch (e) {

@@ -30,7 +30,7 @@ routes.get("/jogos/:id", JogoController.find);
 routes.post("/jogos", JogoController.create);
 
 routes.get("/jogos/:jogoId/pecas/:casaNome/possiveis-jogadas", JogoPecaController.possiveisJogadas);
-routes.get("/jogos/:jogoId/pecas/:casaOrigem/move/:casaDestino", JogoPecaController.realizaJogada);
+routes.post("/jogos/:jogoId/pecas/:casaOrigem/move/:casaDestino", JogoPecaController.realizaJogada);
 
 
 routes.get("/tabela-equivalencia", TabelaEquivalenciaController.index);

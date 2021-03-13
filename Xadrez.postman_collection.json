@@ -31,6 +31,34 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "Realiza Jogada",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "lado",
+										"value": "0",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{API_XADREZ_URL}}/jogos/0/pecas/a2/move/a4",
+									"host": [
+										"{{API_XADREZ_URL}}"
+									],
+									"path": [
+										"jogos",
+										"0",
+										"pecas",
+										"a2",
+										"move",
+										"a4"
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				},

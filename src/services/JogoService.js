@@ -18,5 +18,10 @@ module.exports = {
             index: ultimoIndex,
             jogo: db.jogos[ultimoIndex]
         };
+    }, realizaJogada(jogoId, ladoId, casaOrigem, casaDestino) {
+        let jogo = this.find(jogoId);
+        jogo = jogo.realizaJogada(ladoId, casaOrigem, casaDestino);
+        db.jogos[jogoId] = jogo;
+        return db.jogos[jogoId];
     }
 };
