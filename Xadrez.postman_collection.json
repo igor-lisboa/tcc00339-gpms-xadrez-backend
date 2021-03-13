@@ -39,7 +39,7 @@
 								"header": [
 									{
 										"key": "lado",
-										"value": "0",
+										"value": "{{ladoId}}",
 										"type": "text"
 									}
 								],
@@ -172,6 +172,10 @@
 		},
 		{
 			"key": "jogoIndex",
+			"value": "0"
+		},
+		{
+			"key": "ladoId",
 			"value": "0"
 		}
 	]
