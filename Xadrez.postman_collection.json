@@ -17,15 +17,15 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{API_XADREZ_URL}}/jogos/0/pecas/a2/possiveis-jogadas",
+									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/pecas/{{casaOrigem}}/possiveis-jogadas",
 									"host": [
 										"{{API_XADREZ_URL}}"
 									],
 									"path": [
 										"jogos",
-										"0",
+										"{{jogoIndex}}",
 										"pecas",
-										"a2",
+										"{{casaOrigem}}",
 										"possiveis-jogadas"
 									]
 								}
@@ -44,17 +44,17 @@
 									}
 								],
 								"url": {
-									"raw": "{{API_XADREZ_URL}}/jogos/0/pecas/a2/move/a4",
+									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/pecas/{{casaOrigem}}/move/{{casaDestino}}",
 									"host": [
 										"{{API_XADREZ_URL}}"
 									],
 									"path": [
 										"jogos",
-										"0",
+										"{{jogoIndex}}",
 										"pecas",
-										"a2",
+										"{{casaOrigem}}",
 										"move",
-										"a4"
+										"{{casaDestino}}"
 									]
 								}
 							},
@@ -85,13 +85,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{API_XADREZ_URL}}/jogos/0",
+							"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}",
 							"host": [
 								"{{API_XADREZ_URL}}"
 							],
 							"path": [
 								"jogos",
-								"0"
+								"{{jogoIndex}}"
 							]
 						}
 					},
@@ -159,6 +159,20 @@
 					"response": []
 				}
 			]
+		}
+	],
+	"variable": [
+		{
+			"key": "casaOrigem",
+			"value": "a2"
+		},
+		{
+			"key": "casaDestino",
+			"value": "a4"
+		},
+		{
+			"key": "jogoIndex",
+			"value": "0"
 		}
 	]
 }
