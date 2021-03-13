@@ -42,14 +42,33 @@ module.exports = class Jogo {
         this.chequeMate = false;
 
         /**
-         * A casa de captura do enPassant so eh valida por 1 jogada
-         * nessa jogada em questao o jogador adversario caso tenha
-         * alguma peca q pode ir ate a casa armazenada nessa variavel
-         * ira realizar a captura do PEÃO que executou o enPassant
+         * Objeto contendo a casa de captura do enPassant e a casa onde a peca se encontra
+         * so eh valida por 1 jogada nessa jogada em questao o jogador adversario caso tenha
+         * alguma peca q pode ir ate a casa armazenada nessa variavel ira realizar a captura
+         * do PEÃO que executou o enPassant
          */
         this.enPassantCasaCaptura = null;
 
         this.atualizaPecasDosLados();
+    }
+
+    realizaJogada(ladoId, casaOrigem, casaDestino) {
+        if (ladoId != this.ladoIdAtual) {
+            throw "Não está na sua vez de jogar, espere sua vez";
+        }
+
+        this.move(casaOrigem, casaDestino);
+
+        // passa a vez p outro jogador
+        const ladoAdversario = this.recuperaLadoAdversarioPeloId(this.ladoIdAtual);
+        this.defineLadoIdAtual(ladoAdversario.id);
+
+        // verifica se a jogada colocou o rei em cheque
+        const reiEmCheque = this.verificaReiLadoAtualCheque();
+
+        this.cheque = reiEmCheque;
+
+        return this;
     }
 
     find(jogoId) {
@@ -98,6 +117,8 @@ module.exports = class Jogo {
             } else if (this.ladoPreto.id == this.ladoIdAtual) {
                 this.ladoPreto.fazNovoMovimento(novoMovimento);
             }
+
+            return jogadaEscolhida;
         } catch (e) {
             // desfaz movimento
             this.tabuleiro[casaDe.linha][casaDe.coluna] = peca;
