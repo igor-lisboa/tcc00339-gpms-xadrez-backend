@@ -8,6 +8,7 @@ const Rainha = require("./Rainha");
 
 const db = require("../database.json");
 const PossivelJogada = require("./PossivelJogada");
+const MovimentoRealizado = require("./MovimentoRealizado");
 
 module.exports = class Jogo {
     constructor() {
@@ -71,7 +72,7 @@ module.exports = class Jogo {
         casaDe = this.recuperaCasaLinhaColuna(casaDe);
         casaPara = this.recuperaCasaLinhaColuna(casaPara);
 
-        this.verificaJogadaPossivel(casaDe, casaPara);
+        const jogadaEscolhida = this.verificaJogadaPossivel(casaDe, casaPara);
 
         const peca = this.tabuleiro[casaDe.linha][casaDe.coluna];
         const casaDestino = this.tabuleiro[casaPara.linha][casaPara.coluna];
@@ -85,7 +86,17 @@ module.exports = class Jogo {
             const reiEmCheque = this.verificaReiLadoAtualCheque();
 
             if (reiEmCheque) {
-                throw "A jogada não pode ser realizada pois coloca sei rei em cheque";
+                throw "A jogada não pode ser realizada pois coloca seu rei em cheque";
+            }
+
+            const novoMovimento = new MovimentoRealizado(casaDe, casaPara, casaDestino);
+
+            this.tabuleiro[casaPara.linha][casaPara.coluna].incluiMovimentoRealizado(novoMovimento);
+
+            if (this.ladoBranco.id == this.ladoIdAtual) {
+                this.ladoBranco.fazNovoMovimento(novoMovimento);
+            } else if (this.ladoPreto.id == this.ladoIdAtual) {
+                this.ladoPreto.fazNovoMovimento(novoMovimento);
             }
         } catch (e) {
             // desfaz movimento
@@ -139,15 +150,20 @@ module.exports = class Jogo {
 
         const possiveisMovimentosDaPeca = this.recuperaMovimentosPossiveisDaPecaDaCasa(casaOrigem);
         let casaDestinoEhUmDestino = false;
+        let movimentoDestinoEscolhido = null;
+
         possiveisMovimentosDaPeca.forEach((movimentoDestino) => {
             if (movimentoDestino.casa.casa === casaDestino.casa) {
                 casaDestinoEhUmDestino = true;
+                movimentoDestinoEscolhido = movimentoDestino;
             }
         });
 
         if (casaDestinoEhUmDestino === false) {
             throw "A casa de destino da jogada escolhida não pode ser realizada pela peça escolhida";
         }
+
+        return movimentoDestinoEscolhido;
     }
 
     recuperaLadoPeloId(ladoId) {

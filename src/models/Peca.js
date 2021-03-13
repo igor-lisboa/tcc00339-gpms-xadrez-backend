@@ -27,6 +27,10 @@ module.exports = class Peca {
         this.valor = valor;
     }
 
+    incluiMovimentoRealizado(movimento) {
+        this.movimentosRealizados.push(movimento);
+    }
+
     movimentosEspeciais(linha, coluna) {
         return [];
     }
