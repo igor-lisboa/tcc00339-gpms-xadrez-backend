@@ -9,6 +9,32 @@
 			"name": "Jogos",
 			"item": [
 				{
+					"name": "Peças",
+					"item": [
+						{
+							"name": "Possíveis Jogadas",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{API_XADREZ_URL}}/jogos/0/pecas/a2/possiveis-jogadas",
+									"host": [
+										"{{API_XADREZ_URL}}"
+									],
+									"path": [
+										"jogos",
+										"0",
+										"pecas",
+										"a2",
+										"possiveis-jogadas"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "Index",
 					"request": {
 						"method": "GET",

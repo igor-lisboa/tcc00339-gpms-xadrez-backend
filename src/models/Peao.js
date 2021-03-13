@@ -5,7 +5,7 @@ const db = require("../database.json");
 
 module.exports = class Peao extends Peca {
     constructor(ladoId) {
-        super(ladoId, "Peão", false, false, true, false, false, 1);
+        super(ladoId, "Peão", false, false, true, false, false, 1, 1);
     }
 
     // retorna possiveis posicoes de movimento
@@ -20,7 +20,7 @@ module.exports = class Peao extends Peca {
 
         // pega o movimento do enPassant
         if (this.movimentosRealizados.length === 0) {
-            movimentosPossiveis.push(new MovimentoDestino({ "linha": linhaDaCaptura + (1 * (db.lados[this.ladoId].cabecaPraBaixo ? -1 : 1)), "coluna": coluna }));
+            movimentosPossiveis.push(new MovimentoDestino({ "linha": linhaDaCaptura + (1 * (db.lados[this.ladoId].cabecaPraBaixo ? -1 : 1)), "coluna": coluna }, false, "enPassant"));
         }
 
         return movimentosPossiveis;
