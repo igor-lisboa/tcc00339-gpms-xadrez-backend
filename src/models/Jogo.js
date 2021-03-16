@@ -468,30 +468,51 @@ module.exports = class Jogo {
         return casaEncontrada;
     }
 
-    //Ta aqui embaixo pq ainda não esta finalizado e nao quero atrapalhar seu codigo rs
+
+    /*
 
     //Roque Menor
     //Verifica lado
-    // if(ladoId === this.ladoBranco.id) {
-    //     //Verifica peça e casa (Branca)
-    //     if (peca === "Rei" && this.tabuleiro[casa.linha][casa.coluna] === this.tabuleiro[7][4]) {
-    //         if (this.tabuleiro[7][5] === null && this.tabuleiro[7][6] === null) {
-    //             if (this.tabuleiro[7][7] === "Torre") {
-    //                 //if se o jogador mover para tabuleiro[7][6]
-    //                 //verificar se tem algum peça do oponente nas proximidas e/ou vai deixar o rei desprotegido
-    //             }
-    //         }
-    //     }
+    if(this.ladoIdAtual === this.ladoBranco.id) {
+        //Verifica peça e casa (Branca)
+        if (peca === "Rei" && this.tabuleiro[casa.linha][casa.coluna] === this.tabuleiro[7][4]) {
+            //Verifica se as casas no caminho estão vazias
+            if (this.tabuleiro[7][5] === null && this.tabuleiro[7][6] === null) {
+                //Verifica se a Torre está na sua casa de origem
+                if (this.tabuleiro[7][7] === "Torre") {
+                    //Verifica se o jogador pretende mover o Rei para [7][6]
+                    if (casaDestino === this.tabuleiro[7][6]) {
+                        //Mover Rei para [7][6]
+                        realizaJogada(this.ladoBranco.id, this.tabuleiro[casa.linha][casa.coluna], casaDestino);
+                        //Mover Torre manualmente para [7][5]
+                        const peca = this.tabuleiro[7][7];
+                        this.tabuleiro[7][7] = null;
+                        this.tabuleiro[7][5] = peca;
+                    }
+                }
+            }
+        }
 
-    // } else {
-    //     //Verifica peça e casa (Preta)
-    //     if (peca === "Rei" && this.tabuleiro[casa.linha][casa.coluna] === this.tabuleiro[0][4]) {
-    //         if (this.tabuleiro[0][5] === null && this.tabuleiro[0][6] === null) {
-    //             if (this.tabuleiro[0][7] === "Torre") {
-    //                 //if se o jogador mover para tabuleiro[0][6]
-    //                 //verificar se tem algum peça do oponente nas proximidas e/ou vai deixar o rei desprotegido
-    //             }
-    //         }
-    //     }
-    // }
+    } else {
+        //Verifica peça e casa (Preta)
+        if (peca === "Rei" && this.tabuleiro[casa.linha][casa.coluna] === this.tabuleiro[0][4]) {
+            //Verifica se as casa no caminho estão vazias
+            if (this.tabuleiro[0][5] === null && this.tabuleiro[0][6] === null) {
+                //Verifica se a Torre está na sua casa de origem
+                if (this.tabuleiro[0][7] === "Torre") {
+                    //Verifica se o jogador pretende mover o Rei para [0][6]
+                    if (casaDestino === this.tabuleiro[0][6]) {
+                        //Mover Rei para [0][6]
+                        realizaJogada(this.ladoPreto.id, this.tabuleiro[casa.linha][casa.coluna], casaDestino);
+                        //Mover Torre manualmente para [0][5]
+                        const peca = this.tabuleiro[0][7];
+                        this.tabuleiro[0][7] = null;
+                        this.tabuleiro[0][5] = peca;
+                    }
+                }
+            }
+        }
+    }
+    
+    */
 }
