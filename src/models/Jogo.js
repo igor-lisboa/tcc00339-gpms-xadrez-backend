@@ -113,11 +113,12 @@ module.exports = class Jogo {
         this.ladoBranco = jogo.ladoBranco;
         this.ladoPreto = jogo.ladoPreto;
         this.tabuleiro = jogo.tabuleiro;
-        this.cheque = jogo.cheque;
         this.chequeMate = jogo.chequeMate;
         this.enPassantCasaCaptura = jogo.enPassantCasaCaptura;
         this.ladoIdAtual = jogo.ladoIdAtual;
         this.tipoJogo = jogo.tipoJogo;
+
+        this.cheque = this.verificaReiLadoAtualCheque();
 
         return this;
     }
