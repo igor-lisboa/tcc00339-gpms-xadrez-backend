@@ -230,14 +230,20 @@ module.exports = class Jogo {
         if (this.ladoBranco.id == ladoId) {
             return this.ladoBranco;
         }
-        return this.ladoPreto;
+        if (this.ladoPreto.id == ladoId) {
+            return this.ladoPreto;
+        }
+        throw "O lado desejado não existe";
     }
 
     recuperaLadoAdversarioPeloId(ladoId) {
         if (this.ladoBranco.id == ladoId) {
             return this.ladoPreto;
         }
-        return this.ladoBranco;
+        if (this.ladoPreto.id == ladoId) {
+            return this.ladoBranco;
+        }
+        throw "O lado adversário desejado não existe";
     }
 
     encontraCasasVizinhas(casa) {

@@ -45,5 +45,8 @@ module.exports = {
             }
         }
         return ladosIa;
+    }, recuperaLadoPeloId(jogoId, ladoId) {
+        let jogo = this.find(jogoId);
+        return jogo.recuperaLadoPeloId(ladoId);
     }
 };

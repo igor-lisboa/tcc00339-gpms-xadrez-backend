@@ -33,6 +33,31 @@
 							"response": []
 						},
 						{
+							"name": "Index",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "lado",
+										"value": "{{ladoId}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/pecas",
+									"host": [
+										"{{API_XADREZ_URL}}"
+									],
+									"path": [
+										"jogos",
+										"{{jogoIndex}}",
+										"pecas"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "Realiza Jogada",
 							"request": {
 								"method": "POST",
@@ -175,7 +200,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"tipoJogo\":\"{{tipoJogoId}}\"\r\n}",
+							"raw": "{\r\n    \"tipoJogo\": \"{{tipoJogoId}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
