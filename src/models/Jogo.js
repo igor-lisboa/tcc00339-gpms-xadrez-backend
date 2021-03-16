@@ -13,6 +13,8 @@ const TipoJogoService = require("../services/TipoJogoService");
 
 module.exports = class Jogo {
     constructor(tipoJogoId = 0) {
+        this.id = null;
+
         this.ladoBranco = new Lado(db.lados[0]);
         this.ladoPreto = new Lado(db.lados[1]);
         this.tabuleiro = [
@@ -72,6 +74,8 @@ module.exports = class Jogo {
             this.defineJogador(ladoAdversario.id, db.ladoTipos[1]);
         }
 
+        this.salva();
+
         return lado;
     }
 
@@ -90,7 +94,7 @@ module.exports = class Jogo {
             throw "Não está na sua vez de jogar, espere sua vez";
         }
 
-        const jogadaEscolhida = this.move(casaOrigem, casaDestino);
+        const jogadaEscolhida = this.move(casaOrigem, casaDestino, ladoId);
 
         // passa a vez p outro jogador
         const ladoAdversario = this.recuperaLadoAdversarioPeloId(this.ladoIdAtual);
@@ -101,6 +105,8 @@ module.exports = class Jogo {
 
         this.cheque = reiEmCheque;
 
+        this.salva();
+
         return jogadaEscolhida;
     }
 
@@ -110,23 +116,43 @@ module.exports = class Jogo {
             throw "Jogo não encontrado";
         }
 
+        this.id = jogo.id;
         this.ladoBranco = jogo.ladoBranco;
         this.ladoPreto = jogo.ladoPreto;
         this.tabuleiro = jogo.tabuleiro;
-        this.cheque = jogo.cheque;
         this.chequeMate = jogo.chequeMate;
         this.enPassantCasaCaptura = jogo.enPassantCasaCaptura;
         this.ladoIdAtual = jogo.ladoIdAtual;
         this.tipoJogo = jogo.tipoJogo;
 
+        this.cheque = this.verificaReiLadoAtualCheque();
+
         return this;
     }
 
-    move(casaDe, casaPara) {
+    salva() {
+        if (this.id == null) {
+            const tamanhoAntesPush = db.jogos.length;
+            const tamanhoDepoisPush = db.jogos.push(this);
+            if (tamanhoAntesPush >= tamanhoDepoisPush) {
+                throw "Falha ao incluir Jogo";
+            }
+            const ultimoIndex = db.jogos.lastIndexOf(this);
+            this.id = ultimoIndex;
+        }
+        db.jogos[this.id] = this;
+    }
+
+    create() {
+        this.salva();
+        return this;
+    }
+
+    move(casaDe, casaPara, ladoId) {
         casaDe = this.recuperaCasaLinhaColuna(casaDe);
         casaPara = this.recuperaCasaLinhaColuna(casaPara);
 
-        const jogadaEscolhida = this.verificaJogadaPossivel(casaDe, casaPara);
+        const jogadaEscolhida = this.verificaJogadaPossivel(casaDe, casaPara, ladoId);
 
         const peca = this.tabuleiro[casaDe.linha][casaDe.coluna];
         const casaDestino = this.tabuleiro[casaPara.linha][casaPara.coluna];
@@ -174,7 +200,7 @@ module.exports = class Jogo {
         let reiEmPerigo = false;
         ladoAdversario.pecas.todas.forEach((peca) => {
             try {
-                this.verificaJogadaPossivel(peca.casa, reiLadoAtual.casa);
+                this.verificaJogadaPossivel(peca.casa, reiLadoAtual.casa, ladoAdversario.id);
                 reiEmPerigo = true;
             } catch (e) {
                 // se deu excecao eh pq o rei nao esta em cheque
@@ -184,7 +210,7 @@ module.exports = class Jogo {
         return reiEmPerigo;
     }
 
-    verificaJogadaPossivel(casaOrigemPeca, casaDestino) {
+    verificaJogadaPossivel(casaOrigemPeca, casaDestino, ladoId) {
         casaOrigemPeca = this.recuperaCasaLinhaColuna(casaOrigemPeca);
         casaDestino = this.recuperaCasaLinhaColuna(casaDestino);
 
@@ -194,7 +220,7 @@ module.exports = class Jogo {
             throw "Não foi possível encontrar uma peça na casa de origem do movimento";
         }
 
-        if (casaOrigem.ladoId !== this.ladoIdAtual) {
+        if (casaOrigem.ladoId !== ladoId) {
             throw "A peça escolhida para o movimento pertence ao adversário, escolha outra peça";
         }
 
@@ -203,7 +229,7 @@ module.exports = class Jogo {
 
         // se tiver peca
         if (casaPecaDestino != null) {
-            if (casaPecaDestino.ladoId === this.ladoIdAtual) {
+            if (casaPecaDestino.ladoId === ladoId) {
                 throw "Não é possível capturar uma peça que te pertence";
             }
         }
@@ -246,10 +272,10 @@ module.exports = class Jogo {
         throw "O lado adversário desejado não existe";
     }
 
-    encontraCasasVizinhas(casa) {
+    encontraCasasVizinhas(casa, ladoId) {
         casa = this.recuperaCasaLinhaColuna(casa);
 
-        let ladoAtual = this.recuperaLadoPeloId(this.ladoIdAtual);
+        let ladoAtual = this.recuperaLadoPeloId(ladoId);
 
         let casasVizinhas = [];
 
@@ -350,7 +376,7 @@ module.exports = class Jogo {
         }
 
         // recupera casas vizinhas
-        const casasVizinhas = this.encontraCasasVizinhas(casaAtual);
+        const casasVizinhas = this.encontraCasasVizinhas(casaAtual, pecaLadoId);
 
         // recupera o vizinho desejado
         const vizinho = casasVizinhas[vizinhoDesejado];
@@ -467,30 +493,94 @@ module.exports = class Jogo {
         return casaEncontrada;
     }
 
-    //Ta aqui embaixo pq ainda não esta finalizado e nao quero atrapalhar seu codigo rs
+
+    /*    
 
     //Roque Menor
     //Verifica lado
-    // if(ladoId === this.ladoBranco.id) {
-    //     //Verifica peça e casa (Branca)
-    //     if (peca === "Rei" && this.tabuleiro[casa.linha][casa.coluna] === this.tabuleiro[7][4]) {
-    //         if (this.tabuleiro[7][5] === null && this.tabuleiro[7][6] === null) {
-    //             if (this.tabuleiro[7][7] === "Torre") {
-    //                 //if se o jogador mover para tabuleiro[7][6]
-    //                 //verificar se tem algum peça do oponente nas proximidas e/ou vai deixar o rei desprotegido
-    //             }
-    //         }
-    //     }
+    if(this.ladoIdAtual === this.ladoBranco.id) {
+        //Verifica peça e casa (Branca)
+        if (peca === "Rei" && this.tabuleiro[casa.linha][casa.coluna] === this.tabuleiro[7][4]) {
+            //Verifica se as casas no caminho estão vazias
+            if (this.tabuleiro[7][5] === null && this.tabuleiro[7][6] === null) {
+                //Verifica se a Torre está na sua casa de origem
+                if (this.tabuleiro[7][7] === "Torre") {
+                    //Verifica se o jogador pretende mover o Rei para [7][6]
+                    if (casaDestino === this.tabuleiro[7][6]) {
+                        //Mover Rei para [7][6]
+                        realizaJogada(this.ladoBranco.id, this.tabuleiro[casa.linha][casa.coluna], casaDestino);
+                        //Mover Torre manualmente para [7][5]
+                        const peca = this.tabuleiro[7][7];
+                        this.tabuleiro[7][7] = null;
+                        this.tabuleiro[7][5] = peca;
+                    }
+                }
+            }
+        }
 
-    // } else {
-    //     //Verifica peça e casa (Preta)
-    //     if (peca === "Rei" && this.tabuleiro[casa.linha][casa.coluna] === this.tabuleiro[0][4]) {
-    //         if (this.tabuleiro[0][5] === null && this.tabuleiro[0][6] === null) {
-    //             if (this.tabuleiro[0][7] === "Torre") {
-    //                 //if se o jogador mover para tabuleiro[0][6]
-    //                 //verificar se tem algum peça do oponente nas proximidas e/ou vai deixar o rei desprotegido
-    //             }
-    //         }
-    //     }
-    // }
+    } else {
+        //Verifica peça e casa (Preta)
+        if (peca === "Rei" && this.tabuleiro[casa.linha][casa.coluna] === this.tabuleiro[0][4]) {
+            //Verifica se as casa no caminho estão vazias
+            if (this.tabuleiro[0][5] === null && this.tabuleiro[0][6] === null) {
+                //Verifica se a Torre está na sua casa de origem
+                if (this.tabuleiro[0][7] === "Torre") {
+                    //Verifica se o jogador pretende mover o Rei para [0][6]
+                    if (casaDestino === this.tabuleiro[0][6]) {
+                        //Mover Rei para [0][6]
+                        realizaJogada(this.ladoPreto.id, this.tabuleiro[casa.linha][casa.coluna], casaDestino);
+                        //Mover Torre manualmente para [0][5]
+                        const peca = this.tabuleiro[0][7];
+                        this.tabuleiro[0][7] = null;
+                        this.tabuleiro[0][5] = peca;
+                    }
+                }
+            }
+        }
+    }
+
+    //Roque Maior
+    //Verifica lado
+    if(this.ladoIdAtual === this.ladoBranco.id) {
+        //Verifica peça e casa (Branca)
+        if (peca === "Rei" && this.tabuleiro[casa.linha][casa.coluna] === this.tabuleiro[7][4]) {
+            //Verifica se as casas no caminho estão vazias
+            if (this.tabuleiro[7][3] === null & this.tabuleiro[7][2] === null && this.tabuleiro[7][1] === null) {
+                //Verifica se a Torre está na sua casa de origem
+                if (this.tabuleiro[7][0] === "Torre") {
+                    //Verifica se o jogador pretende mover o Rei para [7][2]
+                    if (casaDestino === this.tabuleiro[7][2]) {
+                        //Mover Rei para [7][2]
+                        realizaJogada(this.ladoBranco.id, this.tabuleiro[casa.linha][casa.coluna], casaDestino);
+                        //Mover Torre manualmente para [7][3]
+                        const peca = this.tabuleiro[7][0];
+                        this.tabuleiro[7][0] = null;
+                        this.tabuleiro[7][3] = peca;
+                    }
+                }
+            }
+        }
+
+    } else {
+        //Verifica peça e casa (Branca)
+        if (peca === "Rei" && this.tabuleiro[casa.linha][casa.coluna] === this.tabuleiro[0][4]) {
+            //Verifica se as casas no camniho estão vazias
+            if (this.tabuleiro[0][3] === null && this.tabuleiro[0][2] === null && this.tabuleiro[0][1] === null) {
+                //Verifica se a Torre está na sua casa de origem
+                if (this.tabuleiro[0][0] === "Torre") {
+                    //Verifica se o jogador pretende mover o Rei para [0][2]
+                    if (casaDestino === this.tabuleiro[0][2]) {
+                        //Mover Rei para [0][2]
+                        realizaJogada(this.ladoPreto.id, this.tabuleiro[casa.linha][casa.coluna], casaDestino);
+                        //Mover Torre manualmente para [0][3]
+                        const peca = this.tabuleiro[0][0];
+                        this.tabuleiro[0][0] = null;
+                        this.tabuleiro[0][3] = peca;
+                    }
+                }
+            }
+        }
+    }
+
+    */    
 }
