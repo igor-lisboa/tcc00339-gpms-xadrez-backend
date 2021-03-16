@@ -13,6 +13,8 @@ const TipoJogoService = require("../services/TipoJogoService");
 
 module.exports = class Jogo {
     constructor(tipoJogoId = 0) {
+        this.id = null;
+
         this.ladoBranco = new Lado(db.lados[0]);
         this.ladoPreto = new Lado(db.lados[1]);
         this.tabuleiro = [
@@ -72,6 +74,8 @@ module.exports = class Jogo {
             this.defineJogador(ladoAdversario.id, db.ladoTipos[1]);
         }
 
+        this.salva();
+
         return lado;
     }
 
@@ -90,7 +94,7 @@ module.exports = class Jogo {
             throw "Não está na sua vez de jogar, espere sua vez";
         }
 
-        const jogadaEscolhida = this.move(casaOrigem, casaDestino);
+        const jogadaEscolhida = this.move(casaOrigem, casaDestino, ladoId);
 
         // passa a vez p outro jogador
         const ladoAdversario = this.recuperaLadoAdversarioPeloId(this.ladoIdAtual);
@@ -101,6 +105,8 @@ module.exports = class Jogo {
 
         this.cheque = reiEmCheque;
 
+        this.salva();
+
         return jogadaEscolhida;
     }
 
@@ -110,6 +116,7 @@ module.exports = class Jogo {
             throw "Jogo não encontrado";
         }
 
+        this.id = jogo.id;
         this.ladoBranco = jogo.ladoBranco;
         this.ladoPreto = jogo.ladoPreto;
         this.tabuleiro = jogo.tabuleiro;
@@ -123,11 +130,29 @@ module.exports = class Jogo {
         return this;
     }
 
-    move(casaDe, casaPara) {
+    salva() {
+        if (this.id == null) {
+            const tamanhoAntesPush = db.jogos.length;
+            const tamanhoDepoisPush = db.jogos.push(this);
+            if (tamanhoAntesPush >= tamanhoDepoisPush) {
+                throw "Falha ao incluir Jogo";
+            }
+            const ultimoIndex = db.jogos.lastIndexOf(this);
+            this.id = ultimoIndex;
+        }
+        db.jogos[this.id] = this;
+    }
+
+    create() {
+        this.salva();
+        return this;
+    }
+
+    move(casaDe, casaPara, ladoId) {
         casaDe = this.recuperaCasaLinhaColuna(casaDe);
         casaPara = this.recuperaCasaLinhaColuna(casaPara);
 
-        const jogadaEscolhida = this.verificaJogadaPossivel(casaDe, casaPara);
+        const jogadaEscolhida = this.verificaJogadaPossivel(casaDe, casaPara, ladoId);
 
         const peca = this.tabuleiro[casaDe.linha][casaDe.coluna];
         const casaDestino = this.tabuleiro[casaPara.linha][casaPara.coluna];
@@ -175,7 +200,7 @@ module.exports = class Jogo {
         let reiEmPerigo = false;
         ladoAdversario.pecas.todas.forEach((peca) => {
             try {
-                this.verificaJogadaPossivel(peca.casa, reiLadoAtual.casa);
+                this.verificaJogadaPossivel(peca.casa, reiLadoAtual.casa, ladoAdversario.id);
                 reiEmPerigo = true;
             } catch (e) {
                 // se deu excecao eh pq o rei nao esta em cheque
@@ -185,7 +210,7 @@ module.exports = class Jogo {
         return reiEmPerigo;
     }
 
-    verificaJogadaPossivel(casaOrigemPeca, casaDestino) {
+    verificaJogadaPossivel(casaOrigemPeca, casaDestino, ladoId) {
         casaOrigemPeca = this.recuperaCasaLinhaColuna(casaOrigemPeca);
         casaDestino = this.recuperaCasaLinhaColuna(casaDestino);
 
@@ -195,7 +220,7 @@ module.exports = class Jogo {
             throw "Não foi possível encontrar uma peça na casa de origem do movimento";
         }
 
-        if (casaOrigem.ladoId !== this.ladoIdAtual) {
+        if (casaOrigem.ladoId !== ladoId) {
             throw "A peça escolhida para o movimento pertence ao adversário, escolha outra peça";
         }
 
@@ -204,7 +229,7 @@ module.exports = class Jogo {
 
         // se tiver peca
         if (casaPecaDestino != null) {
-            if (casaPecaDestino.ladoId === this.ladoIdAtual) {
+            if (casaPecaDestino.ladoId === ladoId) {
                 throw "Não é possível capturar uma peça que te pertence";
             }
         }
@@ -247,10 +272,10 @@ module.exports = class Jogo {
         throw "O lado adversário desejado não existe";
     }
 
-    encontraCasasVizinhas(casa) {
+    encontraCasasVizinhas(casa, ladoId) {
         casa = this.recuperaCasaLinhaColuna(casa);
 
-        let ladoAtual = this.recuperaLadoPeloId(this.ladoIdAtual);
+        let ladoAtual = this.recuperaLadoPeloId(ladoId);
 
         let casasVizinhas = [];
 
@@ -351,7 +376,7 @@ module.exports = class Jogo {
         }
 
         // recupera casas vizinhas
-        const casasVizinhas = this.encontraCasasVizinhas(casaAtual);
+        const casasVizinhas = this.encontraCasasVizinhas(casaAtual, pecaLadoId);
 
         // recupera o vizinho desejado
         const vizinho = casasVizinhas[vizinhoDesejado];
