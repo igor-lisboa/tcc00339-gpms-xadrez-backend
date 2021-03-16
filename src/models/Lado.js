@@ -4,6 +4,15 @@ module.exports = class Lado {
         this.lado = lado.nome;
         this.cabecaPraBaixo = lado.cabecaPraBaixo;
         this.movimentosRealizados = [];
+
+        this.tipo = null;
+    }
+
+    defineTipo(tipo) {
+        if (this.tipo != null) {
+            throw "Esse lado já foi escolhido";
+        }
+        this.tipo = tipo;
     }
 
     fazNovoMovimento(movimento) {

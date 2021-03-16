@@ -9,9 +9,10 @@ const Rainha = require("./Rainha");
 const db = require("../database.json");
 const PossivelJogada = require("./PossivelJogada");
 const MovimentoRealizado = require("./MovimentoRealizado");
+const TipoJogoService = require("../services/TipoJogoService");
 
 module.exports = class Jogo {
-    constructor() {
+    constructor(tipoJogoId = 0) {
         this.ladoBranco = new Lado(db.lados[0]);
         this.ladoPreto = new Lado(db.lados[1]);
         this.tabuleiro = [
@@ -49,7 +50,39 @@ module.exports = class Jogo {
          */
         this.enPassantCasaCaptura = null;
 
+        this.defineTipoJogo(tipoJogoId);
+
         this.atualizaPecasDosLados();
+    }
+
+    defineJogador(ladoId, tipo) {
+        let lado = undefined;
+        if (this.ladoBranco.id == ladoId) {
+            this.ladoBranco.defineTipo(tipo);
+            lado = this.ladoBranco;
+        } else {
+            this.ladoPreto.defineTipo(tipo);
+            lado = this.ladoPreto;
+        }
+
+        // se tipo de jogo for Humano X I.A. & tipo for Humano
+        if (this.tipoJogo.id == 1 && tipo.id == 0) {
+            // inclui jogador I.A. no lado adversario
+            let ladoAdversario = this.recuperaLadoAdversarioPeloId(ladoId);
+            this.defineJogador(ladoAdversario.id, db.ladoTipos[1]);
+        }
+
+        return lado;
+    }
+
+    defineTipoJogo(tipoJogoId) {
+        this.tipoJogo = TipoJogoService.find(tipoJogoId);
+        // se tipo de jogo for I.A. X I.A.
+        if (this.tipoJogo.id == 2) {
+            // insere I.A.'s
+            this.defineJogador(0, db.ladoTipos[1]);
+            this.defineJogador(1, db.ladoTipos[1]);
+        }
     }
 
     realizaJogada(ladoId, casaOrigem, casaDestino) {
@@ -57,7 +90,7 @@ module.exports = class Jogo {
             throw "Não está na sua vez de jogar, espere sua vez";
         }
 
-        this.move(casaOrigem, casaDestino);
+        const jogadaEscolhida = this.move(casaOrigem, casaDestino);
 
         // passa a vez p outro jogador
         const ladoAdversario = this.recuperaLadoAdversarioPeloId(this.ladoIdAtual);
@@ -68,7 +101,7 @@ module.exports = class Jogo {
 
         this.cheque = reiEmCheque;
 
-        return this;
+        return jogadaEscolhida;
     }
 
     find(jogoId) {
@@ -84,6 +117,7 @@ module.exports = class Jogo {
         this.chequeMate = jogo.chequeMate;
         this.enPassantCasaCaptura = jogo.enPassantCasaCaptura;
         this.ladoIdAtual = jogo.ladoIdAtual;
+        this.tipoJogo = jogo.tipoJogo;
 
         return this;
     }
@@ -109,7 +143,7 @@ module.exports = class Jogo {
                 throw "A jogada não pode ser realizada pois coloca seu rei em cheque";
             }
 
-            const novoMovimento = new MovimentoRealizado(casaDe, casaPara, casaDestino);
+            const novoMovimento = new MovimentoRealizado(casaDe, casaPara, casaDestino, jogadaEscolhida.nomeJogada);
 
             this.tabuleiro[casaPara.linha][casaPara.coluna].incluiMovimentoRealizado(novoMovimento);
 
@@ -119,7 +153,7 @@ module.exports = class Jogo {
                 this.ladoPreto.fazNovoMovimento(novoMovimento);
             }
 
-            return jogadaEscolhida;
+            return novoMovimento;
         } catch (e) {
             // desfaz movimento
             this.tabuleiro[casaDe.linha][casaDe.coluna] = peca;

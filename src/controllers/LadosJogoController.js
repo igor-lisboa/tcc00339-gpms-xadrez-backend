@@ -1,13 +1,11 @@
-const tipoJogoService = require("../services/TipoJogoService");
+const db = require("../database.json");
 
 module.exports = {
     index(req, res) {
         try {
-
-
             return res.json({
-                message: "Tipos de jogo retornados com sucesso!",
-                data: tipoJogoService.index(),
+                message: "Lados do jogo retornados com sucesso!",
+                data: db.lados,
                 success: true
             });
         } catch (e) {

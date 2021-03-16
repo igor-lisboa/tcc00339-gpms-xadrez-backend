@@ -39,7 +39,7 @@
 								"header": [
 									{
 										"key": "lado",
-										"value": "0",
+										"value": "{{ladoId}}",
 										"type": "text"
 									}
 								],
@@ -55,6 +55,39 @@
 										"{{casaOrigem}}",
 										"move",
 										"{{casaDestino}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Jogadores",
+					"item": [
+						{
+							"name": "Insere Jogador",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"ladoId\": \"{{ladoId}}\",\r\n    \"tipoId\": \"{{tipoJogadorId}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/jogadores",
+									"host": [
+										"{{API_XADREZ_URL}}"
+									],
+									"path": [
+										"jogos",
+										"{{jogoIndex}}",
+										"jogadores"
 									]
 								}
 							},
@@ -98,10 +131,57 @@
 					"response": []
 				},
 				{
+					"name": "Lado Atual",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/lado-atual",
+							"host": [
+								"{{API_XADREZ_URL}}"
+							],
+							"path": [
+								"jogos",
+								"{{jogoIndex}}",
+								"lado-atual"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "I.A.'s",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/ias",
+							"host": [
+								"{{API_XADREZ_URL}}"
+							],
+							"path": [
+								"jogos",
+								"{{jogoIndex}}",
+								"ias"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Create",
 					"request": {
 						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"tipoJogo\":\"{{tipoJogoId}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
 							"raw": "{{API_XADREZ_URL}}/jogos",
 							"host": [
@@ -159,6 +239,70 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Tipos de Jogador",
+			"item": [
+				{
+					"name": "Index",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API_XADREZ_URL}}/tipos-de-jogador",
+							"host": [
+								"{{API_XADREZ_URL}}"
+							],
+							"path": [
+								"tipos-de-jogador"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Lados do Jogo",
+			"item": [
+				{
+					"name": "Index",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API_XADREZ_URL}}/lados-do-jogo",
+							"host": [
+								"{{API_XADREZ_URL}}"
+							],
+							"path": [
+								"lados-do-jogo"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
 		}
 	],
 	"variable": [
@@ -172,6 +316,18 @@
 		},
 		{
 			"key": "jogoIndex",
+			"value": "0"
+		},
+		{
+			"key": "ladoId",
+			"value": "0"
+		},
+		{
+			"key": "tipoJogoId",
+			"value": "0"
+		},
+		{
+			"key": "tipoJogadorId",
 			"value": "0"
 		}
 	]
