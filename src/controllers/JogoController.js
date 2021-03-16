@@ -50,5 +50,37 @@ module.exports = {
                 success: false
             });
         }
+    }, recuperaLadoAtual(req, res) {
+        try {
+            const { jogoId } = req.params;
+            return res.json({
+                message: "Lado atual do jogo retornado com sucesso!",
+                data: JogoService.recuperaLadoAtual(jogoId),
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
+    }, recuperaLadosIa(req, res) {
+        try {
+            const { jogoId } = req.params;
+            return res.json({
+                message: "I.A.'s do jogo retornadas com sucesso!",
+                data: JogoService.recuperaLadosIa(jogoId),
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
     }
 }

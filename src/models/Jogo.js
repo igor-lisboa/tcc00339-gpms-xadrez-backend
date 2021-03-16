@@ -56,17 +56,33 @@ module.exports = class Jogo {
     }
 
     defineJogador(ladoId, tipo) {
+        let lado = undefined;
         if (this.ladoBranco.id == ladoId) {
             this.ladoBranco.defineTipo(tipo);
-            return this.ladoBranco;
+            lado = this.ladoBranco;
         } else {
             this.ladoPreto.defineTipo(tipo);
-            return this.ladoPreto;
+            lado = this.ladoPreto;
         }
+
+        // se tipo de jogo for Humano X I.A. & tipo for Humano
+        if (this.tipoJogo.id == 1 && tipo.id == 0) {
+            // inclui jogador I.A. no lado adversario
+            let ladoAdversario = this.recuperaLadoAdversarioPeloId(ladoId);
+            this.defineJogador(ladoAdversario.id, db.ladoTipos[1]);
+        }
+
+        return lado;
     }
 
     defineTipoJogo(tipoJogoId) {
         this.tipoJogo = TipoJogoService.find(tipoJogoId);
+        // se tipo de jogo for I.A. X I.A.
+        if (this.tipoJogo.id == 2) {
+            // insere I.A.'s
+            this.defineJogador(0, db.ladoTipos[1]);
+            this.defineJogador(1, db.ladoTipos[1]);
+        }
     }
 
     realizaJogada(ladoId, casaOrigem, casaDestino) {

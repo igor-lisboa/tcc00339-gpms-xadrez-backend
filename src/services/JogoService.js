@@ -28,5 +28,22 @@ module.exports = {
         const lado = jogo.defineJogador(ladoId, db.ladoTipos[tipoId]);
         db.jogos[jogoId] = jogo;
         return lado;
+    }, recuperaLadoAtual(jogoId) {
+        let jogo = this.find(jogoId);
+        return jogo.recuperaLadoPeloId(jogo.ladoIdAtual);
+    }, recuperaLadosIa(jogoId) {
+        let jogo = this.find(jogoId);
+        let ladosIa = [];
+        if (jogo.ladoBranco.tipo != null) {
+            if (jogo.ladoBranco.tipo.id == 1) {
+                ladosIa.push(jogo.ladoBranco);
+            }
+        }
+        if (jogo.ladoPreto.tipo != null) {
+            if (jogo.ladoPreto.tipo.id == 1) {
+                ladosIa.push(jogo.ladoPreto);
+            }
+        }
+        return ladosIa;
     }
 };
