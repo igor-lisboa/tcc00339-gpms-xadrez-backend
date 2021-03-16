@@ -1,6 +1,25 @@
 const JogoService = require("../services/JogoService");
 
 module.exports = {
+    index(req, res) {
+        try {
+            const { jogoId } = req.params;
+            const ladoId = req.headers.lado;
+            const lado = JogoService.recuperaLadoPeloId(jogoId, ladoId);
+            return res.json({
+                message: "Peças retornadas com sucesso!",
+                data: lado.pecas.todas,
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
+    },
     possiveisJogadas(req, res) {
         try {
             const { jogoId, casaNome } = req.params;

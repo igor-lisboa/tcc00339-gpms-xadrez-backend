@@ -35,6 +35,7 @@ routes.post("/jogos", JogoController.create);
 routes.get("/jogos/:jogoId/lado-atual", JogoController.recuperaLadoAtual);
 routes.get("/jogos/:jogoId/ias", JogoController.recuperaLadosIa);
 
+routes.get("/jogos/:jogoId/pecas", JogoPecaController.index);
 routes.get("/jogos/:jogoId/pecas/:casaNome/possiveis-jogadas", JogoPecaController.possiveisJogadas);
 routes.post("/jogos/:jogoId/pecas/:casaOrigem/move/:casaDestino", JogoPecaController.realizaJogada);
 
