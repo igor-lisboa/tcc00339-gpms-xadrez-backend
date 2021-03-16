@@ -3,8 +3,6 @@ const tipoJogoService = require("../services/TipoJogoService");
 module.exports = {
     index(req, res) {
         try {
-
-
             return res.json({
                 message: "Tipos de jogo retornados com sucesso!",
                 data: tipoJogoService.index(),

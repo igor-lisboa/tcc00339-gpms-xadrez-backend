@@ -8,14 +8,14 @@ module.exports = class Cavalo extends Peca {
 
     movimentosEspeciais(linha, coluna) {
         return [
-            new MovimentoDestino({ "linha": linha + 3, "coluna": coluna + 1 }),
-            new MovimentoDestino({ "linha": linha + 3, "coluna": coluna - 1 }),
-            new MovimentoDestino({ "linha": linha - 3, "coluna": coluna + 1 }),
-            new MovimentoDestino({ "linha": linha - 3, "coluna": coluna - 1 }),
-            new MovimentoDestino({ "linha": linha + 1, "coluna": coluna + 3 }),
-            new MovimentoDestino({ "linha": linha + 1, "coluna": coluna - 3 }),
-            new MovimentoDestino({ "linha": linha - 1, "coluna": coluna + 3 }),
-            new MovimentoDestino({ "linha": linha - 1, "coluna": coluna - 3 })
+            new MovimentoDestino({ "linha": linha + 2, "coluna": coluna + 1 }),
+            new MovimentoDestino({ "linha": linha + 2, "coluna": coluna - 1 }),
+            new MovimentoDestino({ "linha": linha - 2, "coluna": coluna + 1 }),
+            new MovimentoDestino({ "linha": linha - 2, "coluna": coluna - 1 }),
+            new MovimentoDestino({ "linha": linha + 1, "coluna": coluna + 2 }),
+            new MovimentoDestino({ "linha": linha + 1, "coluna": coluna - 2 }),
+            new MovimentoDestino({ "linha": linha - 1, "coluna": coluna + 2 }),
+            new MovimentoDestino({ "linha": linha - 1, "coluna": coluna - 2 })
         ];
     }
 }
