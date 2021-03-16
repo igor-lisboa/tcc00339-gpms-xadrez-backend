@@ -9,9 +9,10 @@ const Rainha = require("./Rainha");
 const db = require("../database.json");
 const PossivelJogada = require("./PossivelJogada");
 const MovimentoRealizado = require("./MovimentoRealizado");
+const TipoJogoService = require("../services/TipoJogoService");
 
 module.exports = class Jogo {
-    constructor() {
+    constructor(tipoJogoId = 0) {
         this.ladoBranco = new Lado(db.lados[0]);
         this.ladoPreto = new Lado(db.lados[1]);
         this.tabuleiro = [
@@ -49,7 +50,23 @@ module.exports = class Jogo {
          */
         this.enPassantCasaCaptura = null;
 
+        this.defineTipoJogo(tipoJogoId);
+
         this.atualizaPecasDosLados();
+    }
+
+    defineJogador(ladoId, tipo) {
+        if (this.ladoBranco.id == ladoId) {
+            this.ladoBranco.defineTipo(tipo);
+            return this.ladoBranco;
+        } else {
+            this.ladoPreto.defineTipo(tipo);
+            return this.ladoPreto;
+        }
+    }
+
+    defineTipoJogo(tipoJogoId) {
+        this.tipoJogo = TipoJogoService.find(tipoJogoId);
     }
 
     realizaJogada(ladoId, casaOrigem, casaDestino) {
@@ -84,6 +101,7 @@ module.exports = class Jogo {
         this.chequeMate = jogo.chequeMate;
         this.enPassantCasaCaptura = jogo.enPassantCasaCaptura;
         this.ladoIdAtual = jogo.ladoIdAtual;
+        this.tipoJogo = jogo.tipoJogo;
 
         return this;
     }

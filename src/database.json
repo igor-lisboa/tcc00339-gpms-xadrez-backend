@@ -12,18 +12,37 @@
             "cabecaPraBaixo": false
         }
     ],
-    "tiposJogo": [
+    "ladoTipos": [
         {
             "id": 0,
-            "nome": "Humano X Humano"
+            "nome": "Humano"
         },
         {
             "id": 1,
-            "nome": "Humano X I.A."
+            "nome": "I.A."
+        }
+    ],
+    "tiposJogo": [
+        {
+            "id": 0,
+            "integranteLadoTipoIds": [
+                0,
+                0
+            ]
+        },
+        {
+            "id": 1,
+            "integranteLadoTipoIds": [
+                0,
+                1
+            ]
         },
         {
             "id": 2,
-            "nome": "I.A. X I.A."
+            "integranteLadoTipoIds": [
+                1,
+                1
+            ]
         }
     ],
     "tabelaEquivalencia": [

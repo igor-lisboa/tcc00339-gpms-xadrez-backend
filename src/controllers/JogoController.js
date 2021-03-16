@@ -36,9 +36,10 @@ module.exports = {
     },
     create(req, res) {
         try {
+            const { tipoJogo } = req.body;
             return res.json({
                 message: "Jogo incluído com sucesso!",
-                data: JogoService.create(),
+                data: JogoService.create(tipoJogo),
                 success: true
             });
         } catch (e) {

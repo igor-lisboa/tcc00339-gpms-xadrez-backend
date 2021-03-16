@@ -1,8 +1,11 @@
 const express = require("express");
 
 const JogoController = require("./controllers/JogoController");
+const JogoJogadorController = require("./controllers/JogoJogadorController");
 const JogoPecaController = require("./controllers/JogoPecaController");
+const LadosJogoController = require("./controllers/LadosJogoController");
 const TabelaEquivalenciaController = require("./controllers/TabelaEquivalenciaController");
+const TiposJogadorController = require("./controllers/TiposJogadorController");
 const TiposJogoController = require("./controllers/TiposJogoController");
 
 const routes = express.Router();
@@ -32,9 +35,12 @@ routes.post("/jogos", JogoController.create);
 routes.get("/jogos/:jogoId/pecas/:casaNome/possiveis-jogadas", JogoPecaController.possiveisJogadas);
 routes.post("/jogos/:jogoId/pecas/:casaOrigem/move/:casaDestino", JogoPecaController.realizaJogada);
 
+routes.post("/jogos/:jogoId/jogadores", JogoJogadorController.insereJogador);
 
 routes.get("/tabela-equivalencia", TabelaEquivalenciaController.index);
 
 routes.get("/tipos-de-jogo", TiposJogoController.index);
+routes.get("/lados-do-jogo", LadosJogoController.index);
+routes.get("/tipos-de-jogador", TiposJogadorController.index);
 
 module.exports = routes;
