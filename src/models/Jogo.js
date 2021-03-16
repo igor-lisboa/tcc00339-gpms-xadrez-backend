@@ -494,7 +494,7 @@ module.exports = class Jogo {
     }
 
 
-    /*
+    /*    
 
     //Roque Menor
     //Verifica lado
@@ -538,6 +538,49 @@ module.exports = class Jogo {
             }
         }
     }
-    
-    */
+
+    //Roque Maior
+    //Verifica lado
+    if(this.ladoIdAtual === this.ladoBranco.id) {
+        //Verifica peça e casa (Branca)
+        if (peca === "Rei" && this.tabuleiro[casa.linha][casa.coluna] === this.tabuleiro[7][4]) {
+            //Verifica se as casas no caminho estão vazias
+            if (this.tabuleiro[7][3] === null & this.tabuleiro[7][2] === null && this.tabuleiro[7][1] === null) {
+                //Verifica se a Torre está na sua casa de origem
+                if (this.tabuleiro[7][0] === "Torre") {
+                    //Verifica se o jogador pretende mover o Rei para [7][2]
+                    if (casaDestino === this.tabuleiro[7][2]) {
+                        //Mover Rei para [7][2]
+                        realizaJogada(this.ladoBranco.id, this.tabuleiro[casa.linha][casa.coluna], casaDestino);
+                        //Mover Torre manualmente para [7][3]
+                        const peca = this.tabuleiro[7][0];
+                        this.tabuleiro[7][0] = null;
+                        this.tabuleiro[7][3] = peca;
+                    }
+                }
+            }
+        }
+
+    } else {
+        //Verifica peça e casa (Branca)
+        if (peca === "Rei" && this.tabuleiro[casa.linha][casa.coluna] === this.tabuleiro[0][4]) {
+            //Verifica se as casas no camniho estão vazias
+            if (this.tabuleiro[0][3] === null && this.tabuleiro[0][2] === null && this.tabuleiro[0][1] === null) {
+                //Verifica se a Torre está na sua casa de origem
+                if (this.tabuleiro[0][0] === "Torre") {
+                    //Verifica se o jogador pretende mover o Rei para [0][2]
+                    if (casaDestino === this.tabuleiro[0][2]) {
+                        //Mover Rei para [0][2]
+                        realizaJogada(this.ladoPreto.id, this.tabuleiro[casa.linha][casa.coluna], casaDestino);
+                        //Mover Torre manualmente para [0][3]
+                        const peca = this.tabuleiro[0][0];
+                        this.tabuleiro[0][0] = null;
+                        this.tabuleiro[0][3] = peca;
+                    }
+                }
+            }
+        }
+    }
+
+    */    
 }
