@@ -20,9 +20,9 @@ module.exports = {
         };
     }, realizaJogada(jogoId, ladoId, casaOrigem, casaDestino) {
         let jogo = this.find(jogoId);
-        jogo = jogo.realizaJogada(ladoId, casaOrigem, casaDestino);
+        const movimentoRealizado = jogo.realizaJogada(ladoId, casaOrigem, casaDestino);
         db.jogos[jogoId] = jogo;
-        return db.jogos[jogoId];
+        return movimentoRealizado;
     }, insereJogador(jogoId, ladoId, tipoId) {
         let jogo = this.find(jogoId);
         const lado = jogo.defineJogador(ladoId, db.ladoTipos[tipoId]);

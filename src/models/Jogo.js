@@ -74,7 +74,7 @@ module.exports = class Jogo {
             throw "Não está na sua vez de jogar, espere sua vez";
         }
 
-        this.move(casaOrigem, casaDestino);
+        const jogadaEscolhida = this.move(casaOrigem, casaDestino);
 
         // passa a vez p outro jogador
         const ladoAdversario = this.recuperaLadoAdversarioPeloId(this.ladoIdAtual);
@@ -85,7 +85,7 @@ module.exports = class Jogo {
 
         this.cheque = reiEmCheque;
 
-        return this;
+        return jogadaEscolhida;
     }
 
     find(jogoId) {
@@ -127,7 +127,7 @@ module.exports = class Jogo {
                 throw "A jogada não pode ser realizada pois coloca seu rei em cheque";
             }
 
-            const novoMovimento = new MovimentoRealizado(casaDe, casaPara, casaDestino);
+            const novoMovimento = new MovimentoRealizado(casaDe, casaPara, casaDestino, jogadaEscolhida.nomeJogada);
 
             this.tabuleiro[casaPara.linha][casaPara.coluna].incluiMovimentoRealizado(novoMovimento);
 
@@ -137,7 +137,7 @@ module.exports = class Jogo {
                 this.ladoPreto.fazNovoMovimento(novoMovimento);
             }
 
-            return jogadaEscolhida;
+            return novoMovimento;
         } catch (e) {
             // desfaz movimento
             this.tabuleiro[casaDe.linha][casaDe.coluna] = peca;
