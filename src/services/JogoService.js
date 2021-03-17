@@ -32,6 +32,9 @@ module.exports = {
             throw "Aguarde sua vez de interagir com suas peças";
         }
         const possiveisMovimentos = jogo.recuperaMovimentosPossiveisDaPecaDaCasa(casaNome);
+        if (jogo.recuperaPecaDaCasa(casaNome).ladoId != ladoId) {
+            throw "Interaja somente com as suas peças";
+        }
         return possiveisMovimentos;
     }
 };
