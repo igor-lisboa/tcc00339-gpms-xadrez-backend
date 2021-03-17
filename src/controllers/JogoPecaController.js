@@ -5,7 +5,7 @@ module.exports = {
         try {
             const { jogoId } = req.params;
             const ladoId = req.headers.lado;
-            const lado = JogoService.recuperaLadoPeloId(jogoId, ladoId);
+            const lado = JogoService.find(jogoId).recuperaLadoPeloId(ladoId);
             return res.json({
                 message: "Peças retornadas com sucesso!",
                 data: lado.pecas.todas,
@@ -23,10 +23,10 @@ module.exports = {
     possiveisJogadas(req, res) {
         try {
             const { jogoId, casaNome } = req.params;
-            const jogo = JogoService.find(jogoId);
+            const ladoId = req.headers.lado;
             return res.json({
                 message: "Possíveis jogadas da peça na casa informada retornadas com sucesso!",
-                data: jogo.recuperaMovimentosPossiveisDaPecaDaCasa(casaNome),
+                data: JogoService.recuperaPossiveisMovimentosDaPecaDeUmLado(jogoId, ladoId, casaNome),
                 success: true
             });
         } catch (e) {

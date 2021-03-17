@@ -15,7 +15,13 @@
 							"name": "Possíveis Jogadas",
 							"request": {
 								"method": "GET",
-								"header": [],
+								"header": [
+									{
+										"key": "lado",
+										"value": "{{ladoId}}",
+										"type": "text"
+									}
+								],
 								"url": {
 									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/pecas/{{casaOrigem}}/possiveis-jogadas",
 									"host": [
