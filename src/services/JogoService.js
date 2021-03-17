@@ -12,9 +12,6 @@ module.exports = {
         return this.find(jogoId).realizaJogada(ladoId, casaOrigem, casaDestino);
     }, insereJogador(jogoId, ladoId, tipoId) {
         return this.find(jogoId).defineJogador(ladoId, db.ladoTipos[tipoId]);
-    }, recuperaLadoAtual(jogoId) {
-        let jogo = this.find(jogoId);
-        return jogo.recuperaLadoPeloId(jogo.ladoIdAtual);
     }, recuperaLadosIa(jogoId) {
         let jogo = this.find(jogoId);
         let ladosIa = [];
@@ -29,7 +26,12 @@ module.exports = {
             }
         }
         return ladosIa;
-    }, recuperaLadoPeloId(jogoId, ladoId) {
-        return this.find(jogoId).recuperaLadoPeloId(ladoId);
+    }, recuperaPossiveisMovimentosDaPecaDeUmLado(jogoId, ladoId, casaNome) {
+        const jogo = this.find(jogoId);
+        if (jogo.ladoIdAtual != ladoId) {
+            throw "Aguarde sua vez de interagir com suas peças";
+        }
+        const possiveisMovimentos = jogo.recuperaMovimentosPossiveisDaPecaDaCasa(casaNome);
+        return possiveisMovimentos;
     }
 };

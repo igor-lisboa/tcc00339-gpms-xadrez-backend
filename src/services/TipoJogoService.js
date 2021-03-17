@@ -22,7 +22,7 @@ module.exports = {
         return tiposDeJogo;
     }, find(tipoJogoId) {
         const tipoJogoEncontrado = this.index().find(tipoJogo => tipoJogo.id == tipoJogoId);
-        if (typeof (tipoJogoEncontrado) === "undefined") {
+        if (typeof (tipoJogoEncontrado) == "undefined") {
             throw "Não foi possível encontrar o tipo de jogo desejado";
         }
         return tipoJogoEncontrado;
