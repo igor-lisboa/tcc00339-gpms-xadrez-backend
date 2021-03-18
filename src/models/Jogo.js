@@ -35,7 +35,7 @@ module.exports = class Jogo {
          * possui modos de se defender obstruindo o ataque em questao
          * com outra peca ou se movendo
          */
-        this.cheque = false;
+        this.cheque = this.verificaReiLadoAtualCheque();
 
         /**
          * O REI do lado atual nao consegue obstruir os ataques direcionados
@@ -53,8 +53,6 @@ module.exports = class Jogo {
         this.enPassantCasaCaptura = null;
 
         this.defineTipoJogo(tipoJogoId);
-
-        this.atualizaPecasDosLados();
     }
 
     defineJogador(ladoId, tipo) {
@@ -92,7 +90,7 @@ module.exports = class Jogo {
         // passa a vez p outro jogador
         this.defineLadoIdAtual(this.recuperaLadoAdversarioPeloId(this.ladoIdAtual).id);
 
-        // verifica se a jogada colocou o rei em cheque
+        // verifica se a jogada colocou o rei do adversario em cheque
         const reiEmCheque = this.verificaReiLadoAtualCheque();
 
         this.cheque = reiEmCheque;
@@ -177,25 +175,47 @@ module.exports = class Jogo {
         }
     }
 
+    insereCapturavelNasPossiveisJogadasDasPecasDosLados() {
+        this.ladoBranco.pecas.todas.forEach((item) => {
+            item.possiveisJogadas.forEach((possivelJogada) => {
+                possivelJogada.setCapturavel(this.verificaCasaCapturavelPeloAdversario(item.casa, item.peca.ladoId));
+            });
+        });
+        this.ladoPreto.pecas.todas.forEach((item) => {
+            item.possiveisJogadas.forEach((possivelJogada) => {
+                possivelJogada.setCapturavel(this.verificaCasaCapturavelPeloAdversario(item.casa, item.peca.ladoId));
+            });
+        });
+    }
+
     verificaReiLadoAtualCheque() {
         this.atualizaPecasDosLados();
 
         const ladoAtual = this.recuperaLadoPeloId(this.ladoIdAtual);
-        const ladoAdversario = this.recuperaLadoAdversarioPeloId(this.ladoIdAtual);
-
         const reiLadoAtual = ladoAtual.pecas.rei;
 
-        let reiEmPerigo = false;
-        ladoAdversario.pecas.todas.forEach((peca) => {
-            try {
-                this.verificaJogadaPossivel(peca.casa, reiLadoAtual.casa, ladoAdversario.id);
-                reiEmPerigo = true;
-            } catch (e) {
-                // se deu excecao eh pq o rei nao esta em cheque
-            }
-        });
+        return this.verificaCasaCapturavelPeloAdversario(reiLadoAtual.casa, ladoAtual.id);
+    }
 
-        return reiEmPerigo;
+    verificaCasaCapturavelPeloAdversario(casa, ladoId) {
+        casa = this.recuperaCasaLinhaColuna(casa);
+
+        const ladoAdversario = this.recuperaLadoAdversarioPeloId(ladoId);
+
+        if (ladoAdversario.pecas == undefined) {
+            return undefined;
+        } else {
+            ladoAdversario.pecas.todas.forEach((peca) => {
+                try {
+                    this.verificaJogadaPossivel(peca.casa, casa, ladoAdversario.id);
+                    return true;
+                } catch (e) {
+                    // se deu excecao eh pq a casa informada nao eh capturavel pelo adversario
+                }
+            });
+
+            return false;
+        }
     }
 
     verificaJogadaPossivel(casaOrigemPeca, casaDestino, ladoId) {
@@ -314,6 +334,7 @@ module.exports = class Jogo {
     atualizaPecasDosLados() {
         this.ladoBranco.definePecas(this.recuperaPecasDeUmLado(this.ladoBranco.id));
         this.ladoPreto.definePecas(this.recuperaPecasDeUmLado(this.ladoPreto.id));
+        this.insereCapturavelNasPossiveisJogadasDasPecasDosLados();
     }
 
     defineLadoIdAtual(ladoId) {
@@ -379,7 +400,7 @@ module.exports = class Jogo {
 
         // se item casa ta vazio, adiciona na lista casasEncontradas e encontra proximo 
         if (itemCasa == null) {
-            casasEncontradas.push(new PossivelJogada(vizinho));
+            casasEncontradas.push(new PossivelJogada(vizinho, false));
             return this.recuperaPossiveisJogadasEmCasasVizinhas(vizinho, vizinhoDesejado, repeticoesHabilitadas - 1, capturaHabilitada, pecaLadoId, casasEncontradas);
         } else {
             // so adiciona possivel jogada se a peca for do adversario
@@ -404,7 +425,6 @@ module.exports = class Jogo {
         if (peca == null) {
             throw "Não foi possível encontrar a peça desejada";
         }
-
         let movimentosPossiveis = [];
 
         if (peca.permitirJogadaDiagonal) {
