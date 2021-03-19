@@ -479,6 +479,71 @@ module.exports = class Jogo {
             }
         });
 
+        //Aqui vai entrar uma função para incluir se o Rei pode realizar os Roques e retirar as possíveis jogadas dele que são capturáveis        
+        return this.recuperaMovimentosPossiveisValidos(movimentosPossiveis, peca, casa);
+    }
+
+    recuperaMovimentosPossiveisValidos(movimentosPossiveis, peca, pecaCasa) {
+        if (peca.tipo != "Rei") {
+            return movimentosPossiveis;
+        }
+        if (peca.movimentosRealizados.length == 0 && this.verificaCasaCapturavelPeloAdversario(pecaCasa, peca.ladoId) == false) {
+            if (this.ladoIdAtual == this.ladoBranco.id) {
+                //Roque Menor (Brancas)
+                //Verifica se as casas no caminho estão vazias
+                if (this.recuperaPecaDaCasa('F1') == null && this.recuperaPecaDaCasa('G1') == null) {
+                    //Verifica se a Torre está na sua casa de origem
+                    const torre = this.recuperaPecaDaCasa('H1');
+                    if (torre != null) {
+                        const g1 = this.recuperaCasaLinhaColuna('G1');
+                        const capturavel = this.verificaCasaCapturavelPeloAdversario(g1, peca.ladoId);
+                        if (torre.tipo == "Torre" && torre.movimentosRealizados.length == 0 && capturavel == false) {
+                            movimentosPossiveis.push(new PossivelJogada(g1, false, 'Roque Menor', capturavel));
+                        }
+                    }
+                }
+                //Roque Maior (brancas)
+                //Verifica se as casas no caminho estão vazias
+                if (this.recuperaPecaDaCasa('D1') == null && this.recuperaPecaDaCasa('C1') == null) {
+                    //Verifica se a Torre está na sua casa de origem
+                    const torre = this.recuperaPecaDaCasa('A1');
+                    if (torre != null) {
+                        const c1 = this.recuperaCasaLinhaColuna('C1');
+                        const capturavel = this.verificaCasaCapturavelPeloAdversario(c1, peca.ladoId);
+                        if (torre.tipo == "Torre" && torre.movimentosRealizados.length == 0 && capturavel == false) {
+                            movimentosPossiveis.push(new PossivelJogada(c1, false, 'Roque Maior', capturavel));
+                        }
+                    }
+                }
+            } else {
+                //Roque Menor (Pretas)
+                //Verifica se as casas no caminho estão vazias
+                if (this.recuperaPecaDaCasa('F8') == null && this.recuperaPecaDaCasa('G8') == null) {
+                    //Verifica se a Torre está na sua casa de origem
+                    const torre = this.recuperaPecaDaCasa('H8');
+                    if (torre != null) {
+                        const g8 = this.recuperaCasaLinhaColuna('G8');
+                        const capturavel = this.verificaCasaCapturavelPeloAdversario(g8, peca.ladoId);
+                        if (torre.tipo == "Torre" && torre.movimentosRealizados.length == 0 && capturavel == false) {
+                            movimentosPossiveis.push(new PossivelJogada(g8, false, 'Roque Menor', capturavel));
+                        }
+                    }
+                }
+                //Roque Maior (Pretas)
+                //Verifica se as casas no caminho estão vazias
+                if (this.recuperaPecaDaCasa('D8') == null && this.recuperaPecaDaCasa('C8') == null) {
+                    //Verifica se a Torre está na sua casa de origem
+                    const torre = this.recuperaPecaDaCasa('A8');
+                    if (torre != null) {
+                        const c8 = this.recuperaCasaLinhaColuna('C8');
+                        const capturavel = this.verificaCasaCapturavelPeloAdversario(c8, peca.ladoId);
+                        if (torre.tipo == "Torre" && torre.movimentosRealizados.length == 0 && capturavel == false) {
+                            movimentosPossiveis.push(new PossivelJogada(c8, false, 'Roque Maior', capturavel));
+                        }
+                    }
+                }
+            }
+        }
         return movimentosPossiveis;
     }
 
@@ -505,95 +570,4 @@ module.exports = class Jogo {
         }
         return casaEncontrada;
     }
-
-
-    /*    
-
-    //Roque Menor
-    //Verifica lado
-    if(this.ladoIdAtual == this.ladoBranco.id) {
-        //Verifica peça e casa (Branca)
-        if (peca == "Rei" && this.tabuleiro[casa.linha][casa.coluna] == this.tabuleiro[7][4]) {
-            //Verifica se as casas no caminho estão vazias
-            if (this.tabuleiro[7][5] == null && this.tabuleiro[7][6] == null) {
-                //Verifica se a Torre está na sua casa de origem
-                if (this.tabuleiro[7][7] == "Torre") {
-                    //Verifica se o jogador pretende mover o Rei para [7][6]
-                    if (casaDestino == this.tabuleiro[7][6]) {
-                        //Mover Rei para [7][6]
-                        realizaJogada(this.ladoBranco.id, this.tabuleiro[casa.linha][casa.coluna], casaDestino);
-                        //Mover Torre manualmente para [7][5]
-                        const peca = this.tabuleiro[7][7];
-                        this.tabuleiro[7][7] = null;
-                        this.tabuleiro[7][5] = peca;
-                    }
-                }
-            }
-        }
-
-    } else {
-        //Verifica peça e casa (Preta)
-        if (peca == "Rei" && this.tabuleiro[casa.linha][casa.coluna] == this.tabuleiro[0][4]) {
-            //Verifica se as casa no caminho estão vazias
-            if (this.tabuleiro[0][5] == null && this.tabuleiro[0][6] == null) {
-                //Verifica se a Torre está na sua casa de origem
-                if (this.tabuleiro[0][7] == "Torre") {
-                    //Verifica se o jogador pretende mover o Rei para [0][6]
-                    if (casaDestino == this.tabuleiro[0][6]) {
-                        //Mover Rei para [0][6]
-                        realizaJogada(this.ladoPreto.id, this.tabuleiro[casa.linha][casa.coluna], casaDestino);
-                        //Mover Torre manualmente para [0][5]
-                        const peca = this.tabuleiro[0][7];
-                        this.tabuleiro[0][7] = null;
-                        this.tabuleiro[0][5] = peca;
-                    }
-                }
-            }
-        }
-    }
-
-    //Roque Maior
-    //Verifica lado
-    if(this.ladoIdAtual == this.ladoBranco.id) {
-        //Verifica peça e casa (Branca)
-        if (peca == "Rei" && this.tabuleiro[casa.linha][casa.coluna] == this.tabuleiro[7][4]) {
-            //Verifica se as casas no caminho estão vazias
-            if (this.tabuleiro[7][3] == null & this.tabuleiro[7][2] == null && this.tabuleiro[7][1] == null) {
-                //Verifica se a Torre está na sua casa de origem
-                if (this.tabuleiro[7][0] == "Torre") {
-                    //Verifica se o jogador pretende mover o Rei para [7][2]
-                    if (casaDestino == this.tabuleiro[7][2]) {
-                        //Mover Rei para [7][2]
-                        realizaJogada(this.ladoBranco.id, this.tabuleiro[casa.linha][casa.coluna], casaDestino);
-                        //Mover Torre manualmente para [7][3]
-                        const peca = this.tabuleiro[7][0];
-                        this.tabuleiro[7][0] = null;
-                        this.tabuleiro[7][3] = peca;
-                    }
-                }
-            }
-        }
-
-    } else {
-        //Verifica peça e casa (Branca)
-        if (peca == "Rei" && this.tabuleiro[casa.linha][casa.coluna] == this.tabuleiro[0][4]) {
-            //Verifica se as casas no camniho estão vazias
-            if (this.tabuleiro[0][3] == null && this.tabuleiro[0][2] == null && this.tabuleiro[0][1] == null) {
-                //Verifica se a Torre está na sua casa de origem
-                if (this.tabuleiro[0][0] == "Torre") {
-                    //Verifica se o jogador pretende mover o Rei para [0][2]
-                    if (casaDestino == this.tabuleiro[0][2]) {
-                        //Mover Rei para [0][2]
-                        realizaJogada(this.ladoPreto.id, this.tabuleiro[casa.linha][casa.coluna], casaDestino);
-                        //Mover Torre manualmente para [0][3]
-                        const peca = this.tabuleiro[0][0];
-                        this.tabuleiro[0][0] = null;
-                        this.tabuleiro[0][3] = peca;
-                    }
-                }
-            }
-        }
-    }
-
-    */
 }
