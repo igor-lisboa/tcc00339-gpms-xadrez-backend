@@ -29,11 +29,7 @@ module.exports = {
         }
         return ladosIa;
     }, recuperaPossiveisMovimentosDaPecaDeUmLado(jogoId, ladoId, casaNome) {
-        const jogo = this.find(jogoId);
-        if (jogo.ladoIdAtual != ladoId) {
-            throw "Aguarde sua vez de interagir com suas peças";
-        }
-        const pecaDoLado = jogo.recuperaLadoPeloId(ladoId).pecas.todas.find(peca => peca.casa.trim().toUpperCase() == casaNome.trim().toUpperCase());
+        const pecaDoLado = this.recuperaTodasAsPecasDeUmLado(jogoId, ladoId).find(peca => peca.casa.trim().toUpperCase() == casaNome.trim().toUpperCase());
         if (typeof (pecaDoLado) == "undefined") {
             throw "Nenhuma peça pertencente a você foi encontrada na casa procurada";
         }
@@ -44,5 +40,11 @@ module.exports = {
             throw "Aguarde sua vez de interagir com o jogo";
         }
         return jogo.recuperaLadoAdversarioPeloId(ladoId).pecas.rei;
+    }, recuperaTodasAsPecasDeUmLado(jogoId, ladoId) {
+        const jogo = this.find(jogoId);
+        if (jogo.ladoIdAtual != ladoId) {
+            throw "Aguarde sua vez de interagir com suas peças";
+        }
+        return jogo.recuperaLadoPeloId(ladoId).pecas.todas;
     }
 };
