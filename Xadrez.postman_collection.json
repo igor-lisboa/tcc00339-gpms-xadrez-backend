@@ -144,6 +144,49 @@
 					"response": []
 				},
 				{
+					"name": "Index I.A.",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API_XADREZ_URL}}/jogos/ia",
+							"host": [
+								"{{API_XADREZ_URL}}"
+							],
+							"path": [
+								"jogos",
+								"ia"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Rei Adversário",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "lado",
+								"value": "{{ladoId}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/rei-adversario",
+							"host": [
+								"{{API_XADREZ_URL}}"
+							],
+							"path": [
+								"jogos",
+								"{{jogoIndex}}",
+								"rei-adversario"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Find",
 					"request": {
 						"method": "GET",

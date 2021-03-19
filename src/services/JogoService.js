@@ -38,5 +38,11 @@ module.exports = {
             throw "Nenhuma peça pertencente a você foi encontrada na casa procurada";
         }
         return pecaDoLado.possiveisJogadas;
+    }, recuperaPecaReiAdversario(jogoId, ladoId) {
+        const jogo = this.find(jogoId);
+        if (jogo.ladoIdAtual != ladoId) {
+            throw "Aguarde sua vez de interagir com o jogo";
+        }
+        return jogo.recuperaLadoAdversarioPeloId(ladoId).pecas.rei;
     }
 };

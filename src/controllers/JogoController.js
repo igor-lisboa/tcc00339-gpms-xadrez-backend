@@ -19,10 +19,10 @@ module.exports = {
     },
     find(req, res) {
         try {
-            const { id } = req.params;
+            const { jogoId } = req.params;
             return res.json({
                 message: "Jogo retornado com sucesso!",
-                data: JogoService.find(id),
+                data: JogoService.find(jogoId),
                 success: true
             });
         } catch (e) {
@@ -88,6 +88,23 @@ module.exports = {
             return res.json({
                 message: "Jogos que possuem jogadores I.A. retornados com sucesso!",
                 data: JogoService.indexIa(),
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
+    }, recuperaPecaReiAdversario(req, res) {
+        try {
+            const { jogoId } = req.params;
+            const ladoId = req.headers.lado;
+            return res.json({
+                message: "Rei do jogador adversário retornado com sucesso!",
+                data: JogoService.recuperaPecaReiAdversario(jogoId, ladoId),
                 success: true
             });
         } catch (e) {
