@@ -357,6 +357,28 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Tipos de Peça",
+			"item": [
+				{
+					"name": "Index",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API_XADREZ_URL}}/tipos-de-peca",
+							"host": [
+								"{{API_XADREZ_URL}}"
+							],
+							"path": [
+								"tipos-de-peca"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"event": [

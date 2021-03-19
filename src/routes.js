@@ -7,6 +7,7 @@ const LadosJogoController = require("./controllers/LadosJogoController");
 const TabelaEquivalenciaController = require("./controllers/TabelaEquivalenciaController");
 const TiposJogadorController = require("./controllers/TiposJogadorController");
 const TiposJogoController = require("./controllers/TiposJogoController");
+const TiposPecaController = require("./controllers/TiposPecaController");
 
 const routes = express.Router();
 
@@ -48,5 +49,6 @@ routes.get("/tabela-equivalencia", TabelaEquivalenciaController.index);
 routes.get("/tipos-de-jogo", TiposJogoController.index);
 routes.get("/lados-do-jogo", LadosJogoController.index);
 routes.get("/tipos-de-jogador", TiposJogadorController.index);
+routes.get("/tipos-de-peca", TiposPecaController.index);
 
 module.exports = routes;

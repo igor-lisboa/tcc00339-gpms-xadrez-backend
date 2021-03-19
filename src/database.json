@@ -45,6 +45,50 @@
             ]
         }
     ],
+    "tiposPeca": [
+        {
+            "id": 0,
+            "nome": "Rei",
+            "classe": "Rei",
+            "unicodePreto": "♚",
+            "unicodeBranco": "♔"
+        },
+        {
+            "id": 1,
+            "nome": "Rainha",
+            "classe": "Rainha",
+            "unicodePreto": "♛",
+            "unicodeBranco": "♕"
+        },
+        {
+            "id": 2,
+            "nome": "Torre",
+            "classe": "Torre",
+            "unicodePreto": "♜",
+            "unicodeBranco": "♖"
+        },
+        {
+            "id": 3,
+            "nome": "Bispo",
+            "classe": "Bispo",
+            "unicodePreto": "♝",
+            "unicodeBranco": "♗"
+        },
+        {
+            "id": 4,
+            "nome": "Cavalo",
+            "classe": "Cavalo",
+            "unicodePreto": "♞",
+            "unicodeBranco": "♘"
+        },
+        {
+            "id": 5,
+            "nome": "Peão",
+            "classe": "Peao",
+            "unicodePreto": "♟",
+            "unicodeBranco": "♙"
+        }
+    ],
     "tabelaEquivalencia": [
         {
             "casa": "A1",
