@@ -83,5 +83,20 @@ module.exports = {
                 success: false
             });
         }
+    }, indexIa(req, res) {
+        try {
+            return res.json({
+                message: "Jogos que possuem jogadores I.A. retornados com sucesso!",
+                data: JogoService.indexIa(),
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
     }
 }

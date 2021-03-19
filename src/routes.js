@@ -29,6 +29,7 @@ routes.get("/", (req, res) => {
 });
 
 routes.get("/jogos", JogoController.index);
+routes.get("/jogos/ia", JogoController.indexIa);
 routes.get("/jogos/:id", JogoController.find);
 routes.post("/jogos", JogoController.create);
 
