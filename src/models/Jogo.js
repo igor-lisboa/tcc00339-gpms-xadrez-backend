@@ -85,6 +85,10 @@ module.exports = class Jogo {
             throw "Não está na sua vez de jogar, espere sua vez";
         }
 
+        if (this.recuperaLadoPeloId(ladoId).tipo == null) {
+            throw "Para realizar essa jogada, faça o login adequadamente no lado desejado";
+        }
+
         const jogadaEscolhida = this.move(casaOrigem, casaDestino, ladoId);
 
         // passa a vez p outro jogador
