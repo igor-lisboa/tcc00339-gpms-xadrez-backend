@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "f523ff90-1549-46e8-9bb5-d26a92d2acdd",
+		"_postman_id": "9d2c4ff0-47b0-4213-b5d9-8603b76ea761",
 		"name": "Xadrez",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -39,7 +39,7 @@
 							"response": []
 						},
 						{
-							"name": "Index",
+							"name": "Lista",
 							"request": {
 								"method": "GET",
 								"header": [
@@ -127,7 +127,112 @@
 					]
 				},
 				{
-					"name": "Index",
+					"name": "Jogo",
+					"item": [
+						{
+							"name": "Rei Adversário",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "lado",
+										"value": "{{ladoId}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/rei-adversario",
+									"host": [
+										"{{API_XADREZ_URL}}"
+									],
+									"path": [
+										"jogos",
+										"{{jogoIndex}}",
+										"rei-adversario"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Encontra",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}",
+									"host": [
+										"{{API_XADREZ_URL}}"
+									],
+									"path": [
+										"jogos",
+										"{{jogoIndex}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Lados Sem Jogador",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/lado-sem-jogador",
+									"host": [
+										"{{API_XADREZ_URL}}"
+									],
+									"path": [
+										"jogos",
+										"{{jogoIndex}}",
+										"lado-sem-jogador"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Lado Atual",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/lado-atual",
+									"host": [
+										"{{API_XADREZ_URL}}"
+									],
+									"path": [
+										"jogos",
+										"{{jogoIndex}}",
+										"lado-atual"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "I.A.'s",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/ias",
+									"host": [
+										"{{API_XADREZ_URL}}"
+									],
+									"path": [
+										"jogos",
+										"{{jogoIndex}}",
+										"ias"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Lista",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -144,63 +249,25 @@
 					"response": []
 				},
 				{
-					"name": "Find",
+					"name": "Lista I.A.",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}",
+							"raw": "{{API_XADREZ_URL}}/jogos/ia",
 							"host": [
 								"{{API_XADREZ_URL}}"
 							],
 							"path": [
 								"jogos",
-								"{{jogoIndex}}"
+								"ia"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Lado Atual",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/lado-atual",
-							"host": [
-								"{{API_XADREZ_URL}}"
-							],
-							"path": [
-								"jogos",
-								"{{jogoIndex}}",
-								"lado-atual"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "I.A.'s",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/ias",
-							"host": [
-								"{{API_XADREZ_URL}}"
-							],
-							"path": [
-								"jogos",
-								"{{jogoIndex}}",
-								"ias"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create",
+					"name": "Cria",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -231,7 +298,7 @@
 			"name": "Tabela Equivalência",
 			"item": [
 				{
-					"name": "Index",
+					"name": "Lista",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -253,7 +320,7 @@
 			"name": "Tipos de Jogo",
 			"item": [
 				{
-					"name": "Index",
+					"name": "Lista",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -275,7 +342,7 @@
 			"name": "Tipos de Jogador",
 			"item": [
 				{
-					"name": "Index",
+					"name": "Lista",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -297,7 +364,7 @@
 			"name": "Lados do Jogo",
 			"item": [
 				{
-					"name": "Index",
+					"name": "Lista",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -308,6 +375,28 @@
 							],
 							"path": [
 								"lados-do-jogo"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Tipos de Peça",
+			"item": [
+				{
+					"name": "Lista",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API_XADREZ_URL}}/tipos-de-peca",
+							"host": [
+								"{{API_XADREZ_URL}}"
+							],
+							"path": [
+								"tipos-de-peca"
 							]
 						}
 					},

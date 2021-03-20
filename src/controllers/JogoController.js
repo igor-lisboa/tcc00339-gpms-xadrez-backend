@@ -1,11 +1,11 @@
 const JogoService = require("../services/JogoService");
 
 module.exports = {
-    index(req, res) {
+    lista(req, res) {
         try {
             return res.json({
                 message: "Jogos retornados com sucesso!",
-                data: JogoService.index(),
+                data: JogoService.lista(),
                 success: true
             });
         } catch (e) {
@@ -17,12 +17,12 @@ module.exports = {
             });
         }
     },
-    find(req, res) {
+    encontra(req, res) {
         try {
-            const { id } = req.params;
+            const { jogoId } = req.params;
             return res.json({
                 message: "Jogo retornado com sucesso!",
-                data: JogoService.find(id),
+                data: JogoService.encontra(jogoId),
                 success: true
             });
         } catch (e) {
@@ -34,12 +34,12 @@ module.exports = {
             });
         }
     },
-    create(req, res) {
+    cria(req, res) {
         try {
             const { tipoJogo } = req.body;
             return res.json({
                 message: "Jogo incluído com sucesso!",
-                data: JogoService.create(tipoJogo),
+                data: JogoService.cria(tipoJogo),
                 success: true
             });
         } catch (e) {
@@ -53,7 +53,7 @@ module.exports = {
     }, recuperaLadoAtual(req, res) {
         try {
             const { jogoId } = req.params;
-            const jogo = JogoService.find(jogoId);
+            const jogo = JogoService.encontra(jogoId);
             return res.json({
                 message: "Lado atual do jogo retornado com sucesso!",
                 data: jogo.recuperaLadoPeloId(jogo.ladoIdAtual),
@@ -73,6 +73,38 @@ module.exports = {
             return res.json({
                 message: "I.A.'s do jogo retornadas com sucesso!",
                 data: JogoService.recuperaLadosIa(jogoId),
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
+    }, listaIa(req, res) {
+        try {
+            return res.json({
+                message: "Jogos que possuem jogadores I.A. retornados com sucesso!",
+                data: JogoService.listaIa(),
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
+    }, recuperaPecaReiAdversario(req, res) {
+        try {
+            const { jogoId } = req.params;
+            const ladoId = req.headers.lado;
+            return res.json({
+                message: "Rei do jogador adversário retornado com sucesso!",
+                data: JogoService.recuperaPecaReiAdversario(jogoId, ladoId),
                 success: true
             });
         } catch (e) {

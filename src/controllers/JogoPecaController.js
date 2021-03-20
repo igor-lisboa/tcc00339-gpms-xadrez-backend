@@ -1,14 +1,13 @@
 const JogoService = require("../services/JogoService");
 
 module.exports = {
-    index(req, res) {
+    lista(req, res) {
         try {
             const { jogoId } = req.params;
             const ladoId = req.headers.lado;
-            const lado = JogoService.find(jogoId).recuperaLadoPeloId(ladoId);
             return res.json({
                 message: "Peças retornadas com sucesso!",
-                data: lado.pecas.todas,
+                data: JogoService.recuperaTodasAsPecasDeUmLado(jogoId, ladoId),
                 success: true
             });
         } catch (e) {

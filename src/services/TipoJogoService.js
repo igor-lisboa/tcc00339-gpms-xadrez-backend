@@ -1,7 +1,7 @@
 const db = require("../database.json");
 
 module.exports = {
-    index() {
+    lista() {
         // tratando o array de ids e retornando os objetos
         let tiposDeJogo = db.tiposJogo;
         tiposDeJogo.forEach((tipoDeJogo) => {
@@ -20,8 +20,8 @@ module.exports = {
             }
         });
         return tiposDeJogo;
-    }, find(tipoJogoId) {
-        const tipoJogoEncontrado = this.index().find(tipoJogo => tipoJogo.id == tipoJogoId);
+    }, encontra(tipoJogoId) {
+        const tipoJogoEncontrado = this.lista().find(tipoJogo => tipoJogo.id == tipoJogoId);
         if (typeof (tipoJogoEncontrado) == "undefined") {
             throw "Não foi possível encontrar o tipo de jogo desejado";
         }

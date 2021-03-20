@@ -4,8 +4,8 @@ module.exports = {
     lista(req, res) {
         try {
             return res.json({
-                message: "Tabela de equivalência retornada com sucesso!",
-                data: db.tabelaEquivalencia,
+                message: "Tipos de peça retornados com sucesso!",
+                data: db.tiposPeca,
                 success: true
             });
         } catch (e) {
