@@ -178,25 +178,6 @@
 							"response": []
 						},
 						{
-							"name": "I.A.'s",
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/ias",
-									"host": [
-										"{{API_XADREZ_URL}}"
-									],
-									"path": [
-										"jogos",
-										"{{jogoIndex}}",
-										"ias"
-									]
-								}
-							},
-							"response": []
-						},
-						{
 							"name": "Insere Jogador",
 							"request": {
 								"method": "POST",
@@ -238,24 +219,6 @@
 							],
 							"path": [
 								"jogos"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Lista I.A.",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{API_XADREZ_URL}}/jogos/ia",
-							"host": [
-								"{{API_XADREZ_URL}}"
-							],
-							"path": [
-								"jogos",
-								"ia"
 							]
 						}
 					},
