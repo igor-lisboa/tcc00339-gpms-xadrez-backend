@@ -1,2 +1,2 @@
 web: npm start
-worker: npm ia
+worker: npm run ia
