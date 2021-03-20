@@ -1,7 +1,7 @@
 const db = require("../database.json");
 
 module.exports = {
-    index(req, res) {
+    lista(req, res) {
         try {
             return res.json({
                 message: "Tipos de jogador retornados com sucesso!",

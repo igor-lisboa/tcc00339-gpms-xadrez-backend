@@ -29,26 +29,26 @@ routes.get("/", (req, res) => {
     });
 });
 
-routes.get("/jogos", JogoController.index);
-routes.get("/jogos/ia", JogoController.indexIa);
-routes.get("/jogos/:jogoId", JogoController.find);
-routes.post("/jogos", JogoController.create);
+routes.get("/jogos", JogoController.lista);
+routes.get("/jogos/ia", JogoController.listaIa);
+routes.get("/jogos/:jogoId", JogoController.encontra);
+routes.post("/jogos", JogoController.cria);
 
 routes.get("/jogos/:jogoId/lado-atual", JogoController.recuperaLadoAtual);
 routes.get("/jogos/:jogoId/ias", JogoController.recuperaLadosIa);
 routes.get("/jogos/:jogoId/rei-adversario", JogoController.recuperaPecaReiAdversario);
 
-routes.get("/jogos/:jogoId/pecas", JogoPecaController.index);
+routes.get("/jogos/:jogoId/pecas", JogoPecaController.lista);
 routes.get("/jogos/:jogoId/pecas/:casaNome/possiveis-jogadas", JogoPecaController.possiveisJogadas);
 routes.post("/jogos/:jogoId/pecas/:casaOrigem/move/:casaDestino", JogoPecaController.realizaJogada);
 
 routes.post("/jogos/:jogoId/jogadores", JogoJogadorController.insereJogador);
 
-routes.get("/tabela-equivalencia", TabelaEquivalenciaController.index);
+routes.get("/tabela-equivalencia", TabelaEquivalenciaController.lista);
 
-routes.get("/tipos-de-jogo", TiposJogoController.index);
-routes.get("/lados-do-jogo", LadosJogoController.index);
-routes.get("/tipos-de-jogador", TiposJogadorController.index);
-routes.get("/tipos-de-peca", TiposPecaController.index);
+routes.get("/tipos-de-jogo", TiposJogoController.lista);
+routes.get("/lados-do-jogo", LadosJogoController.lista);
+routes.get("/tipos-de-jogador", TiposJogadorController.lista);
+routes.get("/tipos-de-peca", TiposPecaController.lista);
 
 module.exports = routes;

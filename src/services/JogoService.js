@@ -2,20 +2,20 @@ const db = require("../database.json");
 const Jogo = require("../models/Jogo");
 
 module.exports = {
-    index() {
+    lista() {
         return db.jogos;
-    }, find(index) {
-        return new Jogo().find(index);
-    }, create(tipoJogoId) {
-        return new Jogo(tipoJogoId).create();
+    }, encontra(id) {
+        return new Jogo().encontra(id);
+    }, cria(tipoJogoId) {
+        return new Jogo(tipoJogoId).cria();
     }, realizaJogada(jogoId, ladoId, casaOrigem, casaDestino) {
-        return this.find(jogoId).realizaJogada(ladoId, casaOrigem, casaDestino);
+        return this.encontra(jogoId).realizaJogada(ladoId, casaOrigem, casaDestino);
     }, insereJogador(jogoId, ladoId, tipoId) {
-        return this.find(jogoId).defineJogador(ladoId, db.ladoTipos[tipoId]);
-    }, indexIa() {
+        return this.encontra(jogoId).defineJogador(ladoId, db.ladoTipos[tipoId]);
+    }, listaIa() {
         return db.jogos.filter(jogo => [1, 2].includes(jogo.tipoJogo.id));
     }, recuperaLadosIa(jogoId) {
-        let jogo = this.find(jogoId);
+        let jogo = this.encontra(jogoId);
         let ladosIa = [];
         if (jogo.ladoBranco.tipo != null) {
             if (jogo.ladoBranco.tipo.id == 1) {
@@ -35,13 +35,13 @@ module.exports = {
         }
         return pecaDoLado.possiveisJogadas;
     }, recuperaPecaReiAdversario(jogoId, ladoId) {
-        const jogo = this.find(jogoId);
+        const jogo = this.encontra(jogoId);
         if (jogo.ladoIdAtual != ladoId) {
             throw "Aguarde sua vez de interagir com o jogo";
         }
         return jogo.recuperaLadoAdversarioPeloId(ladoId).pecas.rei;
     }, recuperaTodasAsPecasDeUmLado(jogoId, ladoId) {
-        const jogo = this.find(jogoId);
+        const jogo = this.encontra(jogoId);
         if (jogo.ladoIdAtual != ladoId) {
             throw "Aguarde sua vez de interagir com suas peças";
         }

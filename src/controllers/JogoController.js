@@ -1,11 +1,11 @@
 const JogoService = require("../services/JogoService");
 
 module.exports = {
-    index(req, res) {
+    lista(req, res) {
         try {
             return res.json({
                 message: "Jogos retornados com sucesso!",
-                data: JogoService.index(),
+                data: JogoService.lista(),
                 success: true
             });
         } catch (e) {
@@ -17,12 +17,12 @@ module.exports = {
             });
         }
     },
-    find(req, res) {
+    encontra(req, res) {
         try {
             const { jogoId } = req.params;
             return res.json({
                 message: "Jogo retornado com sucesso!",
-                data: JogoService.find(jogoId),
+                data: JogoService.encontra(jogoId),
                 success: true
             });
         } catch (e) {
@@ -34,12 +34,12 @@ module.exports = {
             });
         }
     },
-    create(req, res) {
+    cria(req, res) {
         try {
             const { tipoJogo } = req.body;
             return res.json({
                 message: "Jogo incluído com sucesso!",
-                data: JogoService.create(tipoJogo),
+                data: JogoService.cria(tipoJogo),
                 success: true
             });
         } catch (e) {
@@ -53,7 +53,7 @@ module.exports = {
     }, recuperaLadoAtual(req, res) {
         try {
             const { jogoId } = req.params;
-            const jogo = JogoService.find(jogoId);
+            const jogo = JogoService.encontra(jogoId);
             return res.json({
                 message: "Lado atual do jogo retornado com sucesso!",
                 data: jogo.recuperaLadoPeloId(jogo.ladoIdAtual),
@@ -83,11 +83,11 @@ module.exports = {
                 success: false
             });
         }
-    }, indexIa(req, res) {
+    }, listaIa(req, res) {
         try {
             return res.json({
                 message: "Jogos que possuem jogadores I.A. retornados com sucesso!",
-                data: JogoService.indexIa(),
+                data: JogoService.listaIa(),
                 success: true
             });
         } catch (e) {

@@ -1,7 +1,7 @@
 const JogoService = require("../services/JogoService");
 
 module.exports = {
-    index(req, res) {
+    lista(req, res) {
         try {
             const { jogoId } = req.params;
             const ladoId = req.headers.lado;

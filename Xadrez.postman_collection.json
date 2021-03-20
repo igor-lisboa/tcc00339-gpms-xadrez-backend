@@ -39,7 +39,7 @@
 							"response": []
 						},
 						{
-							"name": "Index",
+							"name": "Lista",
 							"request": {
 								"method": "GET",
 								"header": [
@@ -127,7 +127,7 @@
 					]
 				},
 				{
-					"name": "Index",
+					"name": "Lista",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -144,7 +144,7 @@
 					"response": []
 				},
 				{
-					"name": "Index I.A.",
+					"name": "Lista I.A.",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -187,7 +187,7 @@
 					"response": []
 				},
 				{
-					"name": "Find",
+					"name": "Encontra",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -243,7 +243,7 @@
 					"response": []
 				},
 				{
-					"name": "Create",
+					"name": "Cria",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -274,7 +274,7 @@
 			"name": "Tabela Equivalência",
 			"item": [
 				{
-					"name": "Index",
+					"name": "Lista",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -296,7 +296,7 @@
 			"name": "Tipos de Jogo",
 			"item": [
 				{
-					"name": "Index",
+					"name": "Lista",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -318,7 +318,7 @@
 			"name": "Tipos de Jogador",
 			"item": [
 				{
-					"name": "Index",
+					"name": "Lista",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -340,7 +340,7 @@
 			"name": "Lados do Jogo",
 			"item": [
 				{
-					"name": "Index",
+					"name": "Lista",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -362,7 +362,7 @@
 			"name": "Tipos de Peça",
 			"item": [
 				{
-					"name": "Index",
+					"name": "Lista",
 					"request": {
 						"method": "GET",
 						"header": [],

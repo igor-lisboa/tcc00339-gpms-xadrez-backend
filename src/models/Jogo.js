@@ -71,7 +71,7 @@ module.exports = class Jogo {
     }
 
     defineTipoJogo(tipoJogoId) {
-        this.tipoJogo = TipoJogoService.find(tipoJogoId);
+        this.tipoJogo = TipoJogoService.encontra(tipoJogoId);
         // se tipo de jogo for I.A. X I.A.
         if (this.tipoJogo.id == 2) {
             // insere I.A.'s
@@ -100,7 +100,7 @@ module.exports = class Jogo {
         return jogadaEscolhida;
     }
 
-    find(jogoId) {
+    encontra(jogoId) {
         const jogo = db.jogos[jogoId];
         if (jogo == undefined) {
             throw "Jogo não encontrado";
@@ -127,13 +127,13 @@ module.exports = class Jogo {
             if (tamanhoAntesPush >= tamanhoDepoisPush) {
                 throw "Falha ao incluir Jogo";
             }
-            const ultimoIndex = db.jogos.lastIndexOf(this);
-            this.id = ultimoIndex;
+            const ultimoIndice = db.jogos.lastIndexOf(this);
+            this.id = ultimoIndice;
         }
         db.jogos[this.id] = this;
     }
 
-    create() {
+    cria() {
         this.salva();
         return this;
     }
@@ -340,14 +340,14 @@ module.exports = class Jogo {
     recuperaPecasDeUmLado(ladoId) {
         let pecas = [];
         let rei = {};
-        this.tabuleiro.forEach((linha, linhaIndex) => {
-            linha.forEach((coluna, colunaIndex) => {
+        this.tabuleiro.forEach((linha, linhaIndice) => {
+            linha.forEach((coluna, colunaIndice) => {
                 // verifica se a casa esta vazia ou nao
                 if (coluna != null) {
                     // se o id do lado da peca q esta na casa for igual ao id do lado informado insere na lista de pecas
                     if (coluna.ladoId == ladoId) {
 
-                        let casa = this.recuperaCasaLinhaColuna({ "linha": linhaIndex, "coluna": colunaIndex });
+                        let casa = this.recuperaCasaLinhaColuna({ "linha": linhaIndice, "coluna": colunaIndice });
 
                         let peca = {
                             "casa": casa.casa,
