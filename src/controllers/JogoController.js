@@ -103,7 +103,7 @@ module.exports = {
     }, listaIa(req, res) {
         try {
             return res.json({
-                message: "Jogos que possuem jogadores I.A. retornados com sucesso!",
+                message: "Contexto dos Jogos que possuem jogadores I.A. retornados com sucesso!",
                 data: JogoService.listaIa(),
                 success: true
             });

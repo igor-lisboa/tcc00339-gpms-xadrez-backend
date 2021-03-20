@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "9d2c4ff0-47b0-4213-b5d9-8603b76ea761",
+		"_postman_id": "5b4c1512-9003-4ae1-ba95-72af4448a1ef",
 		"name": "Xadrez",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -159,6 +159,25 @@
 							"response": []
 						},
 						{
+							"name": "Lados I.A.",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/ias",
+									"host": [
+										"{{API_XADREZ_URL}}"
+									],
+									"path": [
+										"jogos",
+										"{{jogoIndex}}",
+										"ias"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "Lado Atual",
 							"request": {
 								"method": "GET",
@@ -172,25 +191,6 @@
 										"jogos",
 										"{{jogoIndex}}",
 										"lado-atual"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "I.A.'s",
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/ias",
-									"host": [
-										"{{API_XADREZ_URL}}"
-									],
-									"path": [
-										"jogos",
-										"{{jogoIndex}}",
-										"ias"
 									]
 								}
 							},
