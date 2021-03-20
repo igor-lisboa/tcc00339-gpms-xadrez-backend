@@ -262,6 +262,33 @@
 					"response": []
 				},
 				{
+					"name": "Executa Jogadas I.A.",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"jogadas\": [\r\n        {\r\n            \"jogoId\": 0,\r\n            \"casaOrigem\": \"H2\",\r\n            \"casaDestino\": \"H4\",\r\n            \"ladoId\": 0\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{API_XADREZ_URL}}/jogos/ia",
+							"host": [
+								"{{API_XADREZ_URL}}"
+							],
+							"path": [
+								"jogos",
+								"ia"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Cria",
 					"request": {
 						"method": "POST",

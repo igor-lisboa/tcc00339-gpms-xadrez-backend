@@ -32,6 +32,7 @@ routes.get("/", (req, res) => {
 routes.get("/jogos", JogoController.lista);
 routes.post("/jogos", JogoController.cria);
 routes.get("/jogos/ia", JogoController.listaIa);
+routes.post("/jogos/ia", JogoController.executaJogadasIa);
 routes.get("/jogos/:jogoId", JogoController.encontra);
 routes.get("/jogos/:jogoId/ias", JogoController.recuperaLadosIa);
 routes.get("/jogos/:jogoId/lado-atual", JogoController.recuperaLadoAtual);

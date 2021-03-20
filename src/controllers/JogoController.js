@@ -115,5 +115,21 @@ module.exports = {
                 success: false
             });
         }
+    }, executaJogadasIa(req, res) {
+        try {
+            const { jogadas } = req.body;
+            return res.json({
+                message: "Jogadas solicitadas pela I.A. executadas com sucesso!",
+                data: JogoService.executaJogadas(jogadas),
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
     }
 }

@@ -44,6 +44,8 @@ const escolhePossivelJogada = (possiveisJogadas) => {
 
 const tempoSleepSegundos = 5;
 
+const verbose = false;
+
 const ia = async () => {
     while (true) {
         api.get(
@@ -65,13 +67,25 @@ const ia = async () => {
                     // insere jogada escolhida no array de jogadasParaSeremFeitasPelaIa
                     jogadasParaSeremFeitasPelaIa.push({
                         "jogoId": jogoIa.jogo.id,
-                        "casaDe": jogadaEscolhida.de,
-                        "casaPara": jogadaEscolhida.para
+                        "casaOrigem": jogadaEscolhida.de,
+                        "casaDestino": jogadaEscolhida.para,
+                        "ladoId": ladoIa.lado.id
                     });
                 });
 
                 // realiza jogadas listadas
-                console.log(jogadasParaSeremFeitasPelaIa);
+                api.post(
+                    "/jogos/ia",
+                    {
+                        "jogadas": jogadasParaSeremFeitasPelaIa
+                    }
+                ).then((responseJogada) => {
+                    if (verbose) {
+                        console.log(responseJogada.data);
+                    }
+                }).catch((errorJogada) => {
+                    console.log(errorJogada.response.data.message);
+                });
             } else {
                 console.log(response.data.message);
             }
