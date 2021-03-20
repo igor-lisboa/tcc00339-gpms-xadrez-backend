@@ -67,6 +67,23 @@ module.exports = {
                 success: false
             });
         }
+    }, recuperaPecaReiAdversario(req, res) {
+        try {
+            const { jogoId } = req.params;
+            const ladoId = req.headers.lado;
+            return res.json({
+                message: "Rei do jogador adversário retornado com sucesso!",
+                data: JogoService.recuperaPecaReiAdversario(jogoId, ladoId),
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
     }, recuperaLadosIa(req, res) {
         try {
             const { jogoId } = req.params;
@@ -86,7 +103,7 @@ module.exports = {
     }, listaIa(req, res) {
         try {
             return res.json({
-                message: "Jogos que possuem jogadores I.A. retornados com sucesso!",
+                message: "Contexto dos Jogos que possuem jogadores I.A. retornados com sucesso!",
                 data: JogoService.listaIa(),
                 success: true
             });
@@ -98,13 +115,12 @@ module.exports = {
                 success: false
             });
         }
-    }, recuperaPecaReiAdversario(req, res) {
+    }, executaJogadasIa(req, res) {
         try {
-            const { jogoId } = req.params;
-            const ladoId = req.headers.lado;
+            const { jogadas } = req.body;
             return res.json({
-                message: "Rei do jogador adversário retornado com sucesso!",
-                data: JogoService.recuperaPecaReiAdversario(jogoId, ladoId),
+                message: "Jogadas solicitadas pela I.A. executadas com sucesso!",
+                data: JogoService.executaJogadas(jogadas),
                 success: true
             });
         } catch (e) {
