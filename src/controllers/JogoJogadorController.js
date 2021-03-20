@@ -18,5 +18,21 @@ module.exports = {
                 success: false
             });
         }
-    },
+    }, recuperaLadosSemJogador(req, res) {
+        try {
+            const { jogoId } = req.params;
+            return res.json({
+                message: "Lados que estão sem jogador retornados com sucesso!",
+                data: JogoService.recuperaLadosSemJogador(jogoId),
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
+    }
 }

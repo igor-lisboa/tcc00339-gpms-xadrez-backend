@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "771227b2-b1b2-4325-9829-4ef591e8b56e",
+		"_postman_id": "9d2c4ff0-47b0-4213-b5d9-8603b76ea761",
 		"name": "Xadrez",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -127,6 +127,111 @@
 					]
 				},
 				{
+					"name": "Jogo",
+					"item": [
+						{
+							"name": "Rei Adversário",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "lado",
+										"value": "{{ladoId}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/rei-adversario",
+									"host": [
+										"{{API_XADREZ_URL}}"
+									],
+									"path": [
+										"jogos",
+										"{{jogoIndex}}",
+										"rei-adversario"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Encontra",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}",
+									"host": [
+										"{{API_XADREZ_URL}}"
+									],
+									"path": [
+										"jogos",
+										"{{jogoIndex}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Lados Sem Jogador",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/lado-sem-jogador",
+									"host": [
+										"{{API_XADREZ_URL}}"
+									],
+									"path": [
+										"jogos",
+										"{{jogoIndex}}",
+										"lado-sem-jogador"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Lado Atual",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/lado-atual",
+									"host": [
+										"{{API_XADREZ_URL}}"
+									],
+									"path": [
+										"jogos",
+										"{{jogoIndex}}",
+										"lado-atual"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "I.A.'s",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/ias",
+									"host": [
+										"{{API_XADREZ_URL}}"
+									],
+									"path": [
+										"jogos",
+										"{{jogoIndex}}",
+										"ias"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "Lista",
 					"request": {
 						"method": "GET",
@@ -156,87 +261,6 @@
 							"path": [
 								"jogos",
 								"ia"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Rei Adversário",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "lado",
-								"value": "{{ladoId}}",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/rei-adversario",
-							"host": [
-								"{{API_XADREZ_URL}}"
-							],
-							"path": [
-								"jogos",
-								"{{jogoIndex}}",
-								"rei-adversario"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Encontra",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}",
-							"host": [
-								"{{API_XADREZ_URL}}"
-							],
-							"path": [
-								"jogos",
-								"{{jogoIndex}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Lado Atual",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/lado-atual",
-							"host": [
-								"{{API_XADREZ_URL}}"
-							],
-							"path": [
-								"jogos",
-								"{{jogoIndex}}",
-								"lado-atual"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "I.A.'s",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/ias",
-							"host": [
-								"{{API_XADREZ_URL}}"
-							],
-							"path": [
-								"jogos",
-								"{{jogoIndex}}",
-								"ias"
 							]
 						}
 					},

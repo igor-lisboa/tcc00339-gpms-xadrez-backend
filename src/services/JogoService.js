@@ -46,5 +46,15 @@ module.exports = {
             throw "Aguarde sua vez de interagir com suas peças";
         }
         return jogo.recuperaLadoPeloId(ladoId).pecas.todas;
+    }, recuperaLadosSemJogador(jogoId) {
+        const jogo = this.encontra(jogoId);
+        let ladosSemJogador = [];
+        if (jogo.ladoBranco.tipo == null) {
+            ladosSemJogador.push(jogo.ladoBranco);
+        }
+        if (jogo.ladoPreto.tipo == null) {
+            ladosSemJogador.push(jogo.ladoPreto);
+        }
+        return ladosSemJogador;
     }
 };
