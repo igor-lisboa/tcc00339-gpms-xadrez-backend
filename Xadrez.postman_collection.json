@@ -9,126 +9,93 @@
 			"name": "Jogos",
 			"item": [
 				{
-					"name": "Peças",
-					"item": [
-						{
-							"name": "Possíveis Jogadas",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "lado",
-										"value": "{{ladoId}}",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/pecas/{{casaOrigem}}/possiveis-jogadas",
-									"host": [
-										"{{API_XADREZ_URL}}"
-									],
-									"path": [
-										"jogos",
-										"{{jogoIndex}}",
-										"pecas",
-										"{{casaOrigem}}",
-										"possiveis-jogadas"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Lista",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "lado",
-										"value": "{{ladoId}}",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/pecas",
-									"host": [
-										"{{API_XADREZ_URL}}"
-									],
-									"path": [
-										"jogos",
-										"{{jogoIndex}}",
-										"pecas"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Realiza Jogada",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "lado",
-										"value": "{{ladoId}}",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/pecas/{{casaOrigem}}/move/{{casaDestino}}",
-									"host": [
-										"{{API_XADREZ_URL}}"
-									],
-									"path": [
-										"jogos",
-										"{{jogoIndex}}",
-										"pecas",
-										"{{casaOrigem}}",
-										"move",
-										"{{casaDestino}}"
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "Jogadores",
-					"item": [
-						{
-							"name": "Insere Jogador",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"ladoId\": \"{{ladoId}}\",\r\n    \"tipoId\": \"{{tipoJogadorId}}\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/jogadores",
-									"host": [
-										"{{API_XADREZ_URL}}"
-									],
-									"path": [
-										"jogos",
-										"{{jogoIndex}}",
-										"jogadores"
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
 					"name": "Jogo",
 					"item": [
+						{
+							"name": "Peças",
+							"item": [
+								{
+									"name": "Possíveis Jogadas",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "lado",
+												"value": "{{ladoId}}",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/pecas/{{casaOrigem}}/possiveis-jogadas",
+											"host": [
+												"{{API_XADREZ_URL}}"
+											],
+											"path": [
+												"jogos",
+												"{{jogoIndex}}",
+												"pecas",
+												"{{casaOrigem}}",
+												"possiveis-jogadas"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Lista",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "lado",
+												"value": "{{ladoId}}",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/pecas",
+											"host": [
+												"{{API_XADREZ_URL}}"
+											],
+											"path": [
+												"jogos",
+												"{{jogoIndex}}",
+												"pecas"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Realiza Jogada",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "lado",
+												"value": "{{ladoId}}",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/pecas/{{casaOrigem}}/move/{{casaDestino}}",
+											"host": [
+												"{{API_XADREZ_URL}}"
+											],
+											"path": [
+												"jogos",
+												"{{jogoIndex}}",
+												"pecas",
+												"{{casaOrigem}}",
+												"move",
+												"{{casaDestino}}"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
 						{
 							"name": "Rei Adversário",
 							"request": {
@@ -224,6 +191,34 @@
 										"jogos",
 										"{{jogoIndex}}",
 										"ias"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Insere Jogador",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"ladoId\": \"{{ladoId}}\",\r\n    \"tipoId\": \"{{tipoJogadorId}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/jogadores",
+									"host": [
+										"{{API_XADREZ_URL}}"
+									],
+									"path": [
+										"jogos",
+										"{{jogoIndex}}",
+										"jogadores"
 									]
 								}
 							},
