@@ -142,7 +142,7 @@ module.exports = class Jogo {
         casaDe = this.recuperaCasaLinhaColuna(casaDe);
         casaPara = this.recuperaCasaLinhaColuna(casaPara);
 
-        const jogadaEscolhida = this.verificaJogadaPossivel(casaDe, casaPara, ladoId);
+        const jogadaEscolhida = this.verificaJogadaPossivel(this.recuperaCasaPecaDeUmLadoPelaCasaNome(ladoId, casaDe.casa), casaPara, ladoId);
 
         const peca = this.recuperaPecaDaCasa(casaDe);
         const casaDestino = this.recuperaPecaDaCasa(casaPara);
@@ -205,9 +205,9 @@ module.exports = class Jogo {
         if (ladoAdversario.pecas == undefined) {
             return undefined;
         } else {
-            ladoAdversario.pecas.todas.forEach((peca) => {
+            ladoAdversario.pecas.todas.forEach((casaPeca) => {
                 try {
-                    this.verificaJogadaPossivel(peca.casa, casa, ladoAdversario.id);
+                    this.verificaJogadaPossivel(casaPeca, casa, ladoAdversario.id);
                     return true;
                 } catch (e) {
                     // se deu excecao eh pq a casa informada nao eh capturavel pelo adversario
@@ -218,17 +218,14 @@ module.exports = class Jogo {
         }
     }
 
-    verificaJogadaPossivel(casaOrigemPeca, casaDestino, ladoId) {
-        casaOrigemPeca = this.recuperaCasaLinhaColuna(casaOrigemPeca);
+    verificaJogadaPossivel(casaPeca, casaDestino, ladoId) {
         casaDestino = this.recuperaCasaLinhaColuna(casaDestino);
 
-        // verificacoes casa origem
-        const casaOrigem = this.recuperaPecaDaCasa(casaOrigemPeca);
-        if (casaOrigem == null) {
+        if (casaPeca["peca"] == undefined) {
             throw "Não foi possível encontrar uma peça na casa de origem do movimento";
         }
 
-        if (casaOrigem.ladoId != ladoId) {
+        if (casaPeca.peca.ladoId != ladoId) {
             throw "A peça escolhida para o movimento pertence ao adversário, escolha outra peça";
         }
 
@@ -242,11 +239,10 @@ module.exports = class Jogo {
             }
         }
 
-        const possiveisMovimentosDaPeca = this.recuperaMovimentosPossiveisDaPecaDaCasa(casaOrigemPeca);
         let casaDestinoEhUmDestino = false;
         let movimentoDestinoEscolhido = null;
 
-        possiveisMovimentosDaPeca.forEach((movimentoDestino) => {
+        casaPeca.possiveisJogadas.forEach((movimentoDestino) => {
             if (movimentoDestino.casa.casa == casaDestino.casa) {
                 casaDestinoEhUmDestino = true;
                 movimentoDestinoEscolhido = movimentoDestino;
@@ -258,26 +254,6 @@ module.exports = class Jogo {
         }
 
         return movimentoDestinoEscolhido;
-    }
-
-    recuperaLadoPeloId(ladoId) {
-        if (this.ladoBranco.id == ladoId) {
-            return this.ladoBranco;
-        } else if (this.ladoPreto.id == ladoId) {
-            return this.ladoPreto;
-        } else {
-            throw "O lado desejado não existe";
-        }
-    }
-
-    recuperaLadoAdversarioPeloId(ladoId) {
-        if (this.ladoBranco.id == ladoId) {
-            return this.ladoPreto;
-        } else if (this.ladoPreto.id == ladoId) {
-            return this.ladoBranco;
-        } else {
-            throw "O lado adversário desejado não existe";
-        }
     }
 
     encontraCasasVizinhas(casa, ladoId) {
@@ -341,6 +317,26 @@ module.exports = class Jogo {
         this.ladoIdAtual = ladoId;
     }
 
+    recuperaLadoPeloId(ladoId) {
+        if (this.ladoBranco.id == ladoId) {
+            return this.ladoBranco;
+        } else if (this.ladoPreto.id == ladoId) {
+            return this.ladoPreto;
+        } else {
+            throw "O lado desejado não existe";
+        }
+    }
+
+    recuperaLadoAdversarioPeloId(ladoId) {
+        if (this.ladoBranco.id == ladoId) {
+            return this.ladoPreto;
+        } else if (this.ladoPreto.id == ladoId) {
+            return this.ladoBranco;
+        } else {
+            throw "O lado adversário desejado não existe";
+        }
+    }
+
     recuperaPecasDeUmLado(ladoId) {
         let pecas = [];
         let rei = {};
@@ -395,7 +391,7 @@ module.exports = class Jogo {
             return casasEncontradas;
         }
 
-        // pega o item q ta na casa vizinha
+        // recupera o item q ta na casa vizinha
         const itemCasa = this.recuperaPecaDaCasa(vizinho);
 
         // se item casa ta vazio, adiciona na lista casasEncontradas e encontra proximo 
@@ -428,23 +424,23 @@ module.exports = class Jogo {
         let movimentosPossiveis = [];
 
         if (peca.permitirJogadaDiagonal) {
-            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, 'frenteEsquerda', peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
-            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, 'frenteDireita', peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
-            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, 'trasEsquerda', peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
-            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, 'trasDireita', peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
+            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, "frenteEsquerda", peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
+            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, "frenteDireita", peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
+            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, "trasEsquerda", peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
+            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, "trasDireita", peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
         }
 
         if (peca.permitirJogadaFrente) {
-            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, 'frente', peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
+            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, "frente", peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
         }
 
         if (peca.permitirJogadaHorizontal) {
-            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, 'esquerda', peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
-            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, 'direita', peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
+            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, "esquerda", peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
+            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, "direita", peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
         }
 
         if (peca.permitirJogadaParaTras) {
-            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, 'tras', peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
+            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, "tras", peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
         }
 
         // recupera movimentos especiais da peca
@@ -479,7 +475,7 @@ module.exports = class Jogo {
             }
         });
 
-        //Aqui vai entrar uma função para incluir se o Rei pode realizar os Roques e retirar as possíveis jogadas dele que são capturáveis        
+        //Aqui vai entrar uma função para incluir se o Rei pode realizar os Roques
         return this.recuperaMovimentosPossiveisValidos(movimentosPossiveis, peca, casa);
     }
 
@@ -491,54 +487,54 @@ module.exports = class Jogo {
             if (this.ladoIdAtual == this.ladoBranco.id) {
                 //Roque Menor (Brancas)
                 //Verifica se as casas no caminho estão vazias
-                if (this.recuperaPecaDaCasa('F1') == null && this.recuperaPecaDaCasa('G1') == null) {
+                if (this.recuperaPecaDaCasa("F1") == null && this.recuperaPecaDaCasa("G1") == null) {
                     //Verifica se a Torre está na sua casa de origem
-                    const torre = this.recuperaPecaDaCasa('H1');
+                    const torre = this.recuperaPecaDaCasa("H1");
                     if (torre != null) {
-                        const g1 = this.recuperaCasaLinhaColuna('G1');
+                        const g1 = this.recuperaCasaLinhaColuna("G1");
                         const capturavel = this.verificaCasaCapturavelPeloAdversario(g1, peca.ladoId);
                         if (torre.tipo == "Torre" && torre.movimentosRealizados.length == 0 && capturavel == false) {
-                            movimentosPossiveis.push(new PossivelJogada(g1, false, 'Roque Menor', capturavel));
+                            movimentosPossiveis.push(new PossivelJogada(g1, false, "Roque Menor", capturavel));
                         }
                     }
                 }
                 //Roque Maior (brancas)
                 //Verifica se as casas no caminho estão vazias
-                if (this.recuperaPecaDaCasa('D1') == null && this.recuperaPecaDaCasa('C1') == null) {
+                if (this.recuperaPecaDaCasa("D1") == null && this.recuperaPecaDaCasa("C1") == null) {
                     //Verifica se a Torre está na sua casa de origem
-                    const torre = this.recuperaPecaDaCasa('A1');
+                    const torre = this.recuperaPecaDaCasa("A1");
                     if (torre != null) {
-                        const c1 = this.recuperaCasaLinhaColuna('C1');
+                        const c1 = this.recuperaCasaLinhaColuna("C1");
                         const capturavel = this.verificaCasaCapturavelPeloAdversario(c1, peca.ladoId);
                         if (torre.tipo == "Torre" && torre.movimentosRealizados.length == 0 && capturavel == false) {
-                            movimentosPossiveis.push(new PossivelJogada(c1, false, 'Roque Maior', capturavel));
+                            movimentosPossiveis.push(new PossivelJogada(c1, false, "Roque Maior", capturavel));
                         }
                     }
                 }
             } else {
                 //Roque Menor (Pretas)
                 //Verifica se as casas no caminho estão vazias
-                if (this.recuperaPecaDaCasa('F8') == null && this.recuperaPecaDaCasa('G8') == null) {
+                if (this.recuperaPecaDaCasa("F8") == null && this.recuperaPecaDaCasa("G8") == null) {
                     //Verifica se a Torre está na sua casa de origem
-                    const torre = this.recuperaPecaDaCasa('H8');
+                    const torre = this.recuperaPecaDaCasa("H8");
                     if (torre != null) {
-                        const g8 = this.recuperaCasaLinhaColuna('G8');
+                        const g8 = this.recuperaCasaLinhaColuna("G8");
                         const capturavel = this.verificaCasaCapturavelPeloAdversario(g8, peca.ladoId);
                         if (torre.tipo == "Torre" && torre.movimentosRealizados.length == 0 && capturavel == false) {
-                            movimentosPossiveis.push(new PossivelJogada(g8, false, 'Roque Menor', capturavel));
+                            movimentosPossiveis.push(new PossivelJogada(g8, false, "Roque Menor", capturavel));
                         }
                     }
                 }
                 //Roque Maior (Pretas)
                 //Verifica se as casas no caminho estão vazias
-                if (this.recuperaPecaDaCasa('D8') == null && this.recuperaPecaDaCasa('C8') == null) {
+                if (this.recuperaPecaDaCasa("D8") == null && this.recuperaPecaDaCasa("C8") == null) {
                     //Verifica se a Torre está na sua casa de origem
-                    const torre = this.recuperaPecaDaCasa('A8');
+                    const torre = this.recuperaPecaDaCasa("A8");
                     if (torre != null) {
-                        const c8 = this.recuperaCasaLinhaColuna('C8');
+                        const c8 = this.recuperaCasaLinhaColuna("C8");
                         const capturavel = this.verificaCasaCapturavelPeloAdversario(c8, peca.ladoId);
                         if (torre.tipo == "Torre" && torre.movimentosRealizados.length == 0 && capturavel == false) {
-                            movimentosPossiveis.push(new PossivelJogada(c8, false, 'Roque Maior', capturavel));
+                            movimentosPossiveis.push(new PossivelJogada(c8, false, "Roque Maior", capturavel));
                         }
                     }
                 }
@@ -549,13 +545,13 @@ module.exports = class Jogo {
 
     recuperaCasaLinhaColuna(casa) {
         if (typeof casa == "string") {
-            return this.pegaLinhaColunaDeUmaCasa(casa);
+            return this.recuperaLinhaColunaDeUmaCasa(casa);
         }
 
-        return this.pegaCasaDeUmaLinhaColuna(casa);
+        return this.recuperaCasaDeUmaLinhaColuna(casa);
     }
 
-    pegaLinhaColunaDeUmaCasa(casa) {
+    recuperaLinhaColunaDeUmaCasa(casa) {
         const casaEncontrada = db.tabelaEquivalencia.find(element => element.casa.trim().toUpperCase() == casa.trim().toUpperCase());
         if (typeof (casaEncontrada) == "undefined") {
             throw "Não foi possível encontrar a casa desejada buscando pelo nome da casa";
@@ -563,11 +559,19 @@ module.exports = class Jogo {
         return casaEncontrada;
     }
 
-    pegaCasaDeUmaLinhaColuna(casa) {
+    recuperaCasaDeUmaLinhaColuna(casa) {
         const casaEncontrada = db.tabelaEquivalencia.find(element => element.linha == casa.linha && element.coluna == casa.coluna);
         if (typeof (casaEncontrada) == "undefined") {
             throw "Não foi possível encontrar a casa desejada buscando pela linha e coluna";
         }
         return casaEncontrada;
+    }
+
+    recuperaCasaPecaDeUmLadoPelaCasaNome(ladoId, casaNome) {
+        const casaPeca = this.recuperaLadoPeloId(ladoId).pecas.todas.find(casasPeca => casasPeca.casa.trim().toUpperCase() == casaNome.trim().toUpperCase());
+        if (typeof (casaPeca) == "undefined") {
+            throw "Não foi possível encontrar a peça na casa desejada";
+        }
+        return casaPeca;
     }
 }
