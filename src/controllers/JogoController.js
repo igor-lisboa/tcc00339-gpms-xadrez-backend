@@ -84,5 +84,36 @@ module.exports = {
                 success: false
             });
         }
+    }, recuperaLadosIa(req, res) {
+        try {
+            const { jogoId } = req.params;
+            return res.json({
+                message: "I.A.'s do jogo retornadas com sucesso!",
+                data: JogoService.recuperaLadosIa(jogoId),
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
+    }, listaIa(req, res) {
+        try {
+            return res.json({
+                message: "Jogos que possuem jogadores I.A. retornados com sucesso!",
+                data: JogoService.listaIa(),
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
     }
 }

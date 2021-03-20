@@ -8,9 +8,11 @@ const ia = async () => {
     while (true) {
         const jogosIa = JogoService.listaIa();
 
-        JogoService.recuperaLadosIa(jogoId)
+        jogosIa.forEach((jogo) => {
+            const ladosIa = JogoService.recuperaLadosIa(jogo.id);
+            console.log(ladosIa);
+        });
 
-        console.log('teste' + new Date().getTime());
         await sleep(5000);
     }
 
