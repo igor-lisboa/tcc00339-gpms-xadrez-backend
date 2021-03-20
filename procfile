@@ -1,2 +1,2 @@
-web:npm start
-work:npm ia
+web: npm start
+worker: npm ia
