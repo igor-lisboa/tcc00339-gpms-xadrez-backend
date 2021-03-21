@@ -315,6 +315,27 @@ module.exports = class Jogo {
         this.ladoBranco.definePecas(this.recuperaPecasDeUmLado(this.ladoBranco.id));
         this.ladoPreto.definePecas(this.recuperaPecasDeUmLado(this.ladoPreto.id));
         this.insereCapturavelNasPossiveisJogadasDasPecasDosLados();
+        this.tiraMovimentosPossiveisCapturaveisDosReis();
+    }
+
+    tiraMovimentosPossiveisCapturaveisDosReis() {
+        // tira jogadas nas quais o rei branco pode ser capturado
+        let possiveisJogadasReiBranco = [];
+        this.ladoBranco.pecas.rei.possiveisJogadas.forEach((possivelJogada) => {
+            if (possivelJogada.capturavel == false) {
+                possiveisJogadasReiBranco.push(possivelJogada);
+            }
+        });
+        this.ladoBranco.pecas.rei.possiveisJogadas = possiveisJogadasReiBranco;
+
+        // tira jogadas nas quais o rei preto pode ser capturado
+        let possiveisJogadasReiPreto = [];
+        this.ladoPreto.pecas.rei.possiveisJogadas.forEach((possivelJogada) => {
+            if (possivelJogada.capturavel == false) {
+                possiveisJogadasReiPreto.push(possivelJogada);
+            }
+        });
+        this.ladoPreto.pecas.rei.possiveisJogadas = possiveisJogadasReiPreto;
     }
 
     defineLadoIdAtual(ladoId) {
