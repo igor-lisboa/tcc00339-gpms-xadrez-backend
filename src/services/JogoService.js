@@ -38,10 +38,21 @@ module.exports = {
         return ladosIa;
     }, executaJogadas(jogadas = []) {
         let jogadasExecutadas = [];
+        let jogadasErros = [];
         jogadas.forEach((jogada) => {
-            jogadasExecutadas.push(this.realizaJogada(jogada.jogoId, jogada.ladoId, jogada.casaOrigem, jogada.casaDestino));
+            try {
+                jogadasExecutadas.push(this.realizaJogada(jogada.jogoId, jogada.ladoId, jogada.casaOrigem, jogada.casaDestino));
+            } catch (ex) {
+                jogadasErros.push({
+                    "erro": ex,
+                    "jogada": jogada
+                })
+            }
         });
-        return jogadasExecutadas;
+        return {
+            jogadasExecutadas,
+            jogadasErros
+        };
     }, recuperaLadoIa(jogo, lado) {
         if (lado.tipo != null) {
             if (lado.tipo.id == 1) {
