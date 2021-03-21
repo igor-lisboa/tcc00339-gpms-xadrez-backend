@@ -23,7 +23,7 @@ routes.get("/", (req, res) => {
                 "Milena Verissimo",
                 "Matheus Baldas"
             ].sort(),
-            documentacao: "https://documenter.getpostman.com/view/13081554/Tz5wUtfN"
+            documentacao: "https://documenter.getpostman.com/view/13081554/Tz5wVZYq"
         },
         success: true
     });
