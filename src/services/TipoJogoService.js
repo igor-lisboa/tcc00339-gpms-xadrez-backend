@@ -22,7 +22,7 @@ module.exports = {
         return tiposDeJogo;
     }, encontra(tipoJogoId) {
         const tipoJogoEncontrado = this.lista().find(tipoJogo => tipoJogo.id == tipoJogoId);
-        if (typeof (tipoJogoEncontrado) == "undefined") {
+        if (tipoJogoEncontrado == undefined) {
             throw "Não foi possível encontrar o tipo de jogo desejado";
         }
         return tipoJogoEncontrado;

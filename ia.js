@@ -61,16 +61,19 @@ const ia = async () => {
                     // recupera lado atual do jogo
                     const ladoIa = jogoIa.ladosIa.find(ladoIa => ladoIa.lado.id == jogoIa.jogo.ladoIdAtual);
 
-                    // escolhe uma jogada para realizar
-                    const jogadaEscolhida = escolhePossivelJogada(ladoIa.possiveisJogadas);
+                    // checa se o ladoIa foi encontrado
+                    if (ladoIa != undefined) {
+                        // escolhe uma jogada para realizar
+                        const jogadaEscolhida = escolhePossivelJogada(ladoIa.possiveisJogadas);
 
-                    // insere jogada escolhida no array de jogadasParaSeremFeitasPelaIa
-                    jogadasParaSeremFeitasPelaIa.push({
-                        "jogoId": jogoIa.jogo.id,
-                        "casaOrigem": jogadaEscolhida.de,
-                        "casaDestino": jogadaEscolhida.para,
-                        "ladoId": ladoIa.lado.id
-                    });
+                        // insere jogada escolhida no array de jogadasParaSeremFeitasPelaIa
+                        jogadasParaSeremFeitasPelaIa.push({
+                            "jogoId": jogoIa.jogo.id,
+                            "casaOrigem": jogadaEscolhida.de,
+                            "casaDestino": jogadaEscolhida.para,
+                            "ladoId": ladoIa.lado.id
+                        });
+                    }
                 });
 
                 // realiza jogadas listadas
