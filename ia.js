@@ -1,7 +1,7 @@
+require('dotenv').config();
 const axios = require("axios").default;
-const appUrl = process.env.APP_URL || "http://localhost:3333";
 const api = axios.create({
-    baseURL: appUrl
+    baseURL: process.env.APP_URL || "http://localhost:3333"
 });
 
 const sleep = async (s) => {
@@ -89,8 +89,8 @@ const ia = async () => {
             } else {
                 console.log(response.data.message);
             }
-        }).catch((error) => {
-            console.log(error.response.data.message);
+        }).catch((e) => {
+            console.log(e);
         });
 
         await sleep(tempoSleepSegundos);
