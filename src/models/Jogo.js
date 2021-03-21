@@ -557,7 +557,7 @@ module.exports = class Jogo {
 
     recuperaLinhaColunaDeUmaCasa(casa) {
         const casaEncontrada = db.tabelaEquivalencia.find(element => element.casa.trim().toUpperCase() == casa.trim().toUpperCase());
-        if (typeof (casaEncontrada) == "undefined") {
+        if (casaEncontrada == undefined) {
             throw "Não foi possível encontrar a casa desejada buscando pelo nome da casa";
         }
         return casaEncontrada;
@@ -565,7 +565,7 @@ module.exports = class Jogo {
 
     recuperaCasaDeUmaLinhaColuna(casa) {
         const casaEncontrada = db.tabelaEquivalencia.find(element => element.linha == casa.linha && element.coluna == casa.coluna);
-        if (typeof (casaEncontrada) == "undefined") {
+        if (casaEncontrada == undefined) {
             throw "Não foi possível encontrar a casa desejada buscando pela linha e coluna";
         }
         return casaEncontrada;
@@ -573,7 +573,7 @@ module.exports = class Jogo {
 
     recuperaCasaPecaDeUmLadoPelaCasaNome(ladoId, casaNome) {
         const casaPeca = this.recuperaLadoPeloId(ladoId).pecas.todas.find(casasPeca => casasPeca.casa.trim().toUpperCase() == casaNome.trim().toUpperCase());
-        if (typeof (casaPeca) == "undefined") {
+        if (casaPeca == undefined) {
             throw "Não foi possível encontrar a peça na casa desejada";
         }
         return casaPeca;

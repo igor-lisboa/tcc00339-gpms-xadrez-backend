@@ -57,7 +57,7 @@ module.exports = {
                     const possivelJogadaLadoAdversario = ladoAdversarioPossiveisJogadas.find(jogadaAdversario => jogadaAdversario.para == possivelJogada.de);
 
                     // se n achou possivelJogadaLadoAdversario eh pq a peca n ta ameacada
-                    if (typeof (possivelJogadaLadoAdversario) == "undefined") {
+                    if (possivelJogadaLadoAdversario == undefined) {
                         pecaAmeacadaNaPosicaoAtual = false;
                     } else {
                         pecaAmeacadaNaPosicaoAtual = true;
@@ -93,7 +93,7 @@ module.exports = {
         return possiveisJogadas;
     }, recuperaPossiveisMovimentosDaPecaDeUmLado(jogoId, ladoId, casaNome) {
         const pecaDoLado = this.recuperaTodasAsPecasDeUmLado(jogoId, ladoId).find(peca => peca.casa.trim().toUpperCase() == casaNome.trim().toUpperCase());
-        if (typeof (pecaDoLado) == "undefined") {
+        if (pecaDoLado == undefined) {
             throw "Nenhuma peça pertencente a você foi encontrada na casa procurada";
         }
         return pecaDoLado.possiveisJogadas;
