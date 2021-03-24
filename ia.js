@@ -17,9 +17,19 @@ socket.on('uncaughtException', function (err) {
     console.log(err);
 });
 
-const sleep = async (s) => {
-    return new Promise(resolve => setTimeout(resolve, s * 1000));
-}
+socket.on('jogoCriado', function () {
+    if (verbose) {
+        console.log('Novo jogo criado...');
+    }
+    ia();
+});
+
+socket.on('jogadaRealizada', function () {
+    if (verbose) {
+        console.log('Jogada realizada...');
+    }
+    ia();
+});
 
 const escolhePossivelJogada = (possiveisJogadas) => {
     let novasPossibilidadesJogadas = [];
@@ -55,61 +65,52 @@ const escolhePossivelJogada = (possiveisJogadas) => {
     return possiveisJogadas[Math.floor(Math.random() * possiveisJogadas.length)];
 }
 
-const tempoSleepSegundos = 5;
-
-
 const ia = async () => {
-    while (true) {
-        api.get(
-            "/jogos/ia"
-        ).then((response) => {
-            let jogadasParaSeremFeitasPelaIa = [];
+    api.get(
+        "/jogos/ia"
+    ).then((response) => {
+        let jogadasParaSeremFeitasPelaIa = [];
 
-            // se retorno tiver sucesso
-            if (response.data.success) {
+        // se retorno tiver sucesso
+        if (response.data.success) {
 
-                // percorre jogos
-                response.data.data.forEach((jogoIa) => {
-                    // recupera lado atual do jogo
-                    const ladoIa = jogoIa.ladosIa.find(ladoIa => ladoIa.lado.id == jogoIa.jogo.ladoIdAtual);
+            // percorre jogos
+            response.data.data.forEach((jogoIa) => {
+                // recupera lado atual do jogo
+                const ladoIa = jogoIa.ladosIa.find(ladoIa => ladoIa.lado.id == jogoIa.jogo.ladoIdAtual);
 
-                    // checa se o ladoIa foi encontrado
-                    if (ladoIa != undefined) {
-                        // escolhe uma jogada para realizar
-                        const jogadaEscolhida = escolhePossivelJogada(ladoIa.possiveisJogadas);
+                // checa se o ladoIa foi encontrado
+                if (ladoIa != undefined) {
+                    // escolhe uma jogada para realizar
+                    const jogadaEscolhida = escolhePossivelJogada(ladoIa.possiveisJogadas);
 
-                        // insere jogada escolhida no array de jogadasParaSeremFeitasPelaIa
-                        jogadasParaSeremFeitasPelaIa.push({
-                            "jogoId": jogoIa.jogo.id,
-                            "casaOrigem": jogadaEscolhida.de,
-                            "casaDestino": jogadaEscolhida.para,
-                            "ladoId": ladoIa.lado.id
-                        });
-                    }
-                });
+                    // insere jogada escolhida no array de jogadasParaSeremFeitasPelaIa
+                    jogadasParaSeremFeitasPelaIa.push({
+                        "jogoId": jogoIa.jogo.id,
+                        "casaOrigem": jogadaEscolhida.de,
+                        "casaDestino": jogadaEscolhida.para,
+                        "ladoId": ladoIa.lado.id
+                    });
+                }
+            });
 
-                // realiza jogadas listadas
-                api.post(
-                    "/jogos/ia",
-                    {
-                        "jogadas": jogadasParaSeremFeitasPelaIa
-                    }
-                ).then((responseJogada) => {
-                    if (verbose) {
-                        console.log(responseJogada.data);
-                    }
-                }).catch((errorJogada) => {
-                    console.log(errorJogada.response.data.message);
-                });
-            } else {
-                console.log(response.data.message);
-            }
-        }).catch((e) => {
-            console.log(e);
-        });
-
-        await sleep(tempoSleepSegundos);
-    }
+            // realiza jogadas listadas
+            api.post(
+                "/jogos/ia",
+                {
+                    "jogadas": jogadasParaSeremFeitasPelaIa
+                }
+            ).then((responseJogada) => {
+                if (verbose) {
+                    console.log(responseJogada.data);
+                }
+            }).catch((errorJogada) => {
+                console.log(errorJogada.response.data.message);
+            });
+        } else {
+            console.log(response.data.message);
+        }
+    }).catch((e) => {
+        console.log(e);
+    });
 }
-
-ia();

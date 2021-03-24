@@ -37,9 +37,11 @@ module.exports = {
     cria(req, res) {
         try {
             const { tipoJogo } = req.body;
+            const jogo = JogoService.cria(tipoJogo);
+            req.io.emit('jogoCriado');
             return res.json({
                 message: "Jogo incluído com sucesso!",
-                data: JogoService.cria(tipoJogo),
+                data: jogo,
                 success: true
             });
         } catch (e) {
@@ -118,9 +120,32 @@ module.exports = {
     }, executaJogadasIa(req, res) {
         try {
             const { jogadas } = req.body;
+            const jogadasExecutadasRetorno = JogoService.executaJogadas(jogadas);
+
+            // para cada jogada executada avisa o adversario caso ele esteja conectado
+            jogadasExecutadasRetorno.jogadasExecutadas.forEach((jogadaExecutada) => {
+                let jogadorIdentificador = undefined;
+
+                // define parametro q sera usado p buscar socket do adversario
+                if (jogadaExecutada.ladoAdversario.tipoId == 0) {
+                    jogadorIdentificador = jogadaExecutada.jogoId + "-" + jogadaExecutada.ladoId;
+                } else {
+                    jogadorIdentificador = "I.A.";
+                }
+
+                // procura o adversario na lista de jogadores conectados
+                const destinoEvento = req.jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
+
+                // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
+                if (destinoEvento != undefined) {
+                    req.io.to(destinoEvento.socketId).emit('jogadaRealizada');
+                }
+            });
+
+            // retorna json de sucesso
             return res.json({
                 message: "Jogadas solicitadas pela I.A. executadas com sucesso!",
-                data: JogoService.executaJogadas(jogadas),
+                data: jogadasExecutadasRetorno,
                 success: true
             });
         } catch (e) {
