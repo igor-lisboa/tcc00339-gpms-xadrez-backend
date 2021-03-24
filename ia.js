@@ -1,11 +1,12 @@
 require('dotenv').config();
 const axios = require("axios").default;
 
+const verbose = process.env.APP_VERBOSE || true;
 const apiUrl = process.env.APP_URL || "http://localhost:3333";
+
 const api = axios.create({
     baseURL: apiUrl
 });
-
 const io = require("socket.io-client");
 
 const socket = io(apiUrl, {
@@ -14,7 +15,7 @@ const socket = io(apiUrl, {
 
 socket.on('uncaughtException', function (err) {
     console.log(err);
-}); 
+});
 
 const sleep = async (s) => {
     return new Promise(resolve => setTimeout(resolve, s * 1000));
@@ -56,7 +57,6 @@ const escolhePossivelJogada = (possiveisJogadas) => {
 
 const tempoSleepSegundos = 5;
 
-const verbose = false;
 
 const ia = async () => {
     while (true) {

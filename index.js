@@ -7,6 +7,8 @@ const app = express();
 const http = require("http").createServer(app);
 const io = require("socket.io")(http);
 
+const verbose = process.env.APP_VERBOSE || true;
+
 let jogadoresConectados = [];
 
 io.on("connection", (socket) => {
@@ -14,6 +16,9 @@ io.on("connection", (socket) => {
         "socketId": socket.id,
         "identificador": socket.handshake.query.jogador
     });
+    if (verbose) {
+        console.log("O jogador " + socket.handshake.query.jogador + " se conectou...");
+    }
 
     socket.on('disconnect', () => {
         let index = jogadoresConectados.indexOf({
@@ -21,6 +26,9 @@ io.on("connection", (socket) => {
             "identificador": socket.handshake.query.jogador
         });
         jogadoresConectados.splice(index, 1);
+        if (verbose) {
+            console.log("O jogador " + socket.handshake.query.jogador + " se desconectou...");
+        }
     });
 });
 
@@ -29,6 +37,7 @@ io.on("connection", (socket) => {
 app.use((req, res, next) => {
     req.io = io;
     req.jogadoresConectados = jogadoresConectados;
+    req.verbose = verbose;
 
     next();
 });
