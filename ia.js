@@ -12,6 +12,10 @@ const socket = io(apiUrl, {
     query: { jogador: "I.A." }
 });
 
+socket.on('uncaughtException', function (err) {
+    console.log(err);
+}); 
+
 const sleep = async (s) => {
     return new Promise(resolve => setTimeout(resolve, s * 1000));
 }
