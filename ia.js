@@ -1,7 +1,15 @@
 require('dotenv').config();
 const axios = require("axios").default;
+
+const apiUrl = process.env.APP_URL || "http://localhost:3333";
 const api = axios.create({
-    baseURL: process.env.APP_URL || "http://localhost:3333"
+    baseURL: apiUrl
+});
+
+const io = require("socket.io-client");
+
+const socket = io(apiUrl, {
+    query: { jogador: "I.A." }
 });
 
 const sleep = async (s) => {
