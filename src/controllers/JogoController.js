@@ -128,7 +128,7 @@ module.exports = {
 
                 // define parametro q sera usado p buscar socket do adversario
                 if (jogadaExecutada.ladoAdversario.tipoId == 0) {
-                    jogadorIdentificador = jogadaExecutada.jogoId + "-" + jogadaExecutada.ladoId;
+                    jogadorIdentificador = jogadaExecutada.jogoId + "-" + jogadaExecutada.ladoAdversario.ladoId;
                 } else {
                     jogadorIdentificador = "I.A.";
                 }

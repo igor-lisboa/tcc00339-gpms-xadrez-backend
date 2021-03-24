@@ -50,7 +50,7 @@ module.exports = {
 
             // define parametro q sera usado p buscar socket do adversario
             if (ladoAdversario.tipoId == 0) {
-                jogadorIdentificador = jogoId + "-" + ladoId;
+                jogadorIdentificador = jogoId + "-" + ladoAdversario.ladoId;
             } else {
                 jogadorIdentificador = "I.A.";
             }
