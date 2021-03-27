@@ -52,6 +52,8 @@ module.exports = class Jogo {
          */
         this.enPassantCasaCaptura = null;
 
+        this.ladoSemJogador = null;
+
         this.defineTipoJogo(tipoJogoId);
     }
 
@@ -63,6 +65,12 @@ module.exports = class Jogo {
         if (this.tipoJogo.id == 1 && tipo.id == 0) {
             // inclui jogador I.A. no lado adversario
             this.defineJogador(this.recuperaLadoAdversarioPeloId(ladoId).id, db.ladoTipos[1]);
+            this.ladoSemJogador = -1;
+        }
+        if(this.ladoSemJogador == null){
+            this.ladoSemJogador = this.recuperaLadoAdversarioPeloId(ladoId).id;
+        }else{
+            this.ladoSemJogador = -1;
         }
 
         this.salva();
@@ -118,6 +126,7 @@ module.exports = class Jogo {
         this.enPassantCasaCaptura = jogo.enPassantCasaCaptura;
         this.ladoIdAtual = jogo.ladoIdAtual;
         this.tipoJogo = jogo.tipoJogo;
+        this.ladoSemJogador = jogo.ladoSemJogador;
 
         this.cheque = this.verificaReiLadoAtualCheque();
 
