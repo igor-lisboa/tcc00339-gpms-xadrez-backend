@@ -4,23 +4,28 @@ module.exports = {
     insereJogador(req, res) {
         try {
             const { jogoId } = req.params;
-            const { ladoId, tipoId, jogadorId } = req.body;
-            const jogo = JogoService.encontra(jogoId);
-            if(jogo.ladoSemJogador != null && jogo.ladoSemJogador != -1){
-                // procura o adversario na lista de jogadores conectados
-                let index = req.jogadoresConectados.indexOf(req.jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador != jogadorId && jogadorConectado.jogoId == jogoId));
-                req.jogadoresConectados[index].jogoId = jogo.id;
-                const destinoEvento = req.jogadoresConectados[index];
-
-                // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
-                if (destinoEvento != undefined) {
-                    req.io.to(destinoEvento.socketId).emit('adversarioEntrou');
-                }
-            }else{
-                const destinoEvento = req.jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorId);
-                req.io.to(destinoEvento.socketId).emit('jogador1Entrou');
-            }
+            const { ladoId, tipoId } = req.body;
             const jogadorEntrou = JogoService.insereJogador(jogoId, ladoId, tipoId);
+
+            // recupera lado adversario
+            const ladoAdversario = JogoService.recuperaLadoTipo(jogoId, JogoService.recuperaIdLadoAdversarioPeloId(ladoId));
+
+            let jogadorIdentificador = undefined;
+
+            // define parametro q sera usado p buscar socket do adversario
+            if (ladoAdversario.tipoId == 0) {
+                jogadorIdentificador = jogoId + "-" + ladoAdversario.ladoId;
+            } else {
+                jogadorIdentificador = "I.A.";
+            }
+
+            // procura o adversario na lista de jogadores conectados
+            const destinoEvento = req.jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
+
+            // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
+            if (destinoEvento != undefined) {
+                req.io.to(destinoEvento.socketId).emit('adversarioEntrou');
+            }
 
             return res.json({
                 message: "Definições do jogador atualizadas com sucesso!",

@@ -24,6 +24,13 @@ socket.on('jogoCriado', function () {
     ia();
 });
 
+socket.on('adversarioEntrou', function () {
+    if (verbose) {
+        console.log('Adversário entrou...');
+    }
+    ia();
+});
+
 socket.on('jogadaRealizada', function () {
     if (verbose) {
         console.log('Jogada realizada...');
