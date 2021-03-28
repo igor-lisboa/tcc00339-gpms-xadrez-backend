@@ -5,10 +5,8 @@ module.exports = {
         try {
             const { jogoId } = req.params;
             const { ladoId, tipoId, jogadorId } = req.body;
-            const jogo = JogoService.encontra(jogoId);
-            if(jogo.ladoSemJogador == null){
-                req.io.emit('entraJogador');
-            }
+            const jogadorEntrou = JogoService.insereJogador(jogoId, ladoId, tipoId);
+
             if(jogo.ladoSemJogador != null && jogo.ladoSemJogador != -1){
                 // procura o adversario na lista de jogadores conectados
                 let index = req.jogadoresConectados.indexOf(req.jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador != jogadorId && jogadorConectado.jogoId == jogoId));
@@ -20,9 +18,16 @@ module.exports = {
                     req.io.to(destinoEvento.socketId).emit('entraAdversario');
                 }
             }
+            const destinoEvento = req.jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
+
+            // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
+            if (destinoEvento != undefined) {
+                req.io.to(destinoEvento.socketId).emit('adversarioEntrou');
+            }
+
             return res.json({
                 message: "Definições do jogador atualizadas com sucesso!",
-                data: JogoService.insereJogador(jogoId, ladoId, tipoId),
+                data: jogadorEntrou,
                 success: true
             });
         } catch (e) {
