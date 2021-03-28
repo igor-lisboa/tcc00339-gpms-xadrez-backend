@@ -37,8 +37,11 @@ module.exports = {
     cria(req, res) {
         try {
             const { tipoJogo } = req.body;
+            const { jogadorId } = req.body;
             const jogo = JogoService.cria(tipoJogo);
-            req.io.emit('jogoCriado');
+            let index = req.jogadoresConectados.indexOf(req.jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorId));
+            req.jogadoresConectados[index].jogoId = jogo.id;
+            req.io.to(req.jogadoresConectados[index].socketId).emit('jogoCriado', jogo.id);
             return res.json({
                 message: "Jogo incluído com sucesso!",
                 data: jogo,

@@ -5,16 +5,19 @@ const routes = require("./src/routes");
 
 const app = express();
 const http = require("http").createServer(app);
-const io = require("socket.io")(http);
+const options = { cors:true };
+const io = require("socket.io")(http, options);
 
 const verbose = process.env.APP_VERBOSE || true;
 
 let jogadoresConectados = [];
 
 io.on("connection", (socket) => {
+
     jogadoresConectados.push({
         "socketId": socket.id,
-        "identificador": socket.handshake.query.jogador
+        "identificador": socket.handshake.query.jogador,
+        "jogoId": null
     });
     if (verbose) {
         console.log("O jogador " + socket.handshake.query.jogador + " se conectou...");
