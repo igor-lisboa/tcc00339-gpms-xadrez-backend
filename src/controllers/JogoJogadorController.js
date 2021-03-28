@@ -15,14 +15,8 @@ module.exports = {
 
                 // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
                 if (destinoEvento != undefined) {
-                    req.io.to(destinoEvento.socketId).emit('entraAdversario');
+                    req.io.to(destinoEvento.socketId).emit('adversarioEntrou');
                 }
-            }
-            const destinoEvento = req.jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
-
-            // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
-            if (destinoEvento != undefined) {
-                req.io.to(destinoEvento.socketId).emit('adversarioEntrou');
             }
 
             return res.json({
