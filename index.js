@@ -5,20 +5,39 @@ const routes = require("./src/routes");
 
 const app = express();
 const http = require("http").createServer(app);
-const io = require("socket.io")(http);
+const io = require("socket.io")(http, { cors: true });
 
-const jogadoresConectados = {};
+const verbose = process.env.APP_VERBOSE || true;
+
+let jogadoresConectados = [];
 
 io.on("connection", (socket) => {
-    const { user } = socket.handshake.query;
+    jogadoresConectados.push({
+        "socketId": socket.id,
+        "identificador": socket.handshake.query.jogador
+    });
+    if (verbose) {
+        console.log("O jogador " + socket.handshake.query.jogador + " se conectou...");
+    }
 
-    jogadoresConectados[user] = socket.id;
+    socket.on('disconnect', () => {
+        let index = jogadoresConectados.indexOf({
+            "socketId": socket.id,
+            "identificador": socket.handshake.query.jogador
+        });
+        jogadoresConectados.splice(index, 1);
+        if (verbose) {
+            console.log("O jogador " + socket.handshake.query.jogador + " se desconectou...");
+        }
+    });
 });
+
 
 // middleware pra registrar o socket e os jogadores conectados no request
 app.use((req, res, next) => {
     req.io = io;
     req.jogadoresConectados = jogadoresConectados;
+    req.verbose = verbose;
 
     next();
 });

@@ -40,13 +40,18 @@ module.exports = {
         let jogadasExecutadas = [];
         let jogadasErros = [];
         jogadas.forEach((jogada) => {
+            let jogadaRetorno = {
+                "jogoId": jogada.jogoId,
+                "ladoId": jogada.ladoId,
+                "ladoAdversario": this.recuperaLadoTipo(jogada.jogoId, this.recuperaIdLadoAdversarioPeloId(jogada.ladoId))
+            };
             try {
-                jogadasExecutadas.push(this.realizaJogada(jogada.jogoId, jogada.ladoId, jogada.casaOrigem, jogada.casaDestino));
+                jogadaRetorno.jogada = this.realizaJogada(jogada.jogoId, jogada.ladoId, jogada.casaOrigem, jogada.casaDestino);
+                jogadasExecutadas.push(jogadaRetorno);
             } catch (ex) {
-                jogadasErros.push({
-                    "erro": ex,
-                    "jogada": jogada
-                })
+                jogadaRetorno.erro = ex;
+                jogadaRetorno.jogadaSolicitada = jogada;
+                jogadasErros.push(jogadaRetorno)
             }
         });
         return {
@@ -130,5 +135,24 @@ module.exports = {
             ladosSemJogador.push(jogo.ladoPreto);
         }
         return ladosSemJogador;
+    }, recuperaIdLadoAdversarioPeloId(ladoId) {
+        if (ladoId == 0) {
+            return 1;
+        }
+        return 0;
+    }, recuperaLadoTipo(jogoId, ladoId) {
+        const lado = this.encontra(jogoId).recuperaLadoPeloId(ladoId);
+        let ladoRetorno = {
+            "ladoId": lado.id,
+            "lado": lado.lado,
+        };
+        if (lado.tipo != null) {
+            ladoRetorno.tipoId = lado.tipo.id;
+            ladoRetorno.tipoNome = lado.tipo.nome;
+        } else {
+            ladoRetorno.tipoId = null;
+            ladoRetorno.tipoNome = null;
+        }
+        return ladoRetorno;
     }
 };
