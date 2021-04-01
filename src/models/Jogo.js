@@ -12,7 +12,7 @@ const MovimentoRealizado = require("./MovimentoRealizado");
 const TipoJogoService = require("../services/TipoJogoService");
 
 module.exports = class Jogo {
-    constructor(tipoJogoId = 0) {
+    constructor(tipoJogoId = 0, tempoDeTurnoEmMilisegundos = 300000) {
         this.id = null;
 
         this.ladoBranco = new Lado(db.lados[0]);
@@ -52,6 +52,8 @@ module.exports = class Jogo {
          */
         this.enPassantCasaCaptura = null;
 
+        this.turnos = [];
+
         this.defineTipoJogo(tipoJogoId);
     }
 
@@ -87,6 +89,10 @@ module.exports = class Jogo {
 
         if (this.recuperaLadoPeloId(ladoId).tipo == null) {
             throw "Para realizar essa jogada, faça o login adequadamente no lado desejado";
+        }
+
+        if (this.recuperaLadoAdversarioPeloId(ladoId).tipo == null) {
+            throw "Aguarde outro jogador se logar adequadamente no lado adversário";
         }
 
         const jogadaEscolhida = this.move(casaOrigem, casaDestino, ladoId);
