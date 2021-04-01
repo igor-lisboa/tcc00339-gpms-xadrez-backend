@@ -10,6 +10,7 @@ const db = require("../database.json");
 const PossivelJogada = require("./PossivelJogada");
 const MovimentoRealizado = require("./MovimentoRealizado");
 const TipoJogoService = require("../services/TipoJogoService");
+const Turno = require("./Turno");
 
 module.exports = class Jogo {
     constructor(tipoJogoId = 0, tempoDeTurnoEmMilisegundos = 300000) {
@@ -53,6 +54,11 @@ module.exports = class Jogo {
         this.enPassantCasaCaptura = null;
 
         this.turnos = [];
+         /**
+         * O tempo de turno em milisegundos é usado pra verificar se o tempo de turno já foi
+         * atingido, o valor padrão é referente a 5 minutos
+         */
+        this.tempoDeTurnoEmMilisegundos = tempoDeTurnoEmMilisegundos;
 
         this.defineTipoJogo(tipoJogoId);
     }
@@ -65,6 +71,11 @@ module.exports = class Jogo {
         if (this.tipoJogo.id == 1 && tipo.id == 0) {
             // inclui jogador I.A. no lado adversario
             this.defineJogador(this.recuperaLadoAdversarioPeloId(ladoId).id, db.ladoTipos[1]);
+        }
+
+        // se os 2 lados tiverem logados inicia o turno
+        if (this.ladoBranco.tipo != null && this.ladoPreto.tipo != null) {
+            this.turnos.push(new Turno(this.ladoIdAtual, new Date().getTime()));
         }
 
         this.salva();

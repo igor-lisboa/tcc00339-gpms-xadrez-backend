@@ -36,8 +36,8 @@ module.exports = {
     },
     cria(req, res) {
         try {
-            const { tipoJogo } = req.body;
-            const jogo = JogoService.cria(tipoJogo);
+            const { tipoJogo, tempoDeTurnoEmMilisegundos } = req.body;
+            const jogo = JogoService.cria(tipoJogo, tempoDeTurnoEmMilisegundos);
             req.io.emit('jogoCriado');
             return res.json({
                 message: "Jogo incluído com sucesso!",

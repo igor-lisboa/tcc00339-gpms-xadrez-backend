@@ -295,7 +295,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"tipoJogo\": \"{{tipoJogoId}}\"\r\n}",
+							"raw": "{\r\n    \"tipoJogo\": \"{{tipoJogoId}}\",\r\n    \"tempoDeTurnoEmMilisegundos\": \"300000\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
