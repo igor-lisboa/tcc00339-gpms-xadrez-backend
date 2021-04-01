@@ -29,6 +29,14 @@ module.exports = class Jogo {
             [new Torre(this.ladoBranco.id), new Cavalo(this.ladoBranco.id), new Bispo(this.ladoBranco.id), new Rainha(this.ladoBranco.id), new Rei(this.ladoBranco.id), new Bispo(this.ladoBranco.id), new Cavalo(this.ladoBranco.id), new Torre(this.ladoBranco.id)],
         ];
 
+        this.turnos = [];
+
+        /**
+        * O tempo de turno em milisegundos é usado pra verificar se o tempo de turno já foi
+        * atingido, o valor padrão é referente a 5 minutos
+        */
+        this.tempoDeTurnoEmMilisegundos = tempoDeTurnoEmMilisegundos;
+
         this.defineLadoIdAtual(this.ladoBranco.id);
 
         /**
@@ -53,13 +61,6 @@ module.exports = class Jogo {
          */
         this.enPassantCasaCaptura = null;
 
-        this.turnos = [];
-         /**
-         * O tempo de turno em milisegundos é usado pra verificar se o tempo de turno já foi
-         * atingido, o valor padrão é referente a 5 minutos
-         */
-        this.tempoDeTurnoEmMilisegundos = tempoDeTurnoEmMilisegundos;
-
         this.defineTipoJogo(tipoJogoId);
     }
 
@@ -75,12 +76,42 @@ module.exports = class Jogo {
 
         // se os 2 lados tiverem logados inicia o turno
         if (this.ladoBranco.tipo != null && this.ladoPreto.tipo != null) {
-            this.turnos.push(new Turno(this.ladoIdAtual, new Date().getTime()));
+            this.incluiNovoTurno();
         }
 
         this.salva();
 
         return lado;
+    }
+
+    verificaTempoRestanteLados() {
+        this.recuperaTempoRestanteLado(this.ladoBranco.id);
+        this.recuperaTempoRestanteLado(this.ladoPreto.id);
+    }
+
+    recuperaTempoRestanteLado(ladoId) {
+        const turnosLado = this.turnos.filter(turno => turno.ladoId == ladoId);
+        let totalMilisegundosGastos = 0;
+        turnosLado.forEach((turno) => {
+            const turnoTotalMilisegundos = turno.totalMilisegundos;
+            if (turnoTotalMilisegundos == null) {
+                const agora = new Date().getTime();
+                const tempoGastoAteAgora = agora - turno.momentoInicio;
+                totalMilisegundosGastos += tempoGastoAteAgora;
+            } else {
+                totalMilisegundosGastos += turnoTotalMilisegundos;
+            }
+        });
+        let tempoRestante = this.tempoDeTurnoEmMilisegundos - totalMilisegundosGastos;
+        if (tempoRestante <= 0) {
+            // empata por tempo
+        }
+        this.recuperaLadoPeloId(ladoId).definetempoMilisegundosRestante(tempoRestante);
+    }
+
+    incluiNovoTurno() {
+        this.verificaTempoRestanteLados();
+        this.turnos.push(new Turno(this.ladoIdAtual));
     }
 
     defineTipoJogo(tipoJogoId) {
@@ -135,8 +166,12 @@ module.exports = class Jogo {
         this.enPassantCasaCaptura = jogo.enPassantCasaCaptura;
         this.ladoIdAtual = jogo.ladoIdAtual;
         this.tipoJogo = jogo.tipoJogo;
+        this.tempoDeTurnoEmMilisegundos = jogo.tempoDeTurnoEmMilisegundos;
+        this.turnos = jogo.turnos;
 
         this.cheque = this.verificaReiLadoAtualCheque();
+
+        this.verificaTempoRestanteLados();
 
         return this;
     }
@@ -356,6 +391,15 @@ module.exports = class Jogo {
     }
 
     defineLadoIdAtual(ladoId) {
+        // verifica se ja tem algum turno iniciado
+        if (this.turnos.length > 0) {
+            const indexTurnoAtual = this.turnos.length - 1;
+            // finaliza o turno atual
+            this.turnos[indexTurnoAtual].defineMomentoFim();
+            // inicia novo turno
+            this.incluiNovoTurno();
+        }
+        // define ladoIdAtual
         this.ladoIdAtual = ladoId;
     }
 

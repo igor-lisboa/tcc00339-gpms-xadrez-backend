@@ -1,17 +1,15 @@
 module.exports = class Turno {
     constructor(
-        ladoId,
-        momentoInicio,
-        momentoFim = null
+        ladoId
     ) {
         this.ladoId = ladoId;
-        this.momentoInicio = momentoInicio;
-        this.momentoFim = momentoFim;
-        this.totalMilisegundos = 0;
+        this.momentoInicio = new Date().getTime();
+        this.momentoFim = null;
+        this.totalMilisegundos = null;
     }
 
-    defineMomentoFim(momentoFim) {
-        this.momentoFim = momentoFim;
+    defineMomentoFim() {
+        this.momentoFim = new Date().getTime();
         this.totalMilisegundos = this.momentoFim - this.momentoInicio;
     }
 }
