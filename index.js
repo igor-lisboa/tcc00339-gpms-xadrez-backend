@@ -1,5 +1,7 @@
 require('dotenv').config();
 const express = require("express");
+const events = require('events');
+
 const cors = require("cors");
 const routes = require("./src/routes");
 
@@ -32,6 +34,32 @@ io.on("connection", (socket) => {
     });
 });
 
+// instancia tratador de eventos do node
+const emitter = new events();
+emitter.on("jogoFinalizado", (args) => {
+    if ("jogoId" in args) {
+        const jogoId = args.jogoId;
+        const identificadorLadoBranco = jogoId + "-0";
+        const identificadorLadoPreto = jogoId + "-1";
+
+
+        // os sockets
+        const destinoEventoLadoBranco = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == identificadorLadoBranco);
+        const destinoEventoLadoPreto = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == identificadorLadoPreto);
+
+
+        // se encontrar o socket do jogador do lado branco
+        if (destinoEventoLadoBranco != undefined) {
+            io.to(destinoEventoLadoBranco.socketId).emit('jogoFinalizado');
+        }
+
+        // se encontrar o socket do jogador do lado preto
+        if (destinoEventoLadoPreto != undefined) {
+            io.to(destinoEventoLadoPreto.socketId).emit('jogoFinalizado');
+        }
+    }
+});
+global.universalEmitter = emitter;
 
 // middleware pra registrar o socket e os jogadores conectados no request
 app.use((req, res, next) => {

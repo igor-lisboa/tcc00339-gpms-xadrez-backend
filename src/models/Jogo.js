@@ -47,13 +47,6 @@ module.exports = class Jogo {
         this.cheque = this.verificaReiLadoAtualCheque();
 
         /**
-         * O REI do lado atual nao consegue obstruir os ataques direcionados
-         * a ele e nem consegue se mover para escapar do ataque dando a vitoria
-         * para o outro lado
-         */
-        this.chequeMate = false;
-
-        /**
          * Objeto contendo a casa de captura do enPassant e a casa onde a peca se encontra
          * so eh valida por 1 jogada nessa jogada em questao o jogador adversario caso tenha
          * alguma peca q pode ir ate a casa armazenada nessa variavel ira realizar a captura
@@ -61,7 +54,19 @@ module.exports = class Jogo {
          */
         this.enPassantCasaCaptura = null;
 
+        this.finalizado = null;
+
+        this.acoesPossiveis = ["promoçãoPeãoSolicitada", "responderPropostaEmpate"];
+
         this.defineTipoJogo(tipoJogoId);
+    }
+
+    defineFinalizado(finalizacaoId) {
+        const finalizacao = db.tiposFinalizacao.find(finalizacao => finalizacao.id == finalizacaoId);
+        if (finalizacao != undefined) {
+            this.finalizado = finalizacao;
+            universalEmitter.emit("jogoFinalizado", { jogoId: this.id });
+        }
     }
 
     defineJogador(ladoId, tipo) {
@@ -105,6 +110,7 @@ module.exports = class Jogo {
         let tempoRestante = this.tempoDeTurnoEmMilisegundos - totalMilisegundosGastos;
         if (tempoRestante <= 0 && this.ladoIdAtual == ladoId) {
             // empata por Insuficiência material
+            this.defineFinalizado(3);
         }
         this.recuperaLadoPeloId(ladoId).definetempoMilisegundosRestante(tempoRestante);
     }
@@ -125,6 +131,10 @@ module.exports = class Jogo {
     }
 
     realizaJogada(ladoId, casaOrigem, casaDestino) {
+        if (this.finalizado != null) {
+            throw "Esse jogo está finalizado";
+        }
+
         if (ladoId != this.ladoIdAtual) {
             throw "Não está na sua vez de jogar, espere sua vez";
         }
@@ -162,7 +172,7 @@ module.exports = class Jogo {
         this.ladoBranco = jogo.ladoBranco;
         this.ladoPreto = jogo.ladoPreto;
         this.tabuleiro = jogo.tabuleiro;
-        this.chequeMate = jogo.chequeMate;
+        this.finalizado = jogo.finalizado;
         this.enPassantCasaCaptura = jogo.enPassantCasaCaptura;
         this.ladoIdAtual = jogo.ladoIdAtual;
         this.tipoJogo = jogo.tipoJogo;
@@ -251,6 +261,7 @@ module.exports = class Jogo {
         const reiLadoAtual = ladoAtual.pecas.rei;
 
         return this.verificaCasaCapturavelPeloAdversario(reiLadoAtual.casa, ladoAtual.id);
+        // se o rei do lado atual estiver em cheque e n tiver nenhum movimento p impedir o cheque e o rei n tiver como fugir o lado adversario ganha
     }
 
     verificaCasaCapturavelPeloAdversario(casa, ladoId) {
