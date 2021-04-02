@@ -12,6 +12,40 @@
             "cabecaPraBaixo": false
         }
     ],
+    "tiposFinalizacao": [
+        {
+            "id": 0,
+            "tipo": "Vitória: Branco"
+        },
+        {
+            "id": 1,
+            "tipo": "Vitória: Preto"
+        },
+        {
+            "id": 2,
+            "tipo": "Empate: Regra 50 movimentos"
+        },
+        {
+            "id": 3,
+            "tipo": "Empate: Insuficiência material"
+        },
+        {
+            "id": 4,
+            "tipo": "Empate: Rei afogado"
+        },
+        {
+            "id": 5,
+            "tipo": "Empate: Comum acordo"
+        },
+        {
+            "id": 6,
+            "tipo": "Empate: Regra das 3 posições"
+        },
+        {
+            "id": 7,
+            "tipo": "Desistência: Um jogador deixou a partida"
+        }
+    ],
     "ladoTipos": [
         {
             "id": 0,

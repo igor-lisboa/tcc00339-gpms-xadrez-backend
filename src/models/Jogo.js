@@ -103,8 +103,8 @@ module.exports = class Jogo {
             }
         });
         let tempoRestante = this.tempoDeTurnoEmMilisegundos - totalMilisegundosGastos;
-        if (tempoRestante <= 0) {
-            // empata por tempo
+        if (tempoRestante <= 0 && this.ladoIdAtual == ladoId) {
+            // empata por Insuficiência material
         }
         this.recuperaLadoPeloId(ladoId).definetempoMilisegundosRestante(tempoRestante);
     }
