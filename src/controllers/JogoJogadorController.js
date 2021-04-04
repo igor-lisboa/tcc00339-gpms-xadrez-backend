@@ -59,5 +59,23 @@ module.exports = {
                 success: false
             });
         }
+    },
+    removeJogador(req, res) {
+        try {
+            const { jogoId, ladoId } = req.params;
+            const jogadorDesistiu = JogoService.removeJogador(jogoId, ladoId);
+            return res.json({
+                message: "Desistência do jogador realizada com sucesso!",
+                data: jogadorDesistiu,
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
     }
 }

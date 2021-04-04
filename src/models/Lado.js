@@ -14,6 +14,10 @@ module.exports = class Lado {
         this.tempoMilisegundosRestante = tempoMilisegundosRestante;
     }
 
+    removeTipo() {
+        this.tipo = null;
+    }
+
     defineTipo(tipo) {
         if (this.tipo != null) {
             throw "Esse lado já foi escolhido";

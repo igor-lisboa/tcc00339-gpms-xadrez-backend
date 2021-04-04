@@ -78,17 +78,25 @@ module.exports = class Jogo {
 
     defineJogador(ladoId, tipo) {
         let lado = this.recuperaLadoPeloId(ladoId);
-        lado.defineTipo(tipo);
 
-        // se tipo de jogo for Humano X I.A. & tipo for Humano
-        if (this.tipoJogo.id == 1 && tipo.id == 0) {
-            // inclui jogador I.A. no lado adversario
-            this.defineJogador(this.recuperaLadoAdversarioPeloId(ladoId).id, db.ladoTipos[1]);
-        }
+        // se tiver desistindo o tipo vai pra null no metodo removeTipo()
+        if (tipo != null) {
+            lado.defineTipo(tipo);
 
-        // se os 2 lados tiverem logados inicia o turno
-        if (this.ladoBranco.tipo != null && this.ladoPreto.tipo != null) {
-            this.incluiNovoTurno();
+            // se tipo de jogo for Humano X I.A. & tipo for Humano
+            if (this.tipoJogo.id == 1 && tipo.id == 0) {
+                // inclui jogador I.A. no lado adversario
+                this.defineJogador(this.recuperaLadoAdversarioPeloId(ladoId).id, db.ladoTipos[1]);
+            }
+
+            // se os 2 lados tiverem logados inicia o turno
+            if (this.ladoBranco.tipo != null && this.ladoPreto.tipo != null) {
+                this.incluiNovoTurno();
+            }
+        } else {
+            lado.removeTipo();
+            // finalizacao por desistencia de jogador
+            this.defineFinalizado(7);
         }
 
         this.salva();

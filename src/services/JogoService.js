@@ -12,6 +12,8 @@ module.exports = {
         return this.encontra(jogoId).realizaJogada(ladoId, casaOrigem, casaDestino);
     }, insereJogador(jogoId, ladoId, tipoId) {
         return this.encontra(jogoId).defineJogador(ladoId, db.ladoTipos[tipoId]);
+    }, removeJogador(jogoId, ladoId) {
+        return this.encontra(jogoId).defineJogador(ladoId, null);
     }, listaIa() {
         const iaJogos = db.jogos.filter(jogo => [1, 2].includes(jogo.tipoJogo.id) && jogo.finalizado == null);
         let ias = [];

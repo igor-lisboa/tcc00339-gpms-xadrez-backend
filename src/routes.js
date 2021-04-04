@@ -42,6 +42,7 @@ routes.get("/jogos/:jogoId/pecas", JogoPecaController.lista);
 routes.get("/jogos/:jogoId/pecas/:casaNome/possiveis-jogadas", JogoPecaController.possiveisJogadas);
 routes.post("/jogos/:jogoId/pecas/:casaOrigem/move/:casaDestino", JogoPecaController.realizaJogada);
 routes.post("/jogos/:jogoId/jogadores", JogoJogadorController.insereJogador);
+routes.delete("/jogos/:jogoId/jogadores/:ladoId", JogoJogadorController.removeJogador);
 routes.get("/tabela-equivalencia", TabelaEquivalenciaController.lista);
 routes.get("/tipos-de-jogo", TiposJogoController.lista);
 routes.get("/lados-do-jogo", LadosJogoController.lista);
