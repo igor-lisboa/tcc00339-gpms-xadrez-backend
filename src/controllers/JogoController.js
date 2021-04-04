@@ -39,6 +39,9 @@ module.exports = {
             const { tipoJogo, tempoDeTurnoEmMilisegundos } = req.body;
             const jogo = JogoService.cria(tipoJogo, tempoDeTurnoEmMilisegundos);
             req.io.emit('jogoCriado');
+            if (req.verbose) {
+                console.log("Enviando mensagem de jogoCriado para todos os sockets conectados...");
+            }
             return res.json({
                 message: "Jogo incluído com sucesso!",
                 data: jogo,
@@ -139,6 +142,9 @@ module.exports = {
                 // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
                 if (destinoEvento != undefined) {
                     req.io.to(destinoEvento.socketId).emit('jogadaRealizada');
+                    if (req.verbose) {
+                        console.log("Enviando mensagem de jogadaRealizada para " + destinoEvento.identificador + "...");
+                    }
                 }
             });
 

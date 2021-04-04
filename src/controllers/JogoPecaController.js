@@ -61,6 +61,9 @@ module.exports = {
             // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
             if (destinoEvento != undefined) {
                 req.io.to(destinoEvento.socketId).emit('jogadaRealizada');
+                if (req.verbose) {
+                    console.log("Enviando mensagem de jogadaRealizada para " + destinoEvento.identificador + "...");
+                }
             }
 
             return res.json({
