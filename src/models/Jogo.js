@@ -10,6 +10,7 @@ const db = require("../database.json");
 const PossivelJogada = require("./PossivelJogada");
 const MovimentoRealizado = require("./MovimentoRealizado");
 const TipoJogoService = require("../services/TipoJogoService");
+const AcaoSolicitada = require("./AcaoSolicitada");
 const Turno = require("./Turno");
 
 module.exports = class Jogo {
@@ -44,7 +45,7 @@ module.exports = class Jogo {
          * possui modos de se defender obstruindo o ataque em questao
          * com outra peca ou se movendo
          */
-        this.cheque = this.verificaReiLadoAtualCheque();
+        this.chequeLadoAtual = this.verificaReiLadoAtualCheque();
 
         /**
          * Objeto contendo a casa de captura do enPassant e a casa onde a peca se encontra
@@ -61,6 +62,10 @@ module.exports = class Jogo {
         this.acoesSolicitadas = [];
 
         this.defineTipoJogo(tipoJogoId);
+    }
+
+    defineNovaAcaoSolicitada(acao, ladoId) {
+        this.acoesSolicitadas.push(new AcaoSolicitada(acao, ladoId));
     }
 
     defineFinalizado(finalizacaoId) {
@@ -157,7 +162,7 @@ module.exports = class Jogo {
         // verifica se a jogada colocou o rei do adversario em cheque
         const reiEmCheque = this.verificaReiLadoAtualCheque();
 
-        this.cheque = reiEmCheque;
+        this.chequeLadoAtual = reiEmCheque;
 
         this.salva();
 
@@ -182,7 +187,7 @@ module.exports = class Jogo {
         this.turnos = jogo.turnos;
         this.acoesSolicitadas = jogo.acoesSolicitadas;
 
-        this.cheque = this.verificaReiLadoAtualCheque();
+        this.chequeLadoAtual = this.verificaReiLadoAtualCheque();
 
         this.verificaTempoRestanteLados();
 
