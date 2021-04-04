@@ -67,7 +67,7 @@ module.exports = class Jogo {
         const finalizacao = db.tiposFinalizacao.find(finalizacao => finalizacao.id == finalizacaoId);
         if (finalizacao != undefined) {
             this.finalizado = finalizacao;
-            universalEmitter.emit("jogoFinalizado", { jogoId: this.id });
+            this.salva();
         }
     }
 
@@ -200,6 +200,9 @@ module.exports = class Jogo {
             this.id = ultimoIndice;
         }
         db.jogos[this.id] = this;
+        if (this.finalizado != null) {
+            universalEmitter.emit("jogoFinalizado", { jogoId: this.id });
+        }
     }
 
     cria() {
