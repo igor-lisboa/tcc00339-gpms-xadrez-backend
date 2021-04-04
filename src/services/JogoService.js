@@ -13,7 +13,7 @@ module.exports = {
     }, insereJogador(jogoId, ladoId, tipoId) {
         return this.encontra(jogoId).defineJogador(ladoId, db.ladoTipos[tipoId]);
     }, listaIa() {
-        const iaJogos = db.jogos.filter(jogo => [1, 2].includes(jogo.tipoJogo.id));
+        const iaJogos = db.jogos.filter(jogo => [1, 2].includes(jogo.tipoJogo.id) && jogo.finalizado == null);
         let ias = [];
         iaJogos.forEach((iaJogo) => {
             let iaElement = {};

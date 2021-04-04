@@ -56,7 +56,9 @@ module.exports = class Jogo {
 
         this.finalizado = null;
 
-        this.acoesPossiveis = ["promoçãoPeãoSolicitada", "responderPropostaEmpate"];
+        this.acoesPossiveis = ["promocaoPeao", "responderPropostaEmpate"];
+
+        this.acoesSolicitadas = [];
 
         this.defineTipoJogo(tipoJogoId);
     }
@@ -178,6 +180,7 @@ module.exports = class Jogo {
         this.tipoJogo = jogo.tipoJogo;
         this.tempoDeTurnoEmMilisegundos = jogo.tempoDeTurnoEmMilisegundos;
         this.turnos = jogo.turnos;
+        this.acoesSolicitadas = jogo.acoesSolicitadas;
 
         this.cheque = this.verificaReiLadoAtualCheque();
 
