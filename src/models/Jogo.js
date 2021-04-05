@@ -10,9 +10,11 @@ const db = require("../database.json");
 const PossivelJogada = require("./PossivelJogada");
 const MovimentoRealizado = require("./MovimentoRealizado");
 const TipoJogoService = require("../services/TipoJogoService");
+const AcaoSolicitada = require("./AcaoSolicitada");
+const Turno = require("./Turno");
 
 module.exports = class Jogo {
-    constructor(tipoJogoId = 0) {
+    constructor(tipoJogoId = 0, tempoDeTurnoEmMilisegundos = 300000) {
         this.id = null;
 
         this.ladoBranco = new Lado(db.lados[0]);
@@ -28,6 +30,14 @@ module.exports = class Jogo {
             [new Torre(this.ladoBranco.id), new Cavalo(this.ladoBranco.id), new Bispo(this.ladoBranco.id), new Rainha(this.ladoBranco.id), new Rei(this.ladoBranco.id), new Bispo(this.ladoBranco.id), new Cavalo(this.ladoBranco.id), new Torre(this.ladoBranco.id)],
         ];
 
+        this.turnos = [];
+
+        /**
+        * O tempo de turno em milisegundos é usado pra verificar se o tempo de turno já foi
+        * atingido, o valor padrão é referente a 5 minutos
+        */
+        this.tempoDeTurnoEmMilisegundos = tempoDeTurnoEmMilisegundos;
+
         this.defineLadoIdAtual(this.ladoBranco.id);
 
         /**
@@ -35,14 +45,7 @@ module.exports = class Jogo {
          * possui modos de se defender obstruindo o ataque em questao
          * com outra peca ou se movendo
          */
-        this.cheque = this.verificaReiLadoAtualCheque();
-
-        /**
-         * O REI do lado atual nao consegue obstruir os ataques direcionados
-         * a ele e nem consegue se mover para escapar do ataque dando a vitoria
-         * para o outro lado
-         */
-        this.chequeMate = false;
+        this.chequeLadoAtual = this.verificaReiLadoAtualCheque();
 
         /**
          * Objeto contendo a casa de captura do enPassant e a casa onde a peca se encontra
@@ -52,22 +55,84 @@ module.exports = class Jogo {
          */
         this.enPassantCasaCaptura = null;
 
+        this.finalizado = null;
+
+        this.acoesPossiveis = ["promocaoPeao", "responderPropostaEmpate"];
+
+        this.acoesSolicitadas = [];
+
         this.defineTipoJogo(tipoJogoId);
+    }
+
+    defineNovaAcaoSolicitada(acao, ladoId) {
+        this.acoesSolicitadas.push(new AcaoSolicitada(acao, ladoId));
+    }
+
+    defineFinalizado(finalizacaoId) {
+        const finalizacao = db.tiposFinalizacao.find(finalizacao => finalizacao.id == finalizacaoId);
+        if (finalizacao != undefined) {
+            this.finalizado = finalizacao;
+            this.salva();
+        }
     }
 
     defineJogador(ladoId, tipo) {
         let lado = this.recuperaLadoPeloId(ladoId);
-        lado.defineTipo(tipo);
 
-        // se tipo de jogo for Humano X I.A. & tipo for Humano
-        if (this.tipoJogo.id == 1 && tipo.id == 0) {
-            // inclui jogador I.A. no lado adversario
-            this.defineJogador(this.recuperaLadoAdversarioPeloId(ladoId).id, db.ladoTipos[1]);
+        // se tiver desistindo o tipo vai pra null no metodo removeTipo()
+        if (tipo != null) {
+            lado.defineTipo(tipo);
+
+            // se tipo de jogo for Humano X I.A. & tipo for Humano
+            if (this.tipoJogo.id == 1 && tipo.id == 0) {
+                // inclui jogador I.A. no lado adversario
+                this.defineJogador(this.recuperaLadoAdversarioPeloId(ladoId).id, db.ladoTipos[1]);
+            }
+
+            // se os 2 lados tiverem logados inicia o turno
+            if (this.ladoBranco.tipo != null && this.ladoPreto.tipo != null) {
+                this.incluiNovoTurno();
+            }
+        } else {
+            lado.removeTipo();
+            // finalizacao por desistencia de jogador
+            this.defineFinalizado(7);
         }
 
         this.salva();
 
         return lado;
+    }
+
+    verificaTempoRestanteLados() {
+        this.recuperaTempoRestanteLado(this.ladoBranco.id);
+        this.recuperaTempoRestanteLado(this.ladoPreto.id);
+    }
+
+    recuperaTempoRestanteLado(ladoId) {
+        const turnosLado = this.turnos.filter(turno => turno.ladoId == ladoId);
+        let totalMilisegundosGastos = 0;
+        turnosLado.forEach((turno) => {
+            const turnoTotalMilisegundos = turno.totalMilisegundos;
+            if (turnoTotalMilisegundos == null) {
+                const agora = new Date().getTime();
+                const tempoGastoAteAgora = agora - turno.momentoInicio;
+                totalMilisegundosGastos += tempoGastoAteAgora;
+            } else {
+                totalMilisegundosGastos += turnoTotalMilisegundos;
+            }
+        });
+        let tempoRestante = this.tempoDeTurnoEmMilisegundos - totalMilisegundosGastos;
+        if (tempoRestante <= 0 && this.ladoIdAtual == ladoId) {
+            // empata por Insuficiência material
+            this.defineFinalizado(3);
+        }
+        this.recuperaLadoPeloId(ladoId).definetempoMilisegundosRestante(tempoRestante);
+    }
+
+    incluiNovoTurno() {
+        this.verificaTempoRestanteLados();
+        this.turnos.push(new Turno(this.ladoIdAtual));
     }
 
     defineTipoJogo(tipoJogoId) {
@@ -81,12 +146,20 @@ module.exports = class Jogo {
     }
 
     realizaJogada(ladoId, casaOrigem, casaDestino) {
+        if (this.finalizado != null) {
+            throw "Esse jogo está finalizado";
+        }
+
         if (ladoId != this.ladoIdAtual) {
             throw "Não está na sua vez de jogar, espere sua vez";
         }
 
         if (this.recuperaLadoPeloId(ladoId).tipo == null) {
             throw "Para realizar essa jogada, faça o login adequadamente no lado desejado";
+        }
+
+        if (this.recuperaLadoAdversarioPeloId(ladoId).tipo == null) {
+            throw "Aguarde outro jogador se logar adequadamente no lado adversário";
         }
 
         const jogadaEscolhida = this.move(casaOrigem, casaDestino, ladoId);
@@ -97,7 +170,7 @@ module.exports = class Jogo {
         // verifica se a jogada colocou o rei do adversario em cheque
         const reiEmCheque = this.verificaReiLadoAtualCheque();
 
-        this.cheque = reiEmCheque;
+        this.chequeLadoAtual = reiEmCheque;
 
         this.salva();
 
@@ -114,12 +187,17 @@ module.exports = class Jogo {
         this.ladoBranco = jogo.ladoBranco;
         this.ladoPreto = jogo.ladoPreto;
         this.tabuleiro = jogo.tabuleiro;
-        this.chequeMate = jogo.chequeMate;
+        this.finalizado = jogo.finalizado;
         this.enPassantCasaCaptura = jogo.enPassantCasaCaptura;
         this.ladoIdAtual = jogo.ladoIdAtual;
         this.tipoJogo = jogo.tipoJogo;
+        this.tempoDeTurnoEmMilisegundos = jogo.tempoDeTurnoEmMilisegundos;
+        this.turnos = jogo.turnos;
+        this.acoesSolicitadas = jogo.acoesSolicitadas;
 
-        this.cheque = this.verificaReiLadoAtualCheque();
+        this.chequeLadoAtual = this.verificaReiLadoAtualCheque();
+
+        this.verificaTempoRestanteLados();
 
         return this;
     }
@@ -135,6 +213,9 @@ module.exports = class Jogo {
             this.id = ultimoIndice;
         }
         db.jogos[this.id] = this;
+        if (this.finalizado != null) {
+            universalEmitter.emit("jogoFinalizado", { jogoId: this.id });
+        }
     }
 
     cria() {
@@ -199,6 +280,7 @@ module.exports = class Jogo {
         const reiLadoAtual = ladoAtual.pecas.rei;
 
         return this.verificaCasaCapturavelPeloAdversario(reiLadoAtual.casa, ladoAtual.id);
+        // se o rei do lado atual estiver em cheque e n tiver nenhum movimento p impedir o cheque e o rei n tiver como fugir o lado adversario ganha
     }
 
     verificaCasaCapturavelPeloAdversario(casa, ladoId) {
@@ -339,6 +421,15 @@ module.exports = class Jogo {
     }
 
     defineLadoIdAtual(ladoId) {
+        // verifica se ja tem algum turno iniciado
+        if (this.turnos.length > 0) {
+            const indexTurnoAtual = this.turnos.length - 1;
+            // finaliza o turno atual
+            this.turnos[indexTurnoAtual].defineMomentoFim();
+            // inicia novo turno
+            this.incluiNovoTurno();
+        }
+        // define ladoIdAtual
         this.ladoIdAtual = ladoId;
     }
 

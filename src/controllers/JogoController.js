@@ -36,9 +36,12 @@ module.exports = {
     },
     cria(req, res) {
         try {
-            const { tipoJogo } = req.body;
-            const jogo = JogoService.cria(tipoJogo);
+            const { tipoJogo, tempoDeTurnoEmMilisegundos } = req.body;
+            const jogo = JogoService.cria(tipoJogo, tempoDeTurnoEmMilisegundos);
             req.io.emit('jogoCriado');
+            if (req.verbose) {
+                console.log("Enviando mensagem de jogoCriado para todos os sockets conectados...");
+            }
             return res.json({
                 message: "Jogo incluído com sucesso!",
                 data: jogo,
@@ -102,6 +105,22 @@ module.exports = {
                 success: false
             });
         }
+    }, forcaIa(req, res) {
+        try {
+            universalEmitter.emit("forcaIa");
+            return res.json({
+                message: "Tentativa de forçar a I.A. a executar executada com sucesso!",
+                data: null,
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
     }, listaIa(req, res) {
         try {
             return res.json({
@@ -123,12 +142,12 @@ module.exports = {
             const jogadasExecutadasRetorno = JogoService.executaJogadas(jogadas);
 
             // para cada jogada executada avisa o adversario caso ele esteja conectado
-            jogadasExecutadasRetorno.jogadasExecutadas.forEach((jogadaExecutada) => {
+            jogadasExecutadasRetorno.jogadasExecutadas.forEach((jogadaRealizada) => {
                 let jogadorIdentificador = undefined;
 
                 // define parametro q sera usado p buscar socket do adversario
-                if (jogadaExecutada.ladoAdversario.tipoId == 0) {
-                    jogadorIdentificador = jogadaExecutada.jogoId + "-" + jogadaExecutada.ladoAdversario.ladoId;
+                if (jogadaRealizada.ladoAdversario.tipoId == 0) {
+                    jogadorIdentificador = jogadaRealizada.jogoId + "-" + jogadaRealizada.ladoAdversario.ladoId;
                 } else {
                     jogadorIdentificador = "I.A.";
                 }
@@ -138,9 +157,16 @@ module.exports = {
 
                 // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
                 if (destinoEvento != undefined) {
-                    req.io.to(destinoEvento.socketId).emit('jogadaRealizada');
+                    req.io.to(destinoEvento.socketId).emit('jogadaRealizada', jogadaRealizada.jogada);
+                    if (req.verbose) {
+                        console.log("Enviando mensagem de jogadaRealizada para " + destinoEvento.identificador + "...");
+                    }
                 }
             });
+
+            if (jogadasExecutadasRetorno.jogadasErros.length > 0) {
+                universalEmitter.emit("forcaIa");
+            }
 
             // retorna json de sucesso
             return res.json({

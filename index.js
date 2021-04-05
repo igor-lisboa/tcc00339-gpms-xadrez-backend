@@ -1,5 +1,7 @@
 require('dotenv').config();
 const express = require("express");
+const events = require('events');
+
 const cors = require("cors");
 const routes = require("./src/routes");
 
@@ -32,6 +34,47 @@ io.on("connection", (socket) => {
     });
 });
 
+// instancia tratador de eventos do node
+const emitter = new events();
+emitter.on("jogoFinalizado", (args) => {
+    if ("jogoId" in args) {
+        const jogoId = args.jogoId;
+        const identificadorLadoBranco = jogoId + "-0";
+        const identificadorLadoPreto = jogoId + "-1";
+
+
+        // os sockets
+        const destinoEventoLadoBranco = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == identificadorLadoBranco);
+        const destinoEventoLadoPreto = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == identificadorLadoPreto);
+
+
+        // se encontrar o socket do jogador do lado branco
+        if (destinoEventoLadoBranco != undefined) {
+            if (verbose) {
+                console.log("Enviando mensgaem de jogoFinalizado para o jogador " + destinoEventoLadoBranco.identificador + "...");
+            }
+            io.to(destinoEventoLadoBranco.socketId).emit('jogoFinalizado');
+        }
+
+        // se encontrar o socket do jogador do lado preto
+        if (destinoEventoLadoPreto != undefined) {
+            if (verbose) {
+                console.log("Enviando mensgaem de jogoFinalizado para o jogador " + destinoEventoLadoPreto.identificador + "...");
+            }
+            io.to(destinoEventoLadoPreto.socketId).emit('jogoFinalizado');
+        }
+    }
+});
+emitter.on("forcaIa", () => {
+    const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == "I.A.");
+    if (destinoEvento != undefined) {
+        io.to(destinoEvento.socketId).emit('forcaIa');
+        if (verbose) {
+            console.log("Enviando mensagem de forcaIa para " + destinoEvento.identificador + "...");
+        }
+    }
+});
+global.universalEmitter = emitter;
 
 // middleware pra registrar o socket e os jogadores conectados no request
 app.use((req, res, next) => {

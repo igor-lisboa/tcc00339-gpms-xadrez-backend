@@ -6,14 +6,16 @@ module.exports = {
         return db.jogos;
     }, encontra(id) {
         return new Jogo().encontra(id);
-    }, cria(tipoJogoId) {
-        return new Jogo(tipoJogoId).cria();
+    }, cria(tipoJogoId, tempoDeTurnoEmMilisegundos = 300000) {
+        return new Jogo(tipoJogoId, tempoDeTurnoEmMilisegundos).cria();
     }, realizaJogada(jogoId, ladoId, casaOrigem, casaDestino) {
         return this.encontra(jogoId).realizaJogada(ladoId, casaOrigem, casaDestino);
     }, insereJogador(jogoId, ladoId, tipoId) {
         return this.encontra(jogoId).defineJogador(ladoId, db.ladoTipos[tipoId]);
+    }, removeJogador(jogoId, ladoId) {
+        return this.encontra(jogoId).defineJogador(ladoId, null);
     }, listaIa() {
-        const iaJogos = db.jogos.filter(jogo => [1, 2].includes(jogo.tipoJogo.id));
+        const iaJogos = db.jogos.filter(jogo => [1, 2].includes(jogo.tipoJogo.id) && jogo.finalizado == null);
         let ias = [];
         iaJogos.forEach((iaJogo) => {
             let iaElement = {};

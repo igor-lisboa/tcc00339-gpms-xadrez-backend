@@ -25,6 +25,9 @@ module.exports = {
             // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
             if (destinoEvento != undefined) {
                 req.io.to(destinoEvento.socketId).emit('adversarioEntrou');
+                if (req.verbose) {
+                    console.log("Enviando mensagem de adversarioEntrou para " + destinoEvento.identificador + "...");
+                }
             }
 
             return res.json({
@@ -46,6 +49,24 @@ module.exports = {
             return res.json({
                 message: "Lados que estão sem jogador retornados com sucesso!",
                 data: JogoService.recuperaLadosSemJogador(jogoId),
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
+    },
+    removeJogador(req, res) {
+        try {
+            const { jogoId, ladoId } = req.params;
+            const jogadorDesistiu = JogoService.removeJogador(jogoId, ladoId);
+            return res.json({
+                message: "Desistência do jogador realizada com sucesso!",
+                data: jogadorDesistiu,
                 success: true
             });
         } catch (e) {

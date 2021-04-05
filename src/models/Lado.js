@@ -6,6 +6,16 @@ module.exports = class Lado {
         this.movimentosRealizados = [];
 
         this.tipo = null;
+
+        this.tempoMilisegundosRestante = null;
+    }
+
+    definetempoMilisegundosRestante(tempoMilisegundosRestante) {
+        this.tempoMilisegundosRestante = tempoMilisegundosRestante;
+    }
+
+    removeTipo() {
+        this.tipo = null;
     }
 
     defineTipo(tipo) {
