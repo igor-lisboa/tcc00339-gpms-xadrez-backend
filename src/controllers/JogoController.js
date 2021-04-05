@@ -107,21 +107,10 @@ module.exports = {
         }
     }, forcaIa(req, res) {
         try {
-            const destinoEvento = req.jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == "I.A.");
-
-            // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
-            if (destinoEvento != undefined) {
-                req.io.to(destinoEvento.socketId).emit('forcaIa');
-                if (req.verbose) {
-                    console.log("Enviando mensagem de forcaIa para " + destinoEvento.identificador + "...");
-                }
-            } else {
-                throw "A I.A. não foi encontrada na lista de sockets conectados";
-            }
-
+            universalEmitter.emit("forcaIa");
             return res.json({
-                message: "Mensagem que força I.A. a executar enviada com sucesso!",
-                data: destinoEvento,
+                message: "Tentativa de forçar a I.A. a executar executada com sucesso!",
+                data: null,
                 success: true
             });
         } catch (e) {
@@ -174,6 +163,10 @@ module.exports = {
                     }
                 }
             });
+
+            if (jogadasExecutadasRetorno.jogadasErros.length > 0) {
+                universalEmitter.emit("forcaIa");
+            }
 
             // retorna json de sucesso
             return res.json({

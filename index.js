@@ -65,6 +65,15 @@ emitter.on("jogoFinalizado", (args) => {
         }
     }
 });
+emitter.on("forcaIa", () => {
+    const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == "I.A.");
+    if (destinoEvento != undefined) {
+        io.to(destinoEvento.socketId).emit('forcaIa');
+        if (verbose) {
+            console.log("Enviando mensagem de forcaIa para " + destinoEvento.identificador + "...");
+        }
+    }
+});
 global.universalEmitter = emitter;
 
 // middleware pra registrar o socket e os jogadores conectados no request
