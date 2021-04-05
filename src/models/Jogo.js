@@ -573,22 +573,20 @@ module.exports = class Jogo {
                     casaRecuperada = null;
                 }
 
-                if (casaRecuperada == null) {
-                    return;
-                }
+                if (casaRecuperada != null) {
+                    const itemCasa = this.recuperaPecaDaCasa(casaRecuperada);
 
-                const itemCasa = this.recuperaPecaDaCasa(casaRecuperada);
-
-                // casa vazia
-                if (itemCasa == null) {
-                    // se o movimento n for apenas de captura, inclui possivel jogada
-                    if (!movimentoDestino.somenteCaptura) {
-                        movimentosPossiveis.push(new PossivelJogada(casaRecuperada, false, movimentoDestino.movimentoEspecialNome));
-                    }
-                } else {
-                    // so adiciona possivel jogada se a peca for do adversario
-                    if (itemCasa.ladoId != peca.ladoId) {
-                        movimentosPossiveis.push(new PossivelJogada(casaRecuperada, true, movimentoDestino.movimentoEspecialNome));
+                    // casa vazia
+                    if (itemCasa == null) {
+                        // se o movimento n for apenas de captura, inclui possivel jogada
+                        if (!movimentoDestino.somenteCaptura) {
+                            movimentosPossiveis.push(new PossivelJogada(casaRecuperada, false, movimentoDestino.movimentoEspecialNome));
+                        }
+                    } else {
+                        // so adiciona possivel jogada se a peca for do adversario
+                        if (itemCasa.ladoId != peca.ladoId) {
+                            movimentosPossiveis.push(new PossivelJogada(casaRecuperada, true, movimentoDestino.movimentoEspecialNome));
+                        }
                     }
                 }
             });
