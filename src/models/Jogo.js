@@ -562,7 +562,7 @@ module.exports = class Jogo {
         // recupera movimentos especiais da peca
         const movimentosEspeciais = peca.movimentosEspeciais(casa.linha, casa.coluna);
 
-        // se o peao ja n tiver movimento possivel eh pq tem algo obstruindo logo ele n pode ter o enpassant
+        // se o peao n tiver movimento possivel eh pq tem algo obstruindo logo ele n pode ter o enpassant
         if (!(peca.tipo == "Peão" && movimentosPossiveis.length == 0)) {
             // faz veirificacoes p cada movimento especial
             movimentosEspeciais.forEach((movimentoDestino) => {
@@ -584,7 +584,7 @@ module.exports = class Jogo {
                         }
                     } else {
                         // so adiciona possivel jogada se a peca for do adversario
-                        if (itemCasa.ladoId != peca.ladoId) {
+                        if (itemCasa.ladoId != peca.ladoId && movimentoDestino.permiteCaptura) {
                             movimentosPossiveis.push(new PossivelJogada(casaRecuperada, true, movimentoDestino.movimentoEspecialNome));
                         }
                     }
