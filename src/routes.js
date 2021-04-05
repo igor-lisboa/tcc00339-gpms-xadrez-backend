@@ -48,5 +48,6 @@ routes.get("/tipos-de-jogo", TiposJogoController.lista);
 routes.get("/lados-do-jogo", LadosJogoController.lista);
 routes.get("/tipos-de-jogador", TiposJogadorController.lista);
 routes.get("/tipos-de-peca", TiposPecaController.lista);
+routes.get("/ia", JogoController.forcaIa);
 
 module.exports = routes;

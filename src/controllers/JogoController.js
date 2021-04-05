@@ -105,6 +105,33 @@ module.exports = {
                 success: false
             });
         }
+    }, forcaIa(req, res) {
+        try {
+            const destinoEvento = req.jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == "I.A.");
+
+            // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
+            if (destinoEvento != undefined) {
+                req.io.to(destinoEvento.socketId).emit('forcaIa');
+                if (req.verbose) {
+                    console.log("Enviando mensagem de forcaIa para " + destinoEvento.identificador + "...");
+                }
+            } else {
+                throw "A I.A. não foi encontrada na lista de sockets conectados";
+            }
+
+            return res.json({
+                message: "Mensagem que força I.A. a executar enviada com sucesso!",
+                data: destinoEvento,
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
     }, listaIa(req, res) {
         try {
             return res.json({
@@ -126,12 +153,12 @@ module.exports = {
             const jogadasExecutadasRetorno = JogoService.executaJogadas(jogadas);
 
             // para cada jogada executada avisa o adversario caso ele esteja conectado
-            jogadasExecutadasRetorno.jogadasExecutadas.forEach((jogadaExecutada) => {
+            jogadasExecutadasRetorno.jogadasExecutadas.forEach((jogadaRealizada) => {
                 let jogadorIdentificador = undefined;
 
                 // define parametro q sera usado p buscar socket do adversario
-                if (jogadaExecutada.ladoAdversario.tipoId == 0) {
-                    jogadorIdentificador = jogadaExecutada.jogoId + "-" + jogadaExecutada.ladoAdversario.ladoId;
+                if (jogadaRealizada.ladoAdversario.tipoId == 0) {
+                    jogadorIdentificador = jogadaRealizada.jogoId + "-" + jogadaRealizada.ladoAdversario.ladoId;
                 } else {
                     jogadorIdentificador = "I.A.";
                 }
@@ -141,7 +168,7 @@ module.exports = {
 
                 // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
                 if (destinoEvento != undefined) {
-                    req.io.to(destinoEvento.socketId).emit('jogadaRealizada', jogadaExecutada);
+                    req.io.to(destinoEvento.socketId).emit('jogadaRealizada', jogadaRealizada.jogada);
                     if (req.verbose) {
                         console.log("Enviando mensagem de jogadaRealizada para " + destinoEvento.identificador + "...");
                     }

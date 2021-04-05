@@ -38,6 +38,13 @@ socket.on('jogadaRealizada', function () {
     ia();
 });
 
+socket.on('forcaIa', function () {
+    if (verbose) {
+        console.log('Força I.A. a rodar...');
+    }
+    ia();
+});
+
 const escolhePossivelJogada = (possiveisJogadas) => {
     let novasPossibilidadesJogadas = [];
 

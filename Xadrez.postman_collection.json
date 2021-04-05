@@ -445,6 +445,28 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "I.A.",
+			"item": [
+				{
+					"name": "Força I.A. a Executar",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API_XADREZ_URL}}/ia",
+							"host": [
+								"{{API_XADREZ_URL}}"
+							],
+							"path": [
+								"ia"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"event": [
