@@ -51,7 +51,7 @@ emitter.on("jogoFinalizado", (args) => {
         // se encontrar o socket do jogador do lado branco
         if (destinoEventoLadoBranco != undefined) {
             if (verbose) {
-                console.log("Enviando mensgaem de jogoFinalizado para o jogador " + destinoEventoLadoBranco.identificador + "...");
+                console.log("Enviando mensagem de jogoFinalizado para o jogador " + destinoEventoLadoBranco.identificador + "...");
             }
             io.to(destinoEventoLadoBranco.socketId).emit('jogoFinalizado');
         }
@@ -59,7 +59,7 @@ emitter.on("jogoFinalizado", (args) => {
         // se encontrar o socket do jogador do lado preto
         if (destinoEventoLadoPreto != undefined) {
             if (verbose) {
-                console.log("Enviando mensgaem de jogoFinalizado para o jogador " + destinoEventoLadoPreto.identificador + "...");
+                console.log("Enviando mensagem de jogoFinalizado para o jogador " + destinoEventoLadoPreto.identificador + "...");
             }
             io.to(destinoEventoLadoPreto.socketId).emit('jogoFinalizado');
         }

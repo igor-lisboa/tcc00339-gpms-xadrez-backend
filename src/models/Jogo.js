@@ -233,6 +233,12 @@ module.exports = class Jogo {
 
         let pecaCapturada = casaDestino;
 
+        const tabuleiroAntesAlteracoes = this.tabuleiro;
+
+        let movimentosEspeciaisExecutados = [];
+
+        const identificadorMovimento = this.turnos.length;
+
         try {
             // realiza movimento
             this.tabuleiro[casaDe.linha][casaDe.coluna] = null;
@@ -248,8 +254,44 @@ module.exports = class Jogo {
                 }
             }
 
-            if (jogadaEscolhida.nomeJogada == "ROQUES") {
-                // aqui vai validar o movimento dos roques
+            if (jogadaEscolhida.nomeJogada == "Roque Menor") {
+                let casaTorreOrigem = "H1";
+                let casaTorreDestino = "F1";
+                if (this.ladoIdAtual != 0) {
+                    casaTorreOrigem = "H8";
+                    casaTorreDestino = "F8";
+                }
+                const torre = this.recuperaPecaDaCasa(casaTorreOrigem);
+                if (torre != null && torre.tipo == "Torre" && torre.movimentosRealizados.length == 0) {
+                    const destinoTorre = this.recuperaCasaLinhaColuna(casaTorreDestino);
+                    const origemTorre = this.recuperaCasaLinhaColuna(casaTorreOrigem);
+
+                    this.tabuleiro[origemTorre.linha][origemTorre.coluna] = null;
+                    this.tabuleiro[destinoTorre.linha][destinoTorre.coluna] = torre;
+
+                    const movimentoEspecialExecutado = new MovimentoRealizado(identificadorMovimento, origemTorre, destinoTorre, null, "Roque Menor", []);
+                    movimentosEspeciaisExecutados.push(movimentoEspecialExecutado);
+                    torre.incluiMovimentoRealizado(movimentoEspecialExecutado);
+                }
+            } else if (jogadaEscolhida.nomeJogada == "Roque Maior") {
+                let casaTorreOrigem = "A1";
+                let casaTorreDestino = "D1";
+                if (this.ladoIdAtual != 0) {
+                    casaTorreOrigem = "A8";
+                    casaTorreDestino = "D8";
+                }
+                const torre = this.recuperaPecaDaCasa(casaTorreOrigem);
+                if (torre != null && torre.tipo == "Torre" && torre.movimentosRealizados.length == 0) {
+                    const destinoTorre = this.recuperaCasaLinhaColuna(casaTorreDestino);
+                    const origemTorre = this.recuperaCasaLinhaColuna(casaTorreOrigem);
+
+                    this.tabuleiro[origemTorre.linha][origemTorre.coluna] = null;
+                    this.tabuleiro[destinoTorre.linha][destinoTorre.coluna] = torre;
+
+                    const movimentoEspecialExecutado = new MovimentoRealizado(identificadorMovimento, origemTorre, destinoTorre, null, "Roque Maior", []);
+                    movimentosEspeciaisExecutados.push(movimentoEspecialExecutado);
+                    torre.incluiMovimentoRealizado(movimentoEspecialExecutado);
+                }
             }
 
             // verifica se a jogada colocou o rei em cheque
@@ -270,7 +312,7 @@ module.exports = class Jogo {
                 };
             }
 
-            const novoMovimento = new MovimentoRealizado(casaDe, casaPara, pecaCapturada, jogadaEscolhida.nomeJogada);
+            const novoMovimento = new MovimentoRealizado(identificadorMovimento, casaDe, casaPara, pecaCapturada, jogadaEscolhida.nomeJogada, movimentosEspeciaisExecutados);
 
 
             this.recuperaPecaDaCasa(casaPara).incluiMovimentoRealizado(novoMovimento);
@@ -279,15 +321,8 @@ module.exports = class Jogo {
 
             return novoMovimento;
         } catch (e) {
-            // desfaz movimento
-            this.tabuleiro[casaDe.linha][casaDe.coluna] = peca;
-            this.tabuleiro[casaPara.linha][casaPara.coluna] = casaDestino;
-
-            // desfaz alteracao do en passant
-            if (this.enPassantCasaCaptura != null) {
-                this.tabuleiro[this.enPassantCasaCaptura.casaPeao.linha][this.enPassantCasaCaptura.casaPeao.coluna] = pecaCapturada;
-            }
-
+            // desfaz alteracoes
+            this.tabuleiro = tabuleiroAntesAlteracoes;
             throw e;
         }
     }
@@ -666,7 +701,7 @@ module.exports = class Jogo {
                 }
                 //Roque Maior (brancas)
                 //Verifica se as casas no caminho estão vazias
-                if (this.recuperaPecaDaCasa("D1") == null && this.recuperaPecaDaCasa("C1") == null) {
+                if (this.recuperaPecaDaCasa("D1") == null && this.recuperaPecaDaCasa("C1") == null && this.recuperaPecaDaCasa("B1") == null) {
                     //Verifica se a Torre está na sua casa de origem
                     const torre = this.recuperaPecaDaCasa("A1");
                     if (torre != null) {
@@ -693,7 +728,7 @@ module.exports = class Jogo {
                 }
                 //Roque Maior (Pretas)
                 //Verifica se as casas no caminho estão vazias
-                if (this.recuperaPecaDaCasa("D8") == null && this.recuperaPecaDaCasa("C8") == null) {
+                if (this.recuperaPecaDaCasa("D8") == null && this.recuperaPecaDaCasa("C8") == null && this.recuperaPecaDaCasa("B8") == null) {
                     //Verifica se a Torre está na sua casa de origem
                     const torre = this.recuperaPecaDaCasa("A8");
                     if (torre != null) {
