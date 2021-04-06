@@ -490,16 +490,22 @@ module.exports = class Jogo {
     }
 
     defineLadoIdAtual(ladoId) {
+        // define ladoIdAtual
+        this.ladoIdAtual = ladoId;
         // verifica se ja tem algum turno iniciado
         if (this.turnos.length > 0) {
             const indexTurnoAtual = this.turnos.length - 1;
-            // finaliza o turno atual
-            this.turnos[indexTurnoAtual].defineMomentoFim();
-            // inicia novo turno
-            this.incluiNovoTurno();
+
+            const turnoAtual = this.turnos[indexTurnoAtual];
+
+            // se o lado id do turno atual for diferente do lado id pedido
+            if (turnoAtual.ladoId != ladoId) {
+                // finaliza o turno atual
+                turnoAtual.defineMomentoFim();
+                // inicia novo turno
+                this.incluiNovoTurno();
+            }
         }
-        // define ladoIdAtual
-        this.ladoIdAtual = ladoId;
     }
 
     recuperaLadoPeloId(ladoId) {
