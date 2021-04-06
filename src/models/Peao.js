@@ -20,7 +20,7 @@ module.exports = class Peao extends Peca {
 
         // pega o movimento do enPassant
         if (this.movimentosRealizados.length == 0) {
-            movimentosPossiveis.push(new MovimentoDestino({ "linha": linhaDaCaptura + (1 * (db.lados[this.ladoId].cabecaPraBaixo ? -1 : 1)), "coluna": coluna }, false, "En Passant", false));
+            movimentosPossiveis.push(new MovimentoDestino({ "linha": linhaDaCaptura + (1 * (db.lados[this.ladoId].cabecaPraBaixo ? -1 : 1)), "coluna": coluna }, false, "Primeiro Movimento Peão", false));
         }
 
         return movimentosPossiveis;

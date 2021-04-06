@@ -227,15 +227,28 @@ module.exports = class Jogo {
         casaDe = this.recuperaCasaLinhaColuna(casaDe);
         casaPara = this.recuperaCasaLinhaColuna(casaPara);
 
-        const jogadaEscolhida = this.verificaJogadaPossivel(this.recuperaCasaPecaDeUmLadoPelaCasaNome(ladoId, casaDe.casa), casaPara, ladoId);
+        const casaPeca = this.recuperaCasaPecaDeUmLadoPelaCasaNome(ladoId, casaDe.casa);
+        const jogadaEscolhida = this.verificaJogadaPossivel(casaPeca, casaPara, ladoId);
 
         const peca = this.recuperaPecaDaCasa(casaDe);
         const casaDestino = this.recuperaPecaDaCasa(casaPara);
+
+        let pecaCapturada = casaDestino;
 
         try {
             // realiza movimento
             this.tabuleiro[casaDe.linha][casaDe.coluna] = null;
             this.tabuleiro[casaPara.linha][casaPara.coluna] = peca;
+
+            if (this.enPassantCasaCaptura != null) {
+                if (casaPara == this.enPassantCasaCaptura.casaCaptura) {
+                    const pecaCasaPeaoEnPassant = this.recuperaPecaDaCasa(this.enPassantCasaCaptura.casaPeao);
+                    if (pecaCasaPeaoEnPassant != null) {
+                        pecaCapturada = pecaCasaPeaoEnPassant;
+                        this.tabuleiro[this.enPassantCasaCaptura.casaPeao.linha][this.enPassantCasaCaptura.casaPeao.coluna] = null;
+                    }
+                }
+            }
 
             // verifica se a jogada colocou o rei em cheque
             const reiEmCheque = this.verificaReiLadoAtualCheque();
@@ -244,7 +257,19 @@ module.exports = class Jogo {
                 throw "A jogada não pode ser realizada pois coloca seu rei em cheque";
             }
 
-            const novoMovimento = new MovimentoRealizado(casaDe, casaPara, casaDestino, jogadaEscolhida.nomeJogada);
+            // se passar da validacao do rei define enPassantCasaCaptura como null
+            this.enPassantCasaCaptura = null;
+
+            if (jogadaEscolhida.nomeJogada == "Primeiro Movimento Peão") {
+                const jogadaPadraoPeao = casaPeca.possiveisJogadas.find(jogadaPeao => jogadaPeao.nomeJogada == null);
+                this.enPassantCasaCaptura = {
+                    casaCaptura: jogadaPadraoPeao.casa,
+                    casaPeao: casaPara
+                };
+            }
+
+            const novoMovimento = new MovimentoRealizado(casaDe, casaPara, pecaCapturada, jogadaEscolhida.nomeJogada);
+
 
             this.recuperaPecaDaCasa(casaPara).incluiMovimentoRealizado(novoMovimento);
 
@@ -255,6 +280,11 @@ module.exports = class Jogo {
             // desfaz movimento
             this.tabuleiro[casaDe.linha][casaDe.coluna] = peca;
             this.tabuleiro[casaPara.linha][casaPara.coluna] = casaDestino;
+
+            // desfaz alteracao do en passant
+            if (this.enPassantCasaCaptura != null) {
+                this.tabuleiro[this.enPassantCasaCaptura.casaPeao.linha][this.enPassantCasaCaptura.casaPeao.coluna] = pecaCapturada;
+            }
 
             throw e;
         }
@@ -298,6 +328,17 @@ module.exports = class Jogo {
                 } catch (e) {
                     // se deu excecao eh pq a casa informada nao eh capturavel pelo adversario
                 }
+
+                // valida enPassants
+                if (this.enPassantCasaCaptura != null) {
+                    try {
+                        this.verificaJogadaPossivel(casaPeca, this.enPassantCasaCaptura.casaCaptura, ladoAdversario.id);
+                        return true;
+                    } catch (e) {
+                        // se deu excecao eh pq a casa informada nao eh capturavel pelo adversario
+                    }
+                }
+
             });
 
             return false;
@@ -574,7 +615,19 @@ module.exports = class Jogo {
                 }
 
                 if (casaRecuperada != null) {
-                    const itemCasa = this.recuperaPecaDaCasa(casaRecuperada);
+                    let itemCasa = this.recuperaPecaDaCasa(casaRecuperada);
+
+                    let enPassant = false;
+
+                    // se a peca for um peao veriifca o enPassant
+                    if (peca.tipo == "Peão") {
+                        if (this.enPassantCasaCaptura != null) {
+                            if (this.enPassantCasaCaptura.casaCaptura == casaRecuperada) {
+                                itemCasa = this.recuperaPecaDaCasa(this.enPassantCasaCaptura.casaPeao);
+                                enPassant = true;
+                            }
+                        }
+                    }
 
                     // casa vazia
                     if (itemCasa == null) {
@@ -585,7 +638,11 @@ module.exports = class Jogo {
                     } else {
                         // so adiciona possivel jogada se a peca for do adversario
                         if (itemCasa.ladoId != peca.ladoId && movimentoDestino.permiteCaptura) {
-                            movimentosPossiveis.push(new PossivelJogada(casaRecuperada, true, movimentoDestino.movimentoEspecialNome));
+                            let movimentoEspecialNome = movimentoDestino.movimentoEspecialNome;
+                            if (enPassant) {
+                                movimentoEspecialNome = "En Passant";
+                            }
+                            movimentosPossiveis.push(new PossivelJogada(casaRecuperada, true, movimentoEspecialNome));
                         }
                     }
                 }
