@@ -181,17 +181,9 @@ module.exports = class Jogo {
             throw "Jogo não encontrado";
         }
 
-        this.id = jogo.id;
-        this.ladoBranco = jogo.ladoBranco;
-        this.ladoPreto = jogo.ladoPreto;
-        this.tabuleiro = jogo.tabuleiro;
-        this.finalizado = jogo.finalizado;
-        this.enPassantCasaCaptura = jogo.enPassantCasaCaptura;
-        this.ladoIdAtual = jogo.ladoIdAtual;
-        this.tipoJogo = jogo.tipoJogo;
-        this.tempoDeTurnoEmMilisegundos = jogo.tempoDeTurnoEmMilisegundos;
-        this.turnos = jogo.turnos;
-        this.acoesSolicitadas = jogo.acoesSolicitadas;
+        for (var chave in jogo) {
+            this[chave] = jogo[chave];
+        }
 
         this.chequeLadoAtual = this.verificaReiLadoAtualCheque();
 
