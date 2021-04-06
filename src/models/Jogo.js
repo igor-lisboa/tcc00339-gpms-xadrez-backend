@@ -291,12 +291,12 @@ module.exports = class Jogo {
     }
 
     insereCapturavelNasPossiveisJogadasDasPecasDosLados() {
-        this.ladoBranco.pecas.todas.forEach((item) => {
+        this.ladoBranco.pecas.forEach((item) => {
             item.possiveisJogadas.forEach((possivelJogada) => {
                 possivelJogada.setCapturavel(this.verificaCasaCapturavelPeloAdversario(item.casa, item.peca.ladoId));
             });
         });
-        this.ladoPreto.pecas.todas.forEach((item) => {
+        this.ladoPreto.pecas.forEach((item) => {
             item.possiveisJogadas.forEach((possivelJogada) => {
                 possivelJogada.setCapturavel(this.verificaCasaCapturavelPeloAdversario(item.casa, item.peca.ladoId));
             });
@@ -306,10 +306,9 @@ module.exports = class Jogo {
     verificaReiLadoAtualCheque() {
         this.atualizaPecasDosLados();
 
-        const ladoAtual = this.recuperaLadoPeloId(this.ladoIdAtual);
-        const reiLadoAtual = ladoAtual.pecas.rei;
+        const reiLadoAtual = this.recuperaLadoPeloId(this.ladoIdAtual).pecas.find(peca => peca.peca.tipo == "Rei");
 
-        return this.verificaCasaCapturavelPeloAdversario(reiLadoAtual.casa, ladoAtual.id);
+        return this.verificaCasaCapturavelPeloAdversario(reiLadoAtual.casa, reiLadoAtual.peca.ladoId);
         // se o rei do lado atual estiver em cheque e n tiver nenhum movimento p impedir o cheque e o rei n tiver como fugir o lado adversario ganha
     }
 
@@ -321,7 +320,7 @@ module.exports = class Jogo {
         if (ladoAdversario.pecas == undefined) {
             return undefined;
         } else {
-            ladoAdversario.pecas.todas.forEach((casaPeca) => {
+            ladoAdversario.pecas.forEach((casaPeca) => {
                 try {
                     this.verificaJogadaPossivel(casaPeca, casa, ladoAdversario.id);
                     return true;
@@ -444,21 +443,21 @@ module.exports = class Jogo {
     tiraMovimentosPossiveisCapturaveisDosReis() {
         // tira jogadas nas quais o rei branco pode ser capturado
         let possiveisJogadasReiBranco = [];
-        this.ladoBranco.pecas.rei.possiveisJogadas.forEach((possivelJogada) => {
+        this.ladoBranco.pecas.find(peca => peca.peca.tipo == "Rei").possiveisJogadas.forEach((possivelJogada) => {
             if (possivelJogada.capturavel == false) {
                 possiveisJogadasReiBranco.push(possivelJogada);
             }
         });
-        this.ladoBranco.pecas.rei.possiveisJogadas = possiveisJogadasReiBranco;
+        this.ladoBranco.pecas.find(peca => peca.peca.tipo == "Rei").possiveisJogadas = possiveisJogadasReiBranco;
 
         // tira jogadas nas quais o rei preto pode ser capturado
         let possiveisJogadasReiPreto = [];
-        this.ladoPreto.pecas.rei.possiveisJogadas.forEach((possivelJogada) => {
+        this.ladoPreto.pecas.find(peca => peca.peca.tipo == "Rei").possiveisJogadas.forEach((possivelJogada) => {
             if (possivelJogada.capturavel == false) {
                 possiveisJogadasReiPreto.push(possivelJogada);
             }
         });
-        this.ladoPreto.pecas.rei.possiveisJogadas = possiveisJogadasReiPreto;
+        this.ladoPreto.pecas.find(peca => peca.peca.tipo == "Rei").possiveisJogadas = possiveisJogadasReiPreto;
     }
 
     defineLadoIdAtual(ladoId) {
@@ -496,7 +495,6 @@ module.exports = class Jogo {
 
     recuperaPecasDeUmLado(ladoId) {
         let pecas = [];
-        let rei = {};
         this.tabuleiro.forEach((linha, linhaIndice) => {
             linha.forEach((coluna, colunaIndice) => {
                 // verifica se a casa esta vazia ou nao
@@ -515,20 +513,12 @@ module.exports = class Jogo {
                         };
 
                         pecas.push(peca);
-
-                        // se for o rei define na variavel
-                        if (coluna.tipo == "Rei") {
-                            rei = peca;
-                        }
                     }
                 }
             });
         });
 
-        return {
-            "rei": rei,
-            "todas": pecas
-        };
+        return pecas;
     }
 
     recuperaPossiveisJogadasEmCasasVizinhas(casaAtual, vizinhoDesejado, repeticoesHabilitadas, capturaHabilitada, pecaLadoId, casasEncontradas = []) {
@@ -742,7 +732,7 @@ module.exports = class Jogo {
     }
 
     recuperaCasaPecaDeUmLadoPelaCasaNome(ladoId, casaNome) {
-        const casaPeca = this.recuperaLadoPeloId(ladoId).pecas.todas.find(casasPeca => casasPeca.casa.trim().toUpperCase() == casaNome.trim().toUpperCase());
+        const casaPeca = this.recuperaLadoPeloId(ladoId).pecas.find(casasPeca => casasPeca.casa.trim().toUpperCase() == casaNome.trim().toUpperCase());
         if (casaPeca == undefined) {
             throw "Não foi possível encontrar a peça na casa desejada";
         }
