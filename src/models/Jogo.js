@@ -168,9 +168,7 @@ module.exports = class Jogo {
         this.defineLadoIdAtual(this.recuperaLadoAdversarioPeloId(this.ladoIdAtual).id);
 
         // verifica se a jogada colocou o rei do adversario em cheque
-        const reiEmCheque = this.verificaReiLadoAtualCheque();
-
-        this.chequeLadoAtual = reiEmCheque;
+        this.chequeLadoAtual = this.verificaReiLadoAtualCheque();
 
         this.salva();
 
@@ -248,6 +246,10 @@ module.exports = class Jogo {
                         this.tabuleiro[this.enPassantCasaCaptura.casaPeao.linha][this.enPassantCasaCaptura.casaPeao.coluna] = null;
                     }
                 }
+            }
+
+            if (jogadaEscolhida.nomeJogada == "ROQUES") {
+                // aqui vai validar o movimento dos roques
             }
 
             // verifica se a jogada colocou o rei em cheque
