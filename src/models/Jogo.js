@@ -246,32 +246,26 @@ module.exports = class Jogo {
                 }
             }
 
+            // trata roques
+            let casaTorreOrigem = null;
+            let casaTorreDestino = null;
             if (jogadaEscolhida.nomeJogada == "Roque Menor") {
-                let casaTorreOrigem = "H1";
-                let casaTorreDestino = "F1";
+                casaTorreOrigem = "H1";
+                casaTorreDestino = "F1";
                 if (this.ladoIdAtual != 0) {
                     casaTorreOrigem = "H8";
                     casaTorreDestino = "F8";
                 }
-                const torre = this.recuperaPecaDaCasa(casaTorreOrigem);
-                if (torre != null && torre.tipo == "Torre" && torre.movimentosRealizados.length == 0) {
-                    const destinoTorre = this.recuperaCasaLinhaColuna(casaTorreDestino);
-                    const origemTorre = this.recuperaCasaLinhaColuna(casaTorreOrigem);
-
-                    this.tabuleiro[origemTorre.linha][origemTorre.coluna] = null;
-                    this.tabuleiro[destinoTorre.linha][destinoTorre.coluna] = torre;
-
-                    const movimentoEspecialExecutado = new MovimentoRealizado(identificadorMovimento, origemTorre, destinoTorre, null, "Roque Menor", []);
-                    movimentosEspeciaisExecutados.push(movimentoEspecialExecutado);
-                    torre.incluiMovimentoRealizado(movimentoEspecialExecutado);
-                }
             } else if (jogadaEscolhida.nomeJogada == "Roque Maior") {
-                let casaTorreOrigem = "A1";
-                let casaTorreDestino = "D1";
+                casaTorreOrigem = "A1";
+                casaTorreDestino = "D1";
                 if (this.ladoIdAtual != 0) {
                     casaTorreOrigem = "A8";
                     casaTorreDestino = "D8";
                 }
+            }
+            // se definiu casaTorreOrigem e casaTorreDestino executa o roque
+            if (casaTorreOrigem != null && casaTorreDestino != null) {
                 const torre = this.recuperaPecaDaCasa(casaTorreOrigem);
                 if (torre != null && torre.tipo == "Torre" && torre.movimentosRealizados.length == 0) {
                     const destinoTorre = this.recuperaCasaLinhaColuna(casaTorreDestino);
@@ -280,7 +274,7 @@ module.exports = class Jogo {
                     this.tabuleiro[origemTorre.linha][origemTorre.coluna] = null;
                     this.tabuleiro[destinoTorre.linha][destinoTorre.coluna] = torre;
 
-                    const movimentoEspecialExecutado = new MovimentoRealizado(identificadorMovimento, origemTorre, destinoTorre, null, "Roque Maior", []);
+                    const movimentoEspecialExecutado = new MovimentoRealizado(identificadorMovimento, origemTorre, destinoTorre, null, jogadaEscolhida.nomeJogada, []);
                     movimentosEspeciaisExecutados.push(movimentoEspecialExecutado);
                     torre.incluiMovimentoRealizado(movimentoEspecialExecutado);
                 }
