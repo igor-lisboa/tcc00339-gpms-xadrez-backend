@@ -556,7 +556,7 @@ module.exports = class Jogo {
         return pecas;
     }
 
-    recuperaPossiveisJogadasEmCasasVizinhas(casaAtual, vizinhoDesejado, repeticoesHabilitadas, capturaHabilitada, pecaLadoId, casasEncontradas = []) {
+    recuperaPossiveisJogadasEmCasasVizinhas(casaAtual, vizinhoDesejado, repeticoesHabilitadas, pecaLadoId, opcoes = [], casasEncontradas = []) {
         // verifica se ainda tem repeticoesHabilitadas
         if (repeticoesHabilitadas == 0) {
             return casasEncontradas;
@@ -578,11 +578,13 @@ module.exports = class Jogo {
 
         // se item casa ta vazio, adiciona na lista casasEncontradas e encontra proximo 
         if (itemCasa == null) {
-            casasEncontradas.push(new PossivelJogada(vizinho, false));
-            return this.recuperaPossiveisJogadasEmCasasVizinhas(vizinho, vizinhoDesejado, repeticoesHabilitadas - 1, capturaHabilitada, pecaLadoId, casasEncontradas);
+            if (!opcoes.includes("somenteCaptura")) {
+                casasEncontradas.push(new PossivelJogada(vizinho, false));
+            }
+            return this.recuperaPossiveisJogadasEmCasasVizinhas(vizinho, vizinhoDesejado, repeticoesHabilitadas - 1, pecaLadoId, opcoes, casasEncontradas);
         } else {
             // so adiciona possivel jogada se a peca for do adversario
-            if (itemCasa.ladoId != pecaLadoId && capturaHabilitada) {
+            if (itemCasa.ladoId != pecaLadoId && !opcoes.includes("somenteAnda")) {
                 casasEncontradas.push(new PossivelJogada(vizinho, true));
             }
             return casasEncontradas;
@@ -603,27 +605,12 @@ module.exports = class Jogo {
         if (peca == null) {
             throw "Não foi possível encontrar a peça desejada";
         }
+
         let movimentosPossiveis = [];
 
-        if (peca.permitirJogadaDiagonal) {
-            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, "frenteEsquerda", peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
-            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, "frenteDireita", peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
-            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, "trasEsquerda", peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
-            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, "trasDireita", peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
-        }
-
-        if (peca.permitirJogadaFrente) {
-            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, "frente", peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
-        }
-
-        if (peca.permitirJogadaHorizontal) {
-            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, "esquerda", peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
-            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, "direita", peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
-        }
-
-        if (peca.permitirJogadaParaTras) {
-            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, "tras", peca.passosHabilitados, peca.permitirJogadaCaptura, peca.ladoId));
-        }
+        peca.movimentacao.forEach((movimento) => {
+            movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, movimento.direcao, peca.passosHabilitados, peca.ladoId, movimento.opcoes));
+        });
 
         // recupera movimentos especiais da peca
         const movimentosEspeciais = peca.movimentosEspeciais(casa.linha, casa.coluna);
@@ -662,7 +649,7 @@ module.exports = class Jogo {
                         }
                     } else {
                         // so adiciona possivel jogada se a peca for do adversario
-                        if (itemCasa.ladoId != peca.ladoId && movimentoDestino.permiteCaptura) {
+                        if (itemCasa.ladoId != peca.ladoId && !movimentoDestino.somenteAnda) {
                             let movimentoEspecialNome = movimentoDestino.movimentoEspecialNome;
                             if (enPassant) {
                                 movimentoEspecialNome = "En Passant";
