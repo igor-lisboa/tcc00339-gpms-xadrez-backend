@@ -4,7 +4,7 @@ module.exports = class PossivelJogada {
         captura = false,
         nomeJogada = null,
         capturavel = undefined,
-        direcao = "Especial"
+        direcao = "especial"
     ) {
         this.casa = casa;
         this.captura = captura;

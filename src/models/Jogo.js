@@ -316,12 +316,12 @@ module.exports = class Jogo {
     insereCapturavelNasPossiveisJogadasDasPecasDosLados() {
         this.ladoBranco.pecas.forEach((item) => {
             item.possiveisJogadas.forEach((possivelJogada) => {
-                possivelJogada.setCapturavel(this.verificaCasaCapturavelPeloAdversario(item.casa, item.peca.ladoId));
+                possivelJogada.setCapturavel(this.verificaCasaCapturavelPeloAdversario(possivelJogada.casa, item.peca.ladoId));
             });
         });
         this.ladoPreto.pecas.forEach((item) => {
             item.possiveisJogadas.forEach((possivelJogada) => {
-                possivelJogada.setCapturavel(this.verificaCasaCapturavelPeloAdversario(item.casa, item.peca.ladoId));
+                possivelJogada.setCapturavel(this.verificaCasaCapturavelPeloAdversario(possivelJogada.casa, item.peca.ladoId));
             });
         });
     }
@@ -340,16 +340,20 @@ module.exports = class Jogo {
 
         const ladoAdversario = this.recuperaLadoAdversarioPeloId(ladoId);
 
+        let capturavel = undefined;
+
         if (ladoAdversario.pecas == undefined) {
-            return undefined;
+            return capturavel;
         } else {
-            ladoAdversario.pecas.forEach((casaPeca) => {
+            capturavel = false;
+            for (let casaPeca of ladoAdversario.pecas) {
                 // valida enPassants
                 if (casaPeca.peca.tipo == "Peão" && this.enPassantCasaCaptura != null) {
                     if (casa == this.enPassantCasaCaptura.casaPeao) {
                         try {
                             this.verificaJogadaPossivel(casaPeca, this.enPassantCasaCaptura.casaCaptura, ladoAdversario.id);
-                            return true;
+                            capturavel = true;
+                            break;
                         } catch (e) {
                             // se deu excecao eh pq a casa informada nao eh capturavel pelo adversario
                         }
@@ -357,13 +361,14 @@ module.exports = class Jogo {
                 }
                 try {
                     this.verificaJogadaPossivel(casaPeca, casa, ladoAdversario.id);
-                    return true;
+                    capturavel = true;
+                    break;
                 } catch (e) {
                     // se deu excecao eh pq a casa informada nao eh capturavel pelo adversario
                 }
-            });
+            }
 
-            return false;
+            return capturavel;
         }
     }
 
