@@ -344,23 +344,23 @@ module.exports = class Jogo {
             return undefined;
         } else {
             ladoAdversario.pecas.forEach((casaPeca) => {
+                // valida enPassants
+                if (casaPeca.peca.tipo == "Peão" && this.enPassantCasaCaptura != null) {
+                    if (casa == this.enPassantCasaCaptura.casaPeao) {
+                        try {
+                            this.verificaJogadaPossivel(casaPeca, this.enPassantCasaCaptura.casaCaptura, ladoAdversario.id);
+                            return true;
+                        } catch (e) {
+                            // se deu excecao eh pq a casa informada nao eh capturavel pelo adversario
+                        }
+                    }
+                }
                 try {
                     this.verificaJogadaPossivel(casaPeca, casa, ladoAdversario.id);
                     return true;
                 } catch (e) {
                     // se deu excecao eh pq a casa informada nao eh capturavel pelo adversario
                 }
-
-                // valida enPassants
-                if (this.enPassantCasaCaptura != null) {
-                    try {
-                        this.verificaJogadaPossivel(casaPeca, this.enPassantCasaCaptura.casaCaptura, ladoAdversario.id);
-                        return true;
-                    } catch (e) {
-                        // se deu excecao eh pq a casa informada nao eh capturavel pelo adversario
-                    }
-                }
-
             });
 
             return false;
@@ -655,52 +655,50 @@ module.exports = class Jogo {
             });
         }
 
-        if (peca.tipo == "Rei") {
-            if (peca.movimentosRealizados.length == 0 && this.verificaCasaCapturavelPeloAdversario(casa, peca.ladoId) == false) {
-                // trata roques
-                let torreRoqueMenorCasa = "H1";
-                let casaCaminhoRoqueMenorUm = "F1";
-                let casaCaminhoRoqueMenorDois = "G1";
+        if (peca.tipo == "Rei" && peca.movimentosRealizados.length == 0 && this.verificaCasaCapturavelPeloAdversario(casa, peca.ladoId) == false) {
+            // trata roques
+            let torreRoqueMenorCasa = "H1";
+            let casaCaminhoRoqueMenorUm = "F1";
+            let casaCaminhoRoqueMenorDois = "G1";
 
-                let torreRoqueMaiorCasa = "A1";
-                let casaCaminhoRoqueMaiorUm = "D1";
-                let casaCaminhoRoqueMaiorDois = "C1";
-                let casaCaminhoRoqueMaiorTres = "B1";
-                if (peca.ladoId != this.ladoBranco.id) {
-                    torreRoqueMenorCasa = "H8";
-                    casaCaminhoRoqueMenorUm = "F8";
-                    casaCaminhoRoqueMenorDois = "G8";
+            let torreRoqueMaiorCasa = "A1";
+            let casaCaminhoRoqueMaiorUm = "D1";
+            let casaCaminhoRoqueMaiorDois = "C1";
+            let casaCaminhoRoqueMaiorTres = "B1";
+            if (peca.ladoId != this.ladoBranco.id) {
+                torreRoqueMenorCasa = "H8";
+                casaCaminhoRoqueMenorUm = "F8";
+                casaCaminhoRoqueMenorDois = "G8";
 
-                    torreRoqueMaiorCasa = "A8";
-                    casaCaminhoRoqueMaiorUm = "D8";
-                    casaCaminhoRoqueMaiorDois = "C8";
-                    casaCaminhoRoqueMaiorTres = "B8";
-                }
+                torreRoqueMaiorCasa = "A8";
+                casaCaminhoRoqueMaiorUm = "D8";
+                casaCaminhoRoqueMaiorDois = "C8";
+                casaCaminhoRoqueMaiorTres = "B8";
+            }
 
-                //Roque Menor
-                //Verifica se as casas no caminho estão vazias
-                if (this.recuperaPecaDaCasa(casaCaminhoRoqueMenorUm) == null && this.recuperaPecaDaCasa(casaCaminhoRoqueMenorDois) == null) {
-                    //Verifica se a Torre está na sua casa de origem
-                    const torre = this.recuperaPecaDaCasa(torreRoqueMenorCasa);
-                    if (torre != null) {
-                        const casaRei = this.recuperaCasaLinhaColuna(casaCaminhoRoqueMenorDois);
-                        const capturavel = this.verificaCasaCapturavelPeloAdversario(casaRei, peca.ladoId);
-                        if (torre.tipo == "Torre" && torre.movimentosRealizados.length == 0 && capturavel == false) {
-                            movimentosPossiveis.push(new PossivelJogada(casaRei, false, "Roque Menor", capturavel));
-                        }
+            //Roque Menor
+            //Verifica se as casas no caminho estão vazias
+            if (this.recuperaPecaDaCasa(casaCaminhoRoqueMenorUm) == null && this.recuperaPecaDaCasa(casaCaminhoRoqueMenorDois) == null) {
+                //Verifica se a Torre está na sua casa de origem
+                const torre = this.recuperaPecaDaCasa(torreRoqueMenorCasa);
+                if (torre != null) {
+                    const casaRei = this.recuperaCasaLinhaColuna(casaCaminhoRoqueMenorDois);
+                    const capturavel = this.verificaCasaCapturavelPeloAdversario(casaRei, peca.ladoId);
+                    if (torre.tipo == "Torre" && torre.movimentosRealizados.length == 0 && capturavel == false) {
+                        movimentosPossiveis.push(new PossivelJogada(casaRei, false, "Roque Menor", capturavel));
                     }
                 }
-                //Roque Maior
-                //Verifica se as casas no caminho estão vazias
-                if (this.recuperaPecaDaCasa(casaCaminhoRoqueMaiorUm) == null && this.recuperaPecaDaCasa(casaCaminhoRoqueMaiorDois) == null && this.recuperaPecaDaCasa(casaCaminhoRoqueMaiorTres) == null) {
-                    //Verifica se a Torre está na sua casa de origem
-                    const torre = this.recuperaPecaDaCasa(torreRoqueMaiorCasa);
-                    if (torre != null) {
-                        const casaRei = this.recuperaCasaLinhaColuna(casaCaminhoRoqueMaiorDois);
-                        const capturavel = this.verificaCasaCapturavelPeloAdversario(casaRei, peca.ladoId);
-                        if (torre.tipo == "Torre" && torre.movimentosRealizados.length == 0 && capturavel == false) {
-                            movimentosPossiveis.push(new PossivelJogada(casaRei, false, "Roque Maior", capturavel));
-                        }
+            }
+            //Roque Maior
+            //Verifica se as casas no caminho estão vazias
+            if (this.recuperaPecaDaCasa(casaCaminhoRoqueMaiorUm) == null && this.recuperaPecaDaCasa(casaCaminhoRoqueMaiorDois) == null && this.recuperaPecaDaCasa(casaCaminhoRoqueMaiorTres) == null) {
+                //Verifica se a Torre está na sua casa de origem
+                const torre = this.recuperaPecaDaCasa(torreRoqueMaiorCasa);
+                if (torre != null) {
+                    const casaRei = this.recuperaCasaLinhaColuna(casaCaminhoRoqueMaiorDois);
+                    const capturavel = this.verificaCasaCapturavelPeloAdversario(casaRei, peca.ladoId);
+                    if (torre.tipo == "Torre" && torre.movimentosRealizados.length == 0 && capturavel == false) {
+                        movimentosPossiveis.push(new PossivelJogada(casaRei, false, "Roque Maior", capturavel));
                     }
                 }
             }
