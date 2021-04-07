@@ -628,36 +628,38 @@ module.exports = class Jogo {
             movimentosPossiveis = movimentosPossiveis.concat(this.recuperaPossiveisJogadasEmCasasVizinhas(casa, movimento.direcao, peca.passosHabilitados, peca, movimento.opcoes));
         });
 
-        // recupera movimentos especiais da peca
-        const movimentosEspeciais = peca.movimentosEspeciais(casa.linha, casa.coluna);
+        // se o peao n tiver movimento possivel eh pq tem algo obstruindo logo ele n pode ter o primeiro movimento c 2 casas pra frente
+        if (!(peca.tipo == "Peão" && movimentosPossiveis.length == 0)) {
+            // recupera movimentos especiais da peca
+            const movimentosEspeciais = peca.movimentosEspeciais(casa.linha, casa.coluna);
 
+            // faz veirificacoes p cada movimento especial
+            movimentosEspeciais.forEach((movimentoDestino) => {
+                let casaRecuperada = undefined;
+                try {
+                    casaRecuperada = this.recuperaCasaLinhaColuna(movimentoDestino.casa);
+                } catch (ex) {
+                    casaRecuperada = null;
+                }
 
-        // faz veirificacoes p cada movimento especial
-        movimentosEspeciais.forEach((movimentoDestino) => {
-            let casaRecuperada = undefined;
-            try {
-                casaRecuperada = this.recuperaCasaLinhaColuna(movimentoDestino.casa);
-            } catch (ex) {
-                casaRecuperada = null;
-            }
+                if (casaRecuperada != null) {
+                    const itemCasa = this.recuperaPecaDaCasa(casaRecuperada);
 
-            if (casaRecuperada != null) {
-                const itemCasa = this.recuperaPecaDaCasa(casaRecuperada);
-
-                // casa vazia
-                if (itemCasa == null) {
-                    // se o movimento n for apenas de captura, inclui possivel jogada
-                    if (!movimentoDestino.somenteCaptura) {
-                        movimentosPossiveis.push(new PossivelJogada(casaRecuperada, false, movimentoDestino.movimentoEspecialNome));
-                    }
-                } else {
-                    // so adiciona possivel jogada se a peca for do adversario
-                    if (itemCasa.ladoId != peca.ladoId && !movimentoDestino.somenteAnda) {
-                        movimentosPossiveis.push(new PossivelJogada(casaRecuperada, true, movimentoDestino.movimentoEspecialNome));
+                    // casa vazia
+                    if (itemCasa == null) {
+                        // se o movimento n for apenas de captura, inclui possivel jogada
+                        if (!movimentoDestino.somenteCaptura) {
+                            movimentosPossiveis.push(new PossivelJogada(casaRecuperada, false, movimentoDestino.movimentoEspecialNome));
+                        }
+                    } else {
+                        // so adiciona possivel jogada se a peca for do adversario
+                        if (itemCasa.ladoId != peca.ladoId && !movimentoDestino.somenteAnda) {
+                            movimentosPossiveis.push(new PossivelJogada(casaRecuperada, true, movimentoDestino.movimentoEspecialNome));
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
 
         //Aqui vai entrar uma função para incluir se o Rei pode realizar os Roques
         return this.recuperaMovimentosPossiveisValidos(movimentosPossiveis, peca, casa);
