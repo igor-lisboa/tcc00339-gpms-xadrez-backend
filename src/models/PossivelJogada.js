@@ -3,11 +3,13 @@ module.exports = class PossivelJogada {
         casa,
         captura = false,
         nomeJogada = null,
-        capturavel = undefined
+        capturavel = undefined,
+        direcao = "especial"
     ) {
         this.casa = casa;
         this.captura = captura;
         this.nomeJogada = nomeJogada;
+        this.direcao = direcao;
         this.setCapturavel(capturavel);
     }
 

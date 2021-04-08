@@ -1,11 +1,13 @@
 module.exports = class MovimentoDestino {
     constructor(
         casa,
-        somenteCaptura = false,
-        movimentoEspecialNome = null
+        movimentoEspecialNome = null,
+        somenteAnda = false,
+        somenteCaptura = false
     ) {
         this.casa = casa;
-        this.somenteCaptura = somenteCaptura;
         this.movimentoEspecialNome = movimentoEspecialNome;
+        this.somenteAnda = somenteAnda;
+        this.somenteCaptura = somenteCaptura;
     }
 }

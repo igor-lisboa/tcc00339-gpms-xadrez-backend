@@ -2,11 +2,7 @@ module.exports = class Peca {
     constructor(
         ladoId,
         tipo,
-        permitirJogadaParaTras = false,
-        permitirJogadaDiagonal = false,
-        permitirJogadaFrente = false,
-        permitirJogadaHorizontal = false,
-        permitirJogadaCaptura = true,
+        movimentacao = [],
         passosHabilitados = 8,
         valor = 0
     ) {
@@ -15,14 +11,9 @@ module.exports = class Peca {
         this.ladoId = ladoId;
         this.tipo = tipo;
 
-        this.permitirJogadaParaTras = permitirJogadaParaTras;
-        this.permitirJogadaDiagonal = permitirJogadaDiagonal;
-        this.permitirJogadaFrente = permitirJogadaFrente;
-        this.permitirJogadaHorizontal = permitirJogadaHorizontal;
+        this.movimentacao = movimentacao;
 
         this.passosHabilitados = passosHabilitados;
-
-        this.permitirJogadaCaptura = permitirJogadaCaptura;
 
         this.valor = valor;
     }
