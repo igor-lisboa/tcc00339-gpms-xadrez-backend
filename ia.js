@@ -13,36 +13,40 @@ const socket = io(apiUrl, {
     query: { jogador: "I.A." }
 });
 
+const sleep = async (ms) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 socket.on('uncaughtException', function (err) {
     console.log(err);
 });
 
-socket.on('jogoCriado', function () {
+socket.on('jogoCriado', async function () {
     if (verbose) {
         console.log('Novo jogo criado...');
     }
-    ia();
+    await ia();
 });
 
-socket.on('adversarioEntrou', function () {
+socket.on('adversarioEntrou', async function () {
     if (verbose) {
         console.log('Adversário entrou...');
     }
-    ia();
+    await ia();
 });
 
-socket.on('jogadaRealizada', function () {
+socket.on('jogadaRealizada', async function () {
     if (verbose) {
         console.log('Jogada realizada...');
     }
-    ia();
+    await ia();
 });
 
-socket.on('forcaIa', function () {
+socket.on('forcaIa', async function () {
     if (verbose) {
         console.log('Força I.A. a rodar...');
     }
-    ia();
+    await ia();
 });
 
 const escolhePossivelJogada = (possiveisJogadas) => {
@@ -80,6 +84,8 @@ const escolhePossivelJogada = (possiveisJogadas) => {
 }
 
 const ia = async () => {
+    // espera 3 segundos pra executar
+    await sleep(3000);
     api.get(
         "/jogos/ia"
     ).then((response) => {

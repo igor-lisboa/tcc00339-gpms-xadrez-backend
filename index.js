@@ -4,7 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const routes = require("./src/routes");
 
-const events = require('events');
+const events = require('events').EventEmitter;
 
 const app = express();
 const http = require("http").createServer(app);
@@ -40,7 +40,7 @@ io.on("connection", (socket) => {
 // instancia tratador de eventos do node
 const emitter = new events();
 emitter.on("jogoCriado", (args) => {
-    if ("jogadasExecutadas" in args) {
+    if ("jogo" in args) {
         io.emit("jogoCriado", {
             jogo: args.jogo
         });
@@ -131,7 +131,7 @@ emitter.on("jogadasExecutadasIa", (args) => {
             // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
             if (destinoEvento != undefined) {
                 io.to(destinoEvento.socketId).emit('jogadaRealizada', {
-                    jogadaRealizada,
+                    jogadaRealizada: jogadaRealizada.jogada,
                     tabuleiro
                 });
                 if (verbose) {

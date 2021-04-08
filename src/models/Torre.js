@@ -21,22 +21,6 @@ module.exports = class Torre extends Peca {
                 {
                     direcao: "direita",
                     opcoes: []
-                },
-                {
-                    direcao: "frenteEsquerda",
-                    opcoes: []
-                },
-                {
-                    direcao: "frenteDireita",
-                    opcoes: []
-                },
-                {
-                    direcao: "trasEsquerda",
-                    opcoes: []
-                },
-                {
-                    direcao: "trasDireita",
-                    opcoes: []
                 }
             ],
             9,
