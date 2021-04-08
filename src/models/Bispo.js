@@ -8,19 +8,19 @@ module.exports = class Bispo extends Peca {
             [
                 {
                     direcao: "frenteEsquerda",
-                    opcoes: []
+                    opcoes: ["anda", "captura"]
                 },
                 {
                     direcao: "frenteDireita",
-                    opcoes: []
+                    opcoes: ["anda", "captura"]
                 },
                 {
                     direcao: "trasEsquerda",
-                    opcoes: []
+                    opcoes: ["anda", "captura"]
                 },
                 {
                     direcao: "trasDireita",
-                    opcoes: []
+                    opcoes: ["anda", "captura"]
                 }
             ],
             8,

@@ -90,43 +90,39 @@ module.exports = {
         }
         throw "O lado solicitado não é uma I.A."
     }, recuperaMovimentosPossiveisConsolidado(jogo, ladoId) {
-        const casaPecas = jogo.recuperaLadoPeloId(ladoId).pecas;
+        const possiveisJogadas = jogo.recuperaLadoPeloId(ladoId).possiveisJogadas;
 
-        let possiveisJogadas = [];
+        let possiveisJogadasIa = [];
 
-        casaPecas.forEach((casaPeca) => {
-            casaPeca.possiveisJogadas.forEach((possivelJogada) => {
+        possiveisJogadas.forEach((possivelJogada) => {
 
-                let possivelJogadaIa = {};
-                possivelJogadaIa.de = casaPeca.casa;
-                possivelJogadaIa.para = possivelJogada.casa.casa;
-                possivelJogadaIa.capturavel = possivelJogada.capturavel;
-                possivelJogadaIa.captura = possivelJogada.captura;
+            let possivelJogadaIa = {};
+            possivelJogadaIa.de = possivelJogada.casaOrigem.casa;
+            possivelJogadaIa.para = possivelJogada.casaDestino.casa;
+            possivelJogadaIa.capturavel = possivelJogada.capturavel;
+            possivelJogadaIa.captura = possivelJogada.captura;
 
-                possiveisJogadas.push(possivelJogadaIa);
-            });
-
+            possiveisJogadasIa.push(possivelJogadaIa);
         });
 
-        return possiveisJogadas;
-    }, recuperaPossiveisMovimentosDaPecaDeUmLado(jogoId, ladoId, casaNome) {
-        const pecaDoLado = this.recuperaTodasAsPecasDeUmLado(jogoId, ladoId).find(peca => peca.casa.trim().toUpperCase() == casaNome.trim().toUpperCase());
+        return possiveisJogadasIa;
+    }, recuperaPossiveisJogadasDaPecaDeUmLado(jogoId, ladoId, casaNome) {
+        const jogo = this.encontra(jogoId);
+        if (jogo.ladoIdAtual != ladoId) {
+            throw "Aguarde sua vez de interagir com suas peças";
+        }
+        const lado = jogo.recuperaLadoPeloId(ladoId);
+        const pecaDoLado = lado.pecas.find(peca => peca.casa.trim().toUpperCase() == casaNome.trim().toUpperCase());
         if (pecaDoLado == undefined) {
             throw "Nenhuma peça pertencente a você foi encontrada na casa procurada";
         }
-        return pecaDoLado.possiveisJogadas;
+        return lado.possiveisJogadas.filter(possiveisJogadasPeca => possiveisJogadasPeca.casaOrigem.casa.trim().toUpperCase() == pecaDoLado.casa.trim().toUpperCase());
     }, recuperaPecaReiAdversario(jogoId, ladoId) {
         const jogo = this.encontra(jogoId);
         if (jogo.ladoIdAtual != ladoId) {
             throw "Aguarde sua vez de interagir com o jogo";
         }
         return jogo.recuperaLadoAdversarioPeloId(ladoId).pecas.find(peca => peca.peca.tipo == "Rei");
-    }, recuperaTodasAsPecasDeUmLado(jogoId, ladoId) {
-        const jogo = this.encontra(jogoId);
-        if (jogo.ladoIdAtual != ladoId) {
-            throw "Aguarde sua vez de interagir com suas peças";
-        }
-        return jogo.recuperaLadoPeloId(ladoId).pecas;
     }, recuperaLadosSemJogador(jogoId) {
         const jogo = this.encontra(jogoId);
         let ladosSemJogador = [];

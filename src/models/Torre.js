@@ -8,19 +8,19 @@ module.exports = class Torre extends Peca {
             [
                 {
                     direcao: "frente",
-                    opcoes: []
+                    opcoes: ["anda", "captura"]
                 },
                 {
                     direcao: "tras",
-                    opcoes: []
+                    opcoes: ["anda", "captura"]
                 },
                 {
                     direcao: "esquerda",
-                    opcoes: []
+                    opcoes: ["anda", "captura"]
                 },
                 {
                     direcao: "direita",
-                    opcoes: []
+                    opcoes: ["anda", "captura"]
                 }
             ],
             9,

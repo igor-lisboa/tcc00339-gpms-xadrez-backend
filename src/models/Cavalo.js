@@ -14,14 +14,54 @@ module.exports = class Cavalo extends Peca {
 
     movimentosEspeciais(linha, coluna) {
         return [
-            new MovimentoDestino({ "linha": linha + 2, "coluna": coluna + 1 }),
-            new MovimentoDestino({ "linha": linha + 2, "coluna": coluna - 1 }),
-            new MovimentoDestino({ "linha": linha - 2, "coluna": coluna + 1 }),
-            new MovimentoDestino({ "linha": linha - 2, "coluna": coluna - 1 }),
-            new MovimentoDestino({ "linha": linha + 1, "coluna": coluna + 2 }),
-            new MovimentoDestino({ "linha": linha + 1, "coluna": coluna - 2 }),
-            new MovimentoDestino({ "linha": linha - 1, "coluna": coluna + 2 }),
-            new MovimentoDestino({ "linha": linha - 1, "coluna": coluna - 2 })
+            new MovimentoDestino(
+                { "linha": linha + 2, "coluna": coluna + 1 },
+                "L",
+                true,
+                true
+            ),
+            new MovimentoDestino(
+                { "linha": linha + 2, "coluna": coluna - 1 },
+                "L",
+                true,
+                true
+            ),
+            new MovimentoDestino(
+                { "linha": linha - 2, "coluna": coluna + 1 },
+                "L",
+                true,
+                true
+            ),
+            new MovimentoDestino(
+                { "linha": linha - 2, "coluna": coluna - 1 },
+                "L",
+                true,
+                true
+            ),
+            new MovimentoDestino(
+                { "linha": linha + 1, "coluna": coluna + 2 },
+                "L",
+                true,
+                true
+            ),
+            new MovimentoDestino(
+                { "linha": linha + 1, "coluna": coluna - 2 },
+                "L",
+                true,
+                true
+            ),
+            new MovimentoDestino(
+                { "linha": linha - 1, "coluna": coluna + 2 },
+                "L",
+                true,
+                true
+            ),
+            new MovimentoDestino(
+                { "linha": linha - 1, "coluna": coluna - 2 },
+                "L",
+                true,
+                true
+            )
         ];
     }
 }

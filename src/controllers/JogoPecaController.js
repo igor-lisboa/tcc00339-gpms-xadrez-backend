@@ -25,7 +25,7 @@ module.exports = {
             const ladoId = req.headers.lado;
             return res.json({
                 message: "Possíveis jogadas da peça na casa informada retornadas com sucesso!",
-                data: JogoService.recuperaPossiveisMovimentosDaPecaDeUmLado(jogoId, ladoId, casaNome),
+                data: JogoService.recuperaPossiveisJogadasDaPecaDeUmLado(jogoId, ladoId, casaNome),
                 success: true
             });
         } catch (e) {

@@ -89,6 +89,7 @@ const ia = async () => {
     api.get(
         "/jogos/ia"
     ).then((response) => {
+
         let jogadasParaSeremFeitasPelaIa = [];
 
         // se retorno tiver sucesso

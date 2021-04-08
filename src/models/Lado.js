@@ -3,11 +3,17 @@ module.exports = class Lado {
         this.id = lado.id;
         this.lado = lado.nome;
         this.cabecaPraBaixo = lado.cabecaPraBaixo;
-        this.movimentosRealizados = [];
+        this.jogadasRealizadas = [];
 
         this.tipo = null;
 
         this.tempoMilisegundosRestante = null;
+
+        this.possiveisJogadas = [];
+    }
+
+    definePossiveisJogadas(possiveisJogadas) {
+        this.possiveisJogadas = possiveisJogadas;
     }
 
     definetempoMilisegundosRestante(tempoMilisegundosRestante) {
@@ -25,8 +31,8 @@ module.exports = class Lado {
         this.tipo = tipo;
     }
 
-    fazNovoMovimento(movimento) {
-        this.movimentosRealizados.push(movimento);
+    insereJogadaRealizada(jogada) {
+        this.jogadasRealizadas.push(jogada);
     }
 
     definePecas(pecas) {
