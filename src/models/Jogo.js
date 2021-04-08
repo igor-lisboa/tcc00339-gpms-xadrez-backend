@@ -351,18 +351,6 @@ module.exports = class Jogo {
         } else {
             capturavel = false;
             for (let casaPeca of ladoAdversario.pecas) {
-                // valida enPassants
-                if (casaPeca.peca.tipo == "Peão" && this.enPassantCasaCaptura != null) {
-                    if (casa == this.enPassantCasaCaptura.casaPeao) {
-                        try {
-                            this.verificaJogadaPossivel(casaPeca, this.enPassantCasaCaptura.casaCaptura, ladoAdversario.id);
-                            capturavel = true;
-                            break;
-                        } catch (e) {
-                            // se deu excecao eh pq a casa informada nao eh capturavel pelo adversario
-                        }
-                    }
-                }
                 try {
                     this.verificaJogadaPossivel(casaPeca, casa, ladoAdversario.id);
                     capturavel = true;
