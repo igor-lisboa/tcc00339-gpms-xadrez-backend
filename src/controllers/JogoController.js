@@ -38,10 +38,7 @@ module.exports = {
         try {
             const { tipoJogo, tempoDeTurnoEmMilisegundos } = req.body;
             const jogo = JogoService.cria(tipoJogo, tempoDeTurnoEmMilisegundos);
-            req.io.emit('jogoCriado');
-            if (req.verbose) {
-                console.log("Enviando mensagem de jogoCriado para todos os sockets conectados...");
-            }
+            universalEmitter.emit("jogoCriado", { jogo });
             return res.json({
                 message: "Jogo incluído com sucesso!",
                 data: jogo,
@@ -141,28 +138,11 @@ module.exports = {
             const { jogadas } = req.body;
             const jogadasExecutadasRetorno = JogoService.executaJogadas(jogadas);
 
-            // para cada jogada executada avisa o adversario caso ele esteja conectado
-            jogadasExecutadasRetorno.jogadasExecutadas.forEach((jogadaRealizada) => {
-                let jogadorIdentificador = undefined;
-
-                // define parametro q sera usado p buscar socket do adversario
-                if (jogadaRealizada.ladoAdversario.tipoId == 0) {
-                    jogadorIdentificador = jogadaRealizada.jogoId + "-" + jogadaRealizada.ladoAdversario.ladoId;
-                } else {
-                    jogadorIdentificador = "I.A.";
-                }
-
-                // procura o adversario na lista de jogadores conectados
-                const destinoEvento = req.jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
-
-                // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
-                if (destinoEvento != undefined) {
-                    req.io.to(destinoEvento.socketId).emit('jogadaRealizada', jogadaRealizada.jogada);
-                    if (req.verbose) {
-                        console.log("Enviando mensagem de jogadaRealizada para " + destinoEvento.identificador + "...");
-                    }
-                }
-            });
+            if (jogadasExecutadasRetorno.jogadasExecutadas.length > 0) {
+                universalEmitter.emit("jogadasExecutadasIa", {
+                    jogadasExecutadas: jogadasExecutadasRetorno.jogadasExecutadas
+                });
+            }
 
             if (jogadasExecutadasRetorno.jogadasErros.length > 0) {
                 universalEmitter.emit("forcaIa");

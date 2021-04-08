@@ -204,7 +204,7 @@ module.exports = class Jogo {
         }
         db.jogos[this.id] = this;
         if (this.finalizado != null) {
-            universalEmitter.emit("jogoFinalizado", { jogoId: this.id });
+            universalEmitter.emit("jogoFinalizado", { jogo: this });
         }
     }
 
@@ -311,6 +311,10 @@ module.exports = class Jogo {
             this.tabuleiro = tabuleiroAntesAlteracoes;
             throw e;
         }
+    }
+
+    recuperaTabuleiro() {
+        return this.tabuleiro;
     }
 
     insereCapturavelNasPossiveisJogadasDasPecasDosLados() {

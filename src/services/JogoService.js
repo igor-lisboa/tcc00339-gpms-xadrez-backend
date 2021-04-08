@@ -156,5 +156,7 @@ module.exports = {
             ladoRetorno.tipoNome = null;
         }
         return ladoRetorno;
+    }, recuperaTabuleiro(jogoId) {
+        return this.encontra(jogoId).recuperaTabuleiro();
     }
 };
