@@ -135,3 +135,9 @@ const ia = async () => {
         console.log(e);
     });
 }
+
+// executa ia 1 unica vez ao iniciar
+if (verbose) {
+    console.log('Iniciando I.A. ...');
+}
+ia();

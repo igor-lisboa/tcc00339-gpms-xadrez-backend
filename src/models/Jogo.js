@@ -230,7 +230,7 @@ module.exports = class Jogo {
 
         let pecaCapturada = casaDestino;
 
-        const tabuleiroAntesAlteracoes = this.tabuleiro;
+        const tabuleiroAntesAlteracoes = [...this.tabuleiro];
 
         let movimentosEspeciaisExecutados = [];
 
