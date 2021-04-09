@@ -662,6 +662,14 @@ module.exports = class Jogo {
             if (opcoes.includes("primeiroMovimentoPeao") && casas == 2) {
                 nomeJogada = "Primeiro Movimento Peão";
             }
+
+            let ultimaLinha = 0;
+            if (peca.ladoId != this.ladoBranco.id) {
+                ultimaLinha = 7;
+            }
+            if (vizinho.linha == ultimaLinha) {
+                nomeJogada = "Promoção do Peão";
+            }
         }
 
         // se a peca for um rei verifica os roques
