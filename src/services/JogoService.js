@@ -8,6 +8,8 @@ module.exports = {
         return new Jogo().encontra(id);
     }, cria(tipoJogoId, tempoDeTurnoEmMilisegundos = -1) {
         return new Jogo(tipoJogoId, tempoDeTurnoEmMilisegundos).cria();
+    }, promovePeao(jogoId, ladoId, pecaEscolhida) {
+        return this.encontra(jogoId).promovePeao(ladoId, pecaEscolhida);
     }, realizaJogada(jogoId, ladoId, casaOrigem, casaDestino) {
         return this.encontra(jogoId).realizaJogada(ladoId, casaOrigem, casaDestino);
     }, insereJogador(jogoId, ladoId, tipoId) {

@@ -66,8 +66,8 @@ module.exports = class Jogo {
         this.defineTipoJogo(tipoJogoId);
     }
 
-    defineNovaAcaoSolicitada(acao, ladoId) {
-        this.acoesSolicitadas.push(new AcaoSolicitada(acao, ladoId));
+    defineNovaAcaoSolicitada(acao, ladoId, data = null) {
+        this.acoesSolicitadas.push(new AcaoSolicitada(acao, ladoId, data));
     }
 
     defineFinalizado(finalizacaoId) {
@@ -237,6 +237,11 @@ module.exports = class Jogo {
     cria() {
         this.salva();
         return this;
+    }
+
+    promovePeao(ladoId, pecaEscolhida) {
+        console.log(ladoId);
+        console.log(pecaEscolhida);
     }
 
     move(casaDe, casaPara, ladoId) {

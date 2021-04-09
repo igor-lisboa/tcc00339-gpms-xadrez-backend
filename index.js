@@ -159,7 +159,7 @@ emitter.on("acoesSolicitadas", (args) => {
 
             // se encontrar o adversario na lista de jogadores conectados dispara evento p socket
             if (destinoEvento != undefined) {
-                io.to(destinoEvento.socketId).emit(acaoSolicitada.acao);
+                io.to(destinoEvento.socketId).emit(acaoSolicitada.acao, acaoSolicitada.data);
                 if (verbose) {
                     console.log("Enviando mensagem de " + acaoSolicitada.acao + " para " + destinoEvento.identificador + "...");
                 }

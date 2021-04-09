@@ -69,6 +69,23 @@ module.exports = {
                 success: false
             });
         }
+    }, promovePeao(req, res) {
+        try {
+            const { jogoId, pecaIdEscolhida } = req.params;
+            const ladoId = req.headers.lado;
+            return res.json({
+                message: "Peão promovido com sucesso!",
+                data: JogoService.promovePeao(jogoId, ladoId, pecaIdEscolhida),
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
     }, recuperaPecaReiAdversario(req, res) {
         try {
             const { jogoId } = req.params;

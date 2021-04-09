@@ -97,6 +97,32 @@
 							]
 						},
 						{
+							"name": "Promove Peão",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "lado",
+										"value": "{{ladoId}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/promove-peao/{{pecaIndex}}",
+									"host": [
+										"{{API_XADREZ_URL}}"
+									],
+									"path": [
+										"jogos",
+										"{{jogoIndex}}",
+										"promove-peao",
+										"{{pecaIndex}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "Rei Adversário",
 							"request": {
 								"method": "GET",
@@ -443,6 +469,24 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Lista Promoção Peão",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API_XADREZ_URL}}/tipos-de-peca/promocao-peao",
+							"host": [
+								"{{API_XADREZ_URL}}"
+							],
+							"path": [
+								"tipos-de-peca",
+								"promocao-peao"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -491,28 +535,39 @@
 	],
 	"variable": [
 		{
+			"id": "78365313-a218-4363-b9b0-68335c324e2b",
 			"key": "casaOrigem",
 			"value": "a2"
 		},
 		{
+			"id": "349c6439-9191-48f2-ade4-72c966c2c36b",
 			"key": "casaDestino",
 			"value": "a4"
 		},
 		{
+			"id": "e626582a-f490-4083-95ca-90cbcfb9dc21",
 			"key": "jogoIndex",
 			"value": "0"
 		},
 		{
+			"id": "65f8ac5d-f810-41d2-b5f5-776a1779eba8",
 			"key": "ladoId",
 			"value": "0"
 		},
 		{
+			"id": "ce4a565f-955b-4831-b2e2-449e70535754",
 			"key": "tipoJogoId",
 			"value": "0"
 		},
 		{
+			"id": "c1a3d447-223d-46b8-952a-dba95295f1c5",
 			"key": "tipoJogadorId",
 			"value": "0"
+		},
+		{
+			"id": "67ae70f9-a75a-4e49-b096-ed72470a85d3",
+			"key": "pecaIndex",
+			"value": "3"
 		}
 	]
 }

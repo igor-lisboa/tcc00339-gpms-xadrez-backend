@@ -34,6 +34,7 @@ routes.post("/jogos", JogoController.cria);
 routes.get("/jogos/ia", JogoController.listaIa);
 routes.post("/jogos/ia", JogoController.executaJogadasIa);
 routes.get("/jogos/:jogoId", JogoController.encontra);
+routes.post("/jogos/:jogoId/promove-peao/:pecaIdEscolhida", JogoController.promovePeao);
 routes.get("/jogos/:jogoId/ias", JogoController.recuperaLadosIa);
 routes.get("/jogos/:jogoId/lado-atual", JogoController.recuperaLadoAtual);
 routes.get("/jogos/:jogoId/lado-sem-jogador", JogoJogadorController.recuperaLadosSemJogador);
@@ -48,6 +49,7 @@ routes.get("/tipos-de-jogo", TiposJogoController.lista);
 routes.get("/lados-do-jogo", LadosJogoController.lista);
 routes.get("/tipos-de-jogador", TiposJogadorController.lista);
 routes.get("/tipos-de-peca", TiposPecaController.lista);
+routes.get("/tipos-de-peca/promocao-peao", TiposPecaController.listaPromocaoPeao);
 routes.get("/ia", JogoController.forcaIa);
 
 module.exports = routes;
