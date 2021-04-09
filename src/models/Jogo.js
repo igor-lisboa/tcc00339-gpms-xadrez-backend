@@ -252,14 +252,14 @@ module.exports = class Jogo {
             // trata roques
             let casaTorreOrigem = null;
             let casaTorreDestino = null;
-            if (jogadaEscolhida.nomeJogada == "Roque Menor") {
+            if (jogadaEscolhida.nome == "Roque Menor") {
                 casaTorreOrigem = "H1";
                 casaTorreDestino = "F1";
                 if (this.ladoIdAtual != 0) {
                     casaTorreOrigem = "H8";
                     casaTorreDestino = "F8";
                 }
-            } else if (jogadaEscolhida.nomeJogada == "Roque Maior") {
+            } else if (jogadaEscolhida.nome == "Roque Maior") {
                 casaTorreOrigem = "A1";
                 casaTorreDestino = "D1";
                 if (this.ladoIdAtual != 0) {
@@ -277,10 +277,15 @@ module.exports = class Jogo {
                     this.tabuleiro[origemTorre.linha][origemTorre.coluna] = null;
                     this.tabuleiro[destinoTorre.linha][destinoTorre.coluna] = torre;
 
-                    const movimentoEspecialExecutado = new MovimentoRealizado(identificadorMovimento, origemTorre, destinoTorre, null, jogadaEscolhida.nomeJogada, []);
+                    const movimentoEspecialExecutado = new MovimentoRealizado(identificadorMovimento, origemTorre, destinoTorre, null, jogadaEscolhida.nome, []);
                     movimentosEspeciaisExecutados.push(movimentoEspecialExecutado);
                     torre.incluiMovimentoRealizado(movimentoEspecialExecutado);
                 }
+            }
+
+            let jogadaPadraoPeao = undefined;
+            if (jogadaEscolhida.nome == "Primeiro Movimento Peão") {
+                jogadaPadraoPeao = lado.possiveisJogadas.find(jogadaPeao => jogadaPeao.nome == null && jogadaPeao.casaOrigem == casaDe);
             }
 
             // verifica se a jogada colocou o rei em cheque
@@ -293,15 +298,15 @@ module.exports = class Jogo {
             // se passar da validacao do rei define enPassantCasaCaptura como null
             this.enPassantCasaCaptura = null;
 
-            if (jogadaEscolhida.nomeJogada == "Primeiro Movimento Peão") {
-                const jogadaPadraoPeao = lado.possiveisJogadas.find(jogadaPeao => jogadaPeao.nomeJogada == null && jogadaPeao.casaOrigem == casaDe);
+            if (jogadaPadraoPeao != undefined) {
                 this.enPassantCasaCaptura = {
-                    casaCaptura: jogadaPadraoPeao.casa,
+                    casaCaptura: jogadaPadraoPeao.casaDestino,
                     casaPeao: casaPara
                 };
             }
 
-            const novoMovimento = new MovimentoRealizado(identificadorMovimento, casaDe, casaPara, pecaCapturada, jogadaEscolhida.nomeJogada, movimentosEspeciaisExecutados);
+
+            const novoMovimento = new MovimentoRealizado(identificadorMovimento, casaDe, casaPara, pecaCapturada, jogadaEscolhida.nome, movimentosEspeciaisExecutados);
 
 
             this.recuperaPecaDaCasa(casaPara).incluiMovimentoRealizado(novoMovimento);
@@ -482,9 +487,17 @@ module.exports = class Jogo {
                 for (let movimentoPossivelDirecao of direcaoMovimentosPossiveis) {
                     const casaOrigem = this.recuperaCasaLinhaColuna(movimentoPossivelDirecao.ladoPeca.casa);
                     const casaDestino = this.recuperaCasaLinhaColuna(movimentoPossivelDirecao.movimentoPossivel.casaDestino);
-                    const pecaCasaDestino = this.recuperaPecaDaCasa(casaDestino);
                     const nomeJogada = movimentoPossivelDirecao.movimentoPossivel.nomeJogada;
                     const direcao = movimentoPossivelDirecao.movimentoPossivel.direcao;
+
+                    let pecaCasaDestino = this.recuperaPecaDaCasa(casaDestino);
+
+
+                    if (this.enPassantCasaCaptura != null && pecaCasaDestino == null) {
+                        if (movimentoPossivelDirecao.ladoPeca.peca.tipo == "Peão" && this.enPassantCasaCaptura.casaCaptura == casaDestino) {
+                            pecaCasaDestino = this.recuperaPecaDaCasa(this.enPassantCasaCaptura.casaPeao);
+                        }
+                    }
 
                     let pecasMesmoLado = false;
                     if (pecaCasaDestino != null) {
@@ -495,16 +508,17 @@ module.exports = class Jogo {
                         break;
                     }
 
-                    const quebraRegraApenasAnda = (pecaCasaDestino != null && !movimentoPossivelDirecao.movimentoPossivel.captura);
-                    const quebraRegraApenasCaptura = (pecaCasaDestino == null && !movimentoPossivelDirecao.movimentoPossivel.anda);
+                    const quebraRegraNaoCaptura = (pecaCasaDestino != null && !movimentoPossivelDirecao.movimentoPossivel.captura);
+                    const quebraRegraNaoAnda = (pecaCasaDestino == null && !movimentoPossivelDirecao.movimentoPossivel.anda);
 
-                    if (!quebraRegraApenasAnda && (!quebraRegraApenasCaptura || apenasParaChecarAmeacas) && !pecasMesmoLado) {
+                    if (!quebraRegraNaoCaptura && (!quebraRegraNaoAnda || apenasParaChecarAmeacas) && !pecasMesmoLado) {
                         possiveisJogadas.push(
                             {
                                 casaOrigem,
                                 casaDestino,
                                 nomeJogada,
-                                podeCapturavel: movimentoPossivelDirecao.movimentoPossivel.podeCapturavel
+                                podeCapturavel: movimentoPossivelDirecao.movimentoPossivel.podeCapturavel,
+                                pecaCaptura: pecaCasaDestino
                             }
                         );
                         if (pecaCasaDestino != null && direcao != "especial") {
@@ -525,7 +539,6 @@ module.exports = class Jogo {
         const possiveisMovimentosAdversario = this.filtraPossiveisMovimentos(pecasAdversario, true);
 
         possiveisMovimentos.forEach(possivelMovimento => {
-            const pecaCaptura = possiveisMovimentosAdversario.find(pecaAdversario => pecaAdversario.casaOrigem == possivelMovimento.casaDestino);
             const capturantesAdversarios = possiveisMovimentosAdversario.filter(possivelMovimentoAdversario => possivelMovimentoAdversario.casaDestino == possivelMovimento.casaDestino);
             const capturavel = capturantesAdversarios.length > 0;
 
@@ -538,7 +551,7 @@ module.exports = class Jogo {
                         possivelMovimento.casaOrigem,
                         possivelMovimento.casaDestino,
                         possivelMovimento.nomeJogada,
-                        pecaCaptura,
+                        possivelMovimento.pecaCaptura,
                         capturantesAdversarios
                     )
                 );
