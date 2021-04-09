@@ -6,7 +6,7 @@ module.exports = {
         return db.jogos;
     }, encontra(id) {
         return new Jogo().encontra(id);
-    }, cria(tipoJogoId, tempoDeTurnoEmMilisegundos = 300000) {
+    }, cria(tipoJogoId, tempoDeTurnoEmMilisegundos = -1) {
         return new Jogo(tipoJogoId, tempoDeTurnoEmMilisegundos).cria();
     }, realizaJogada(jogoId, ladoId, casaOrigem, casaDestino) {
         return this.encontra(jogoId).realizaJogada(ladoId, casaOrigem, casaDestino);

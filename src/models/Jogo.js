@@ -15,7 +15,7 @@ const AcaoSolicitada = require("./AcaoSolicitada");
 const Turno = require("./Turno");
 
 module.exports = class Jogo {
-    constructor(tipoJogoId = 0, tempoDeTurnoEmMilisegundos = 300000) {
+    constructor(tipoJogoId = 0, tempoDeTurnoEmMilisegundos = -1) {
         this.id = null;
 
         this.ladoBranco = new Lado(db.lados[0]);
@@ -124,7 +124,7 @@ module.exports = class Jogo {
             }
         });
         let tempoRestante = this.tempoDeTurnoEmMilisegundos - totalMilisegundosGastos;
-        if (tempoRestante <= 0 && this.ladoIdAtual == ladoId) {
+        if (tempoRestante <= 0 && this.ladoIdAtual == ladoId && this.tempoDeTurnoEmMilisegundos != -1) {
             // empata por Insuficiência material
             this.defineFinalizado(3);
         }
@@ -133,7 +133,9 @@ module.exports = class Jogo {
 
     incluiNovoTurno() {
         this.verificaTempoRestanteLados();
-        this.turnos.push(new Turno(this.ladoIdAtual));
+        if (this.finalizado == null) {
+            this.turnos.push(new Turno(this.ladoIdAtual));
+        }
     }
 
     defineTipoJogo(tipoJogoId) {
