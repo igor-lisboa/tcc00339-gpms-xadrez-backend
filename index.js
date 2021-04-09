@@ -142,6 +142,33 @@ emitter.on("jogadasExecutadasIa", (args) => {
     }
 });
 
+emitter.on("acoesSolicitadas", (args) => {
+    if ("acoesSolicitadas" in args && "jogoId" in args) {
+        args.acoesSolicitadas.forEach(acaoSolicitada => {
+            const lado = JogoService.encontra(args.jogoId).recuperaLadoPeloId(acaoSolicitada.ladoId);
+
+            let jogadorIdentificador = "I.A.";
+
+            // define parametro q sera usado p buscar socket
+            if (lado.tipoId == 0) {
+                jogadorIdentificador = args.jogoId + "-" + lado.id;
+            }
+
+            // procura o adversario na lista de jogadores conectados
+            const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
+
+            // se encontrar o adversario na lista de jogadores conectados dispara evento p socket
+            if (destinoEvento != undefined) {
+                io.to(destinoEvento.socketId).emit(acaoSolicitada.acao);
+                if (verbose) {
+                    console.log("Enviando mensagem de " + acaoSolicitada.acao + " para " + destinoEvento.identificador + "...");
+                }
+            }
+        });
+
+    }
+});
+
 emitter.on("jogadaRealizada", (args) => {
     if ("jogadaRealizada" in args && "jogoId" in args && "ladoId" in args) {
         // recupera lado adversario

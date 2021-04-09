@@ -58,9 +58,10 @@ module.exports = class Jogo {
 
         this.finalizado = null;
 
-        this.acoesPossiveis = ["promocaoPeao", "responderPropostaEmpate"];
-
+        // promocaoPeao, responderPropostaEmpate
         this.acoesSolicitadas = [];
+
+        this.casaPeaoPromocao = null;
 
         this.defineTipoJogo(tipoJogoId);
     }
@@ -165,6 +166,10 @@ module.exports = class Jogo {
             throw "Aguarde outro jogador se logar adequadamente no lado adversário";
         }
 
+        if (this.acoesSolicitadas.length > 0) {
+            throw "Tem ações solicitadas a serem executadas";
+        }
+
         const jogadaEscolhida = this.move(casaOrigem, casaDestino, ladoId);
 
         // passa a vez p outro jogador
@@ -195,6 +200,24 @@ module.exports = class Jogo {
         return this;
     }
 
+    verificaFinalizado() {
+        if (this.finalizado != null) {
+            universalEmitter.emit("jogoFinalizado", { jogo: this });
+        }
+    }
+
+    verificaAcoesSolicitadas() {
+        if (this.acoesSolicitadas.length > 0) {
+            universalEmitter.emit(
+                "acoesSolicitadas",
+                {
+                    acoesSolicitadas: this.acoesSolicitadas,
+                    jogoId: this.id
+                }
+            );
+        }
+    }
+
     salva() {
         if (this.id == null) {
             const tamanhoAntesPush = db.jogos.length;
@@ -206,9 +229,9 @@ module.exports = class Jogo {
             this.id = ultimoIndice;
         }
         db.jogos[this.id] = this;
-        if (this.finalizado != null) {
-            universalEmitter.emit("jogoFinalizado", { jogo: this });
-        }
+
+        this.verificaFinalizado();
+        this.verificaAcoesSolicitadas();
     }
 
     cria() {
@@ -307,6 +330,11 @@ module.exports = class Jogo {
                 };
             }
 
+            // trata promocao do peao
+            if (jogadaEscolhida.nome == "Promoção do Peão") {
+                this.casaPeaoPromocao = casaPara;
+                this.defineNovaAcaoSolicitada("promocaoPeao", ladoId);
+            }
 
             const novoMovimento = new MovimentoRealizado(identificadorMovimento, casaDe, casaPara, pecaCapturada, jogadaEscolhida.nome, movimentosEspeciaisExecutados);
 
