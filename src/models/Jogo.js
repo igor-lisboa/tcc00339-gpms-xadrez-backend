@@ -90,8 +90,8 @@ module.exports = class Jogo {
                 this.defineJogador(this.recuperaLadoAdversarioPeloId(ladoId).id, db.ladoTipos[1]);
             }
 
-            // se os 2 lados tiverem logados inicia o turno
-            if (this.ladoBranco.tipo != null && this.ladoPreto.tipo != null) {
+            // se os 2 lados tiverem logados e n tiver nenhum turno gravado inicia o turno
+            if (this.ladoBranco.tipo != null && this.ladoPreto.tipo != null && this.turnos.length == 0) {
                 this.incluiNovoTurno();
             }
         } else {
