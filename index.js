@@ -1,10 +1,10 @@
-require('dotenv').config();
+require("dotenv").config();
 const express = require("express");
 
 const cors = require("cors");
 const routes = require("./src/routes");
 
-const events = require('events').EventEmitter;
+const events = require("events").EventEmitter;
 
 const app = express();
 const http = require("http").createServer(app);
@@ -12,7 +12,7 @@ const io = require("socket.io")(http, { cors: true });
 
 const verbose = process.env.APP_VERBOSE || true;
 
-const JogoService = require('./src/services/JogoService');
+const JogoService = require("./src/services/JogoService");
 
 let jogadoresConectados = [];
 
@@ -25,7 +25,7 @@ io.on("connection", (socket) => {
         console.log("O jogador " + socket.handshake.query.jogador + " se conectou...");
     }
 
-    socket.on('disconnect', () => {
+    socket.on("disconnect", () => {
         let index = jogadoresConectados.indexOf({
             "socketId": socket.id,
             "identificador": socket.handshake.query.jogador
@@ -44,6 +44,9 @@ emitter.on("jogoCriado", (args) => {
         io.emit("jogoCriado", {
             jogo: args.jogo
         });
+        if (verbose) {
+            console.log("Enviando mensagem de jogoCriado para todos os jogadores conectados...");
+        }
     }
 });
 
@@ -58,29 +61,31 @@ emitter.on("jogoFinalizado", (args) => {
         const destinoEventoLadoBranco = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == identificadorLadoBranco);
         const destinoEventoLadoPreto = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == identificadorLadoPreto);
 
+        let destinos = [];
 
         // se encontrar o socket do jogador do lado branco
         if (destinoEventoLadoBranco != undefined) {
-            if (verbose) {
-                console.log("Enviando mensagem de jogoFinalizado para o jogador " + destinoEventoLadoBranco.identificador + "...");
-            }
-            io.to(destinoEventoLadoBranco.socketId).emit('jogoFinalizado');
+            destinos.push(destinoEventoLadoBranco);
         }
 
         // se encontrar o socket do jogador do lado preto
         if (destinoEventoLadoPreto != undefined) {
-            if (verbose) {
-                console.log("Enviando mensagem de jogoFinalizado para o jogador " + destinoEventoLadoPreto.identificador + "...");
-            }
-            io.to(destinoEventoLadoPreto.socketId).emit('jogoFinalizado');
+            destinos.push(destinoEventoLadoPreto);
         }
+
+        destinos.forEach(destino => {
+            io.to(destino.socketId).emit("jogoFinalizado", { jogo: args.jogo });
+            if (verbose) {
+                console.log("Enviando mensagem de jogoFinalizado para o jogador " + destino.identificador + "...");
+            }
+        });
     }
 });
 
 emitter.on("forcaIa", () => {
     const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == "I.A.");
     if (destinoEvento != undefined) {
-        io.to(destinoEvento.socketId).emit('forcaIa');
+        io.to(destinoEvento.socketId).emit("forcaIa");
         if (verbose) {
             console.log("Enviando mensagem de forcaIa para " + destinoEvento.identificador + "...");
         }
@@ -104,7 +109,7 @@ emitter.on("jogadorEntrou", (args) => {
 
         // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
         if (destinoEvento != undefined) {
-            io.to(destinoEvento.socketId).emit('adversarioEntrou');
+            io.to(destinoEvento.socketId).emit("adversarioEntrou");
             if (verbose) {
                 console.log("Enviando mensagem de adversarioEntrou para " + destinoEvento.identificador + "...");
             }
@@ -116,26 +121,27 @@ emitter.on("jogadasExecutadasIa", (args) => {
     if ("jogadasExecutadas" in args) {
         // para cada jogada executada avisa o adversario caso ele esteja conectado
         args.jogadasExecutadas.forEach((jogadaRealizada) => {
-            const tabuleiro = JogoService.recuperaTabuleiro(jogadaRealizada.jogoId);
+            // verifica se o adversario eh o lado atual
+            if (jogadaRealizada.ladoAdversario.ladoId == jogadaRealizada.jogo.ladoIdAtual) {
+                let jogadorIdentificador = "I.A.";
 
-            let jogadorIdentificador = "I.A.";
+                // define parametro q sera usado p buscar socket do adversario
+                if (jogadaRealizada.ladoAdversario.tipoId == 0) {
+                    jogadorIdentificador = jogadaRealizada.jogo.id + "-" + jogadaRealizada.ladoAdversario.ladoId;
+                }
 
-            // define parametro q sera usado p buscar socket do adversario
-            if (jogadaRealizada.ladoAdversario.tipoId == 0) {
-                jogadorIdentificador = jogadaRealizada.jogoId + "-" + jogadaRealizada.ladoAdversario.ladoId;
-            }
+                // procura o adversario na lista de jogadores conectados
+                const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
 
-            // procura o adversario na lista de jogadores conectados
-            const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
-
-            // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
-            if (destinoEvento != undefined) {
-                io.to(destinoEvento.socketId).emit('jogadaRealizada', {
-                    jogadaRealizada: jogadaRealizada.jogada,
-                    tabuleiro
-                });
-                if (verbose) {
-                    console.log("Enviando mensagem de jogadaRealizada para " + destinoEvento.identificador + "...");
+                // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
+                if (destinoEvento != undefined) {
+                    io.to(destinoEvento.socketId).emit("jogadaRealizada", {
+                        jogadaRealizada: jogadaRealizada.jogada,
+                        jogo: jogadaRealizada.jogo
+                    });
+                    if (verbose) {
+                        console.log("Enviando mensagem de jogadaRealizada para " + destinoEvento.identificador + "...");
+                    }
                 }
             }
         });
@@ -170,31 +176,28 @@ emitter.on("acoesSolicitadas", (args) => {
 });
 
 emitter.on("jogadaRealizada", (args) => {
-    if ("jogadaRealizada" in args && "jogoId" in args && "ladoId" in args) {
-        // recupera lado adversario
-        const jogo = JogoService.encontra(args.jogoId);
+    if ("jogadaRealizada" in args && "jogo" in args && "ladoAdversario" in args) {
+        // verifica se o adversario eh o lado atual
+        if (args.ladoAdversario.ladoId == args.jogo.ladoIdAtual) {
+            let jogadorIdentificador = "I.A.";
 
-        const ladoAdversario = jogo.recuperaLadoPeloId(JogoService.recuperaIdLadoAdversarioPeloId(args.ladoId));
-        const tabuleiro = jogo.recuperaTabuleiro();
+            // define parametro q sera usado p buscar socket do adversario
+            if (args.ladoAdversario.tipoId == 0) {
+                jogadorIdentificador = args.jogoId + "-" + args.ladoAdversario.ladoId;
+            }
 
-        let jogadorIdentificador = "I.A.";
+            // procura o adversario na lista de jogadores conectados
+            const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
 
-        // define parametro q sera usado p buscar socket do adversario
-        if (ladoAdversario.tipo.id == 0) {
-            jogadorIdentificador = args.jogoId + "-" + ladoAdversario.id;
-        }
-
-        // procura o adversario na lista de jogadores conectados
-        const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
-
-        // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
-        if (destinoEvento != undefined) {
-            io.to(destinoEvento.socketId).emit('jogadaRealizada', {
-                jogadaRealizada: args.jogadaRealizada,
-                tabuleiro
-            });
-            if (verbose) {
-                console.log("Enviando mensagem de jogadaRealizada para " + destinoEvento.identificador + "...");
+            // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
+            if (destinoEvento != undefined) {
+                io.to(destinoEvento.socketId).emit("jogadaRealizada", {
+                    jogadaRealizada: args.jogadaRealizada,
+                    jogo: args.jogo
+                });
+                if (verbose) {
+                    console.log("Enviando mensagem de jogadaRealizada para " + destinoEvento.identificador + "...");
+                }
             }
         }
     }

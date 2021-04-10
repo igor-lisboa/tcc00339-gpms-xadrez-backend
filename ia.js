@@ -1,4 +1,4 @@
-require('dotenv').config();
+require("dotenv").config();
 const axios = require("axios").default;
 
 const verbose = process.env.APP_VERBOSE || true;
@@ -17,34 +17,34 @@ const sleep = async (ms) => {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-socket.on('uncaughtException', function (err) {
+socket.on("uncaughtException", function (err) {
     console.log(err);
 });
 
-socket.on('jogoCriado', async function () {
+socket.on("jogoCriado", async function () {
     if (verbose) {
-        console.log('Novo jogo criado...');
+        console.log("Novo jogo criado...");
     }
     await ia();
 });
 
-socket.on('adversarioEntrou', async function () {
+socket.on("adversarioEntrou", async function () {
     if (verbose) {
-        console.log('Adversário entrou...');
+        console.log("Adversário entrou...");
     }
     await ia();
 });
 
-socket.on('jogadaRealizada', async function () {
+socket.on("jogadaRealizada", async function () {
     if (verbose) {
-        console.log('Jogada realizada...');
+        console.log("Jogada realizada...");
     }
     await ia();
 });
 
-socket.on('forcaIa', async function () {
+socket.on("forcaIa", async function () {
     if (verbose) {
-        console.log('Força I.A. a rodar...');
+        console.log("Força I.A. a rodar...");
     }
     await ia();
 });
@@ -138,6 +138,6 @@ const ia = async () => {
 
 // executa ia 1 unica vez ao iniciar
 if (verbose) {
-    console.log('Iniciando I.A. ...');
+    console.log("Iniciando I.A. ...");
 }
 ia();

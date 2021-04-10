@@ -11,7 +11,14 @@ module.exports = {
     }, promovePeao(jogoId, ladoId, pecaEscolhida) {
         return this.encontra(jogoId).promovePeao(ladoId, pecaEscolhida);
     }, realizaJogada(jogoId, ladoId, casaOrigem, casaDestino) {
-        return this.encontra(jogoId).realizaJogada(ladoId, casaOrigem, casaDestino);
+        const { jogo, jogadaRealizada, ladoAdversario } = this.executaJogada(jogoId, ladoId, casaOrigem, casaDestino);
+        universalEmitter.emit("jogadaRealizada", { jogadaRealizada, jogo, ladoAdversario });
+        return jogadaRealizada;
+    }, executaJogada(jogoId, ladoId, casaOrigem, casaDestino) {
+        const jogo = this.encontra(jogoId);
+        const jogadaRealizada = jogo.realizaJogada(ladoId, casaOrigem, casaDestino);
+        const ladoAdversario = this.recuperaLadoTipoDoJogo(jogo, this.recuperaIdLadoAdversarioPeloId(ladoId));
+        return { jogo, jogadaRealizada, ladoAdversario };
     }, insereJogador(jogoId, ladoId, tipoId) {
         return this.encontra(jogoId).defineJogador(ladoId, db.ladoTipos[tipoId]);
     }, removeJogador(jogoId, ladoId) {
@@ -47,10 +54,12 @@ module.exports = {
             let jogadaRetorno = {
                 "jogoId": jogada.jogoId,
                 "ladoId": jogada.ladoId,
-                "ladoAdversario": this.recuperaLadoTipo(jogada.jogoId, this.recuperaIdLadoAdversarioPeloId(jogada.ladoId))
             };
             try {
-                jogadaRetorno.jogada = this.realizaJogada(jogada.jogoId, jogada.ladoId, jogada.casaOrigem, jogada.casaDestino);
+                const { jogo, jogadaRealizada, ladoAdversario } = this.executaJogada(jogada.jogoId, jogada.ladoId, jogada.casaOrigem, jogada.casaDestino);
+                jogadaRetorno.ladoAdversario = ladoAdversario;
+                jogadaRetorno.jogada = jogadaRealizada;
+                jogadaRetorno.jogo = jogo;
                 jogadasExecutadas.push(jogadaRetorno);
             } catch (ex) {
                 jogadaRetorno.erro = ex;
@@ -58,10 +67,23 @@ module.exports = {
                 jogadasErros.push(jogadaRetorno)
             }
         });
+
+        if (jogadasExecutadas.length > 0) {
+            universalEmitter.emit("jogadasExecutadasIa", {
+                jogadasExecutadas
+            });
+        }
+
+        if (jogadasErros.length > 0) {
+            this.forcaIa();
+        }
+
         return {
             jogadasExecutadas,
             jogadasErros
         };
+    }, forcaIa() {
+        universalEmitter.emit("forcaIa");
     }, recuperaLadoIa(jogo, lado) {
         if (lado.tipo != null) {
             if (lado.tipo.id == 1) {
@@ -141,7 +163,9 @@ module.exports = {
         }
         return 0;
     }, recuperaLadoTipo(jogoId, ladoId) {
-        const lado = this.encontra(jogoId).recuperaLadoPeloId(ladoId);
+        return this.recuperaLadoTipoDoJogo(this.encontra(jogoId), ladoId);
+    }, recuperaLadoTipoDoJogo(jogo, ladoId) {
+        const lado = jogo.recuperaLadoPeloId(ladoId);
         let ladoRetorno = {
             "ladoId": lado.id,
             "lado": lado.lado,

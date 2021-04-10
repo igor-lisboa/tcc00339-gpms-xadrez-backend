@@ -13,6 +13,7 @@ const MovimentoPossivel = require("./MovimentoPossivel");
 const TipoJogoService = require("../services/TipoJogoService");
 const AcaoSolicitada = require("./AcaoSolicitada");
 const Turno = require("./Turno");
+const TipoPecaService = require("../services/TipoPecaService");
 
 module.exports = class Jogo {
     constructor(tipoJogoId = 0, tempoDeTurnoEmMilisegundos = -1) {
@@ -103,6 +104,11 @@ module.exports = class Jogo {
 
         this.salva();
 
+        universalEmitter.emit("jogadorEntrou", {
+            lado,
+            jogoId: this.id
+        });
+
         return lado;
     }
 
@@ -143,7 +149,7 @@ module.exports = class Jogo {
         this.tipoJogo = TipoJogoService.encontra(tipoJogoId);
         // se tipo de jogo for I.A. X I.A.
         if (this.tipoJogo.id == 2) {
-            // insere I.A.'s
+            // insere I.A.s
             this.defineJogador(0, db.ladoTipos[1]);
             this.defineJogador(1, db.ladoTipos[1]);
         }
@@ -172,8 +178,11 @@ module.exports = class Jogo {
 
         const jogadaEscolhida = this.move(casaOrigem, casaDestino, ladoId);
 
-        // passa a vez p outro jogador
-        this.defineLadoIdAtual(this.recuperaLadoAdversarioPeloId(this.ladoIdAtual).id);
+        // so define o lado p adversario se n tiver q promover o peao
+        if (this.casaPeaoPromocao == null) {
+            // passa a vez p outro jogador
+            this.defineLadoIdAtual(this.recuperaLadoAdversarioPeloId(this.ladoIdAtual).id);
+        }
 
         // verifica se a jogada colocou o rei do adversario em cheque
         this.chequeLadoAtual = this.verificaReiLadoAtualCheque();
@@ -236,12 +245,43 @@ module.exports = class Jogo {
 
     cria() {
         this.salva();
+        universalEmitter.emit("jogoCriado", { jogo: this });
         return this;
     }
 
-    promovePeao(ladoId, pecaEscolhida) {
-        console.log(ladoId);
-        console.log(pecaEscolhida);
+    promovePeao(ladoId, pecaEscolhidaId) {
+        if (this.casaPeaoPromocao != null) {
+            const acaoPromovePeao = this.acoesSolicitadas.find(acaoPromovePeao => acaoPromovePeao.acao == "promocaoPeao" && acaoPromovePeao.ladoId == ladoId);
+            if (acaoPromovePeao != undefined) {
+                const pecaEscolhida = TipoPecaService.listaPromocaoPeao().find(tipoPeca => tipoPeca.id == pecaEscolhidaId);
+                if (pecaEscolhida != undefined) {
+                    // atualiza a peca
+                    const pecaClass = pecaEscolhida.classe;
+                    const pecaPromovida = new pecaClass(ladoId);
+                    const pecaDaCasaDePromocao = this.recuperaPecaDaCasa(this.casaPeaoPromocao);
+
+                    [...pecaDaCasaDePromocao.jogadasRealizadas].forEach(jogadasRealizadas => {
+                        pecaPromovida.incluiMovimentoRealizado(jogadasRealizadas);
+                    });
+                    this.tabuleiro[this.casaPeaoPromocao.linha][this.casaPeaoPromocao.coluna] = pecaPromovida;
+
+                    // passa a vez p outro jogador
+                    this.defineLadoIdAtual(this.recuperaLadoAdversarioPeloId(ladoId).id);
+
+                    this.salva();
+
+                    universalEmitter.emit("peaoPromovido", { jogo: this });
+
+                    return pecaPromovida;
+                } else {
+                    throw "Peça inválida escolhida para a promoção do peão";
+                }
+            } else {
+                throw "Promoção de peão inválida";
+            }
+        } else {
+            throw "Não é possível promover nenhum peão no momento";
+        }
     }
 
     move(casaDe, casaPara, ladoId) {

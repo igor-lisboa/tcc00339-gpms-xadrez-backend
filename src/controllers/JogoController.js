@@ -37,11 +37,9 @@ module.exports = {
     cria(req, res) {
         try {
             const { tipoJogo, tempoDeTurnoEmMilisegundos } = req.body;
-            const jogo = JogoService.cria(tipoJogo, tempoDeTurnoEmMilisegundos);
-            universalEmitter.emit("jogoCriado", { jogo });
             return res.json({
                 message: "Jogo incluído com sucesso!",
-                data: jogo,
+                data: JogoService.cria(tipoJogo, tempoDeTurnoEmMilisegundos),
                 success: true
             });
         } catch (e) {
@@ -55,10 +53,9 @@ module.exports = {
     }, recuperaLadoAtual(req, res) {
         try {
             const { jogoId } = req.params;
-            const jogo = JogoService.encontra(jogoId);
             return res.json({
                 message: "Lado atual do jogo retornado com sucesso!",
-                data: jogo.recuperaLadoPeloId(jogo.ladoIdAtual),
+                data: JogoService.encontra(jogoId).recuperaLadoPeloId(jogo.ladoIdAtual),
                 success: true
             });
         } catch (e) {
@@ -107,7 +104,7 @@ module.exports = {
         try {
             const { jogoId } = req.params;
             return res.json({
-                message: "I.A.'s do jogo retornadas com sucesso!",
+                message: "I.A.s do jogo retornadas com sucesso!",
                 data: JogoService.recuperaLadosIa(jogoId),
                 success: true
             });
@@ -121,7 +118,7 @@ module.exports = {
         }
     }, forcaIa(req, res) {
         try {
-            universalEmitter.emit("forcaIa");
+            JogoService.forcaIa();
             return res.json({
                 message: "Tentativa de forçar a I.A. a executar executada com sucesso!",
                 data: null,
@@ -153,22 +150,9 @@ module.exports = {
     }, executaJogadasIa(req, res) {
         try {
             const { jogadas } = req.body;
-            const jogadasExecutadasRetorno = JogoService.executaJogadas(jogadas);
-
-            if (jogadasExecutadasRetorno.jogadasExecutadas.length > 0) {
-                universalEmitter.emit("jogadasExecutadasIa", {
-                    jogadasExecutadas: jogadasExecutadasRetorno.jogadasExecutadas
-                });
-            }
-
-            if (jogadasExecutadasRetorno.jogadasErros.length > 0) {
-                universalEmitter.emit("forcaIa");
-            }
-
-            // retorna json de sucesso
             return res.json({
                 message: "Jogadas solicitadas pela I.A. executadas com sucesso!",
-                data: jogadasExecutadasRetorno,
+                data: JogoService.executaJogadas(jogadas),
                 success: true
             });
         } catch (e) {
