@@ -12,8 +12,6 @@ const io = require("socket.io")(http, { cors: true });
 
 const verbose = process.env.APP_VERBOSE || true;
 
-const JogoService = require("./src/services/JogoService");
-
 let jogadoresConectados = [];
 
 io.on("connection", (socket) => {
@@ -47,14 +45,17 @@ emitter.on("jogoCriado", (args) => {
         if (verbose) {
             console.log("Enviando mensagem de jogoCriado para todos os jogadores conectados...");
         }
+    } else {
+        if (verbose) {
+            console.log("O evento jogoCriado não tinha a propriedade jogo (" + JSON.stringify(args) + ")...");
+        }
     }
 });
 
 emitter.on("jogoFinalizado", (args) => {
     if ("jogo" in args) {
-        const jogoId = args.jogo.id;
-        const identificadorLadoBranco = jogoId + "-0";
-        const identificadorLadoPreto = jogoId + "-1";
+        const identificadorLadoBranco = args.jogo.id + "-0";
+        const identificadorLadoPreto = args.jogo.id + "-1";
 
 
         // os sockets
@@ -79,6 +80,10 @@ emitter.on("jogoFinalizado", (args) => {
                 console.log("Enviando mensagem de jogoFinalizado para o jogador " + destino.identificador + "...");
             }
         });
+    } else {
+        if (verbose) {
+            console.log("O evento jogoFinalizado não tinha a propriedade jogo (" + JSON.stringify(args) + ")...");
+        }
     }
 });
 
@@ -89,19 +94,22 @@ emitter.on("forcaIa", () => {
         if (verbose) {
             console.log("Enviando mensagem de forcaIa para " + destinoEvento.identificador + "...");
         }
+    } else {
+        if (verbose) {
+            console.log("A I.A. não está na lista de jogadores conectados (" + JSON.stringify(jogadoresConectados) + ")...");
+        }
     }
 });
 
 emitter.on("jogadorEntrou", (args) => {
-    if ("lado" in args && "jogoId" in args) {
-        // recupera lado adversario
-        const ladoAdversario = JogoService.recuperaLadoTipo(args.jogoId, JogoService.recuperaIdLadoAdversarioPeloId(args.lado.id));
-
+    if ("jogo" in args && "ladoAdversario" in args) {
         let jogadorIdentificador = "I.A.";
 
         // define parametro q sera usado p buscar socket do adversario
-        if (ladoAdversario.tipoId == 0) {
-            jogadorIdentificador = args.jogoId + "-" + ladoAdversario.ladoId;
+        if (args.ladoAdversario.tipo != null) {
+            if (args.ladoAdversario.tipo.id == 0) {
+                jogadorIdentificador = args.jogo.id + "-" + args.ladoAdversario.id;
+            }
         }
 
         // procura o adversario na lista de jogadores conectados
@@ -109,55 +117,28 @@ emitter.on("jogadorEntrou", (args) => {
 
         // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
         if (destinoEvento != undefined) {
-            io.to(destinoEvento.socketId).emit("adversarioEntrou");
+            io.to(destinoEvento.socketId).emit("adversarioEntrou", { jogo: args.jogo });
             if (verbose) {
                 console.log("Enviando mensagem de adversarioEntrou para " + destinoEvento.identificador + "...");
             }
         }
-    }
-});
-
-emitter.on("jogadasExecutadasIa", (args) => {
-    if ("jogadasExecutadas" in args) {
-        // para cada jogada executada avisa o adversario caso ele esteja conectado
-        args.jogadasExecutadas.forEach((jogadaRealizada) => {
-            // verifica se o adversario eh o lado atual
-            if (jogadaRealizada.ladoAdversario.ladoId == jogadaRealizada.jogo.ladoIdAtual) {
-                let jogadorIdentificador = "I.A.";
-
-                // define parametro q sera usado p buscar socket do adversario
-                if (jogadaRealizada.ladoAdversario.tipoId == 0) {
-                    jogadorIdentificador = jogadaRealizada.jogo.id + "-" + jogadaRealizada.ladoAdversario.ladoId;
-                }
-
-                // procura o adversario na lista de jogadores conectados
-                const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
-
-                // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
-                if (destinoEvento != undefined) {
-                    io.to(destinoEvento.socketId).emit("jogadaRealizada", {
-                        jogadaRealizada: jogadaRealizada.jogada,
-                        jogo: jogadaRealizada.jogo
-                    });
-                    if (verbose) {
-                        console.log("Enviando mensagem de jogadaRealizada para " + destinoEvento.identificador + "...");
-                    }
-                }
-            }
-        });
+    } else {
+        if (verbose) {
+            console.log("O evento jogadorEntrou não tinha a propriedade jogo ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
+        }
     }
 });
 
 emitter.on("acoesSolicitadas", (args) => {
     if ("acoesSolicitadas" in args && "jogoId" in args) {
         args.acoesSolicitadas.forEach(acaoSolicitada => {
-            const lado = JogoService.encontra(args.jogoId).recuperaLadoPeloId(acaoSolicitada.ladoId);
-
             let jogadorIdentificador = "I.A.";
 
             // define parametro q sera usado p buscar socket
-            if (lado.tipoId == 0) {
-                jogadorIdentificador = args.jogoId + "-" + lado.id;
+            if (acaoSolicitada.lado.tipo != null) {
+                if (acaoSolicitada.lado.tipo.id == 0) {
+                    jogadorIdentificador = args.jogoId + "-" + acaoSolicitada.lado.id;
+                }
             }
 
             // procura o adversario na lista de jogadores conectados
@@ -165,25 +146,30 @@ emitter.on("acoesSolicitadas", (args) => {
 
             // se encontrar o adversario na lista de jogadores conectados dispara evento p socket
             if (destinoEvento != undefined) {
-                io.to(destinoEvento.socketId).emit(acaoSolicitada.acao, acaoSolicitada.data);
+                io.to(destinoEvento.socketId).emit(acaoSolicitada.acaoItem.acao, acaoSolicitada.acaoItem.data);
                 if (verbose) {
-                    console.log("Enviando mensagem de " + acaoSolicitada.acao + " para " + destinoEvento.identificador + "...");
+                    console.log("Enviando mensagem de " + acaoSolicitada.acaoItem.acao + " para " + destinoEvento.identificador + "...");
                 }
             }
         });
-
+    } else {
+        if (verbose) {
+            console.log("O evento acoesSolicitadas não tinha a propriedade acoesSolicitadas ou a propriedade jogoId (" + JSON.stringify(args) + ")...");
+        }
     }
 });
 
 emitter.on("jogadaRealizada", (args) => {
     if ("jogadaRealizada" in args && "jogo" in args && "ladoAdversario" in args) {
         // verifica se o adversario eh o lado atual
-        if (args.ladoAdversario.ladoId == args.jogo.ladoIdAtual) {
+        if (args.ladoAdversario.id == args.jogo.ladoIdAtual) {
             let jogadorIdentificador = "I.A.";
 
             // define parametro q sera usado p buscar socket do adversario
-            if (args.ladoAdversario.tipoId == 0) {
-                jogadorIdentificador = args.jogoId + "-" + args.ladoAdversario.ladoId;
+            if (args.ladoAdversario.tipo != null) {
+                if (args.ladoAdversario.tipo.id == 0) {
+                    jogadorIdentificador = args.jogo.id + "-" + args.ladoAdversario.id;
+                }
             }
 
             // procura o adversario na lista de jogadores conectados
@@ -198,7 +184,19 @@ emitter.on("jogadaRealizada", (args) => {
                 if (verbose) {
                     console.log("Enviando mensagem de jogadaRealizada para " + destinoEvento.identificador + "...");
                 }
+            } else {
+                if (verbose) {
+                    console.log("A mensagem de jogadaRealizada não foi enviada para " + jogadorIdentificador + " pois o mesmo não está na lista de jogadores conectados (" + JSON.stringify(jogadoresConectados) + ")...");
+                }
             }
+        } else {
+            if (verbose) {
+                console.log("O evento jogadaRealizada não pode mandar mensagem para o jogador adversário pois ainda não está na vez do mesmo...");
+            }
+        }
+    } else {
+        if (verbose) {
+            console.log("O evento jogadaRealizada não tinha a propriedade jogadaRealizada ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
         }
     }
 });

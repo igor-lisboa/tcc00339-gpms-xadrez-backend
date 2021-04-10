@@ -104,11 +104,6 @@ module.exports = class Jogo {
 
         this.salva();
 
-        universalEmitter.emit("jogadorEntrou", {
-            lado,
-            jogoId: this.id
-        });
-
         return lado;
     }
 
@@ -140,7 +135,7 @@ module.exports = class Jogo {
 
     incluiNovoTurno() {
         this.verificaTempoRestanteLados();
-        if (this.finalizado == null) {
+        if (this.finalizado != null) {
             this.turnos.push(new Turno(this.ladoIdAtual));
         }
     }
@@ -176,12 +171,14 @@ module.exports = class Jogo {
             throw "Tem ações solicitadas a serem executadas";
         }
 
-        const jogadaEscolhida = this.move(casaOrigem, casaDestino, ladoId);
+        const jogadaRealizada = this.move(casaOrigem, casaDestino, ladoId);
+
+        const ladoAdversario = this.recuperaLadoAdversarioPeloId(this.ladoIdAtual);
 
         // so define o lado p adversario se n tiver q promover o peao
         if (this.casaPeaoPromocao == null) {
             // passa a vez p outro jogador
-            this.defineLadoIdAtual(this.recuperaLadoAdversarioPeloId(this.ladoIdAtual).id);
+            this.defineLadoIdAtual(ladoAdversario.id);
         }
 
         // verifica se a jogada colocou o rei do adversario em cheque
@@ -189,7 +186,7 @@ module.exports = class Jogo {
 
         this.salva();
 
-        return jogadaEscolhida;
+        return { jogadaRealizada, ladoAdversario };
     }
 
     encontra(jogoId) {
@@ -217,10 +214,22 @@ module.exports = class Jogo {
 
     verificaAcoesSolicitadas() {
         if (this.acoesSolicitadas.length > 0) {
+            let acoesSolicitadasConsolidado = [];
+
+            this.acoesSolicitadas.forEach(acaoSolicitada => {
+                const lado = this.recuperaLadoPeloId(acaoSolicitada.ladoId);
+                acoesSolicitadasConsolidado.push(
+                    {
+                        acaoItem: acaoSolicitada,
+                        lado
+                    }
+                );
+            });
+
             universalEmitter.emit(
                 "acoesSolicitadas",
                 {
-                    acoesSolicitadas: this.acoesSolicitadas,
+                    acoesSolicitadas: acoesSolicitadasConsolidado,
                     jogoId: this.id
                 }
             );
@@ -245,7 +254,6 @@ module.exports = class Jogo {
 
     cria() {
         this.salva();
-        universalEmitter.emit("jogoCriado", { jogo: this });
         return this;
     }
 
@@ -258,21 +266,25 @@ module.exports = class Jogo {
                     // atualiza a peca
                     const pecaClass = pecaEscolhida.classe;
                     const pecaPromovida = new pecaClass(ladoId);
-                    const pecaDaCasaDePromocao = this.recuperaPecaDaCasa(this.casaPeaoPromocao);
+                    const pecaDaCasaDePromocao = this.recuperaPecaDaCasa(this.casaPeaoPromocao.casaPeao);
 
                     [...pecaDaCasaDePromocao.jogadasRealizadas].forEach(jogadasRealizadas => {
                         pecaPromovida.incluiMovimentoRealizado(jogadasRealizadas);
                     });
-                    this.tabuleiro[this.casaPeaoPromocao.linha][this.casaPeaoPromocao.coluna] = pecaPromovida;
+                    this.tabuleiro[this.casaPeaoPromocao.casaPeao.linha][this.casaPeaoPromocao.casaPeao.coluna] = pecaPromovida;
+
+                    const jogadaRealizada = this.casaPeaoPromocao.jogadaPromocao;
+
+                    this.casaPeaoPromocao = null;
+
+                    const ladoAdversario = this.recuperaLadoAdversarioPeloId(ladoId);
 
                     // passa a vez p outro jogador
-                    this.defineLadoIdAtual(this.recuperaLadoAdversarioPeloId(ladoId).id);
+                    this.defineLadoIdAtual(ladoAdversario.id);
 
                     this.salva();
 
-                    universalEmitter.emit("peaoPromovido", { jogo: this });
-
-                    return pecaPromovida;
+                    return { pecaPromovida, jogadaRealizada, ladoAdversario };
                 } else {
                     throw "Peça inválida escolhida para a promoção do peão";
                 }
@@ -375,18 +387,20 @@ module.exports = class Jogo {
                 };
             }
 
-            // trata promocao do peao
-            if (jogadaEscolhida.nome == "Promoção do Peão") {
-                this.casaPeaoPromocao = casaPara;
-                this.defineNovaAcaoSolicitada("promocaoPeao", ladoId);
-            }
-
             const novoMovimento = new MovimentoRealizado(identificadorMovimento, casaDe, casaPara, pecaCapturada, jogadaEscolhida.nome, movimentosEspeciaisExecutados);
-
 
             this.recuperaPecaDaCasa(casaPara).incluiMovimentoRealizado(novoMovimento);
 
             this.recuperaLadoPeloId(this.ladoIdAtual).insereJogadaRealizada(novoMovimento);
+
+            // trata promocao do peao
+            if (jogadaEscolhida.nome == "Promoção do Peão") {
+                this.casaPeaoPromocao = {
+                    casaPeao: casaPara,
+                    jogadaPromocao: novoMovimento
+                };
+                this.defineNovaAcaoSolicitada("promocaoPeao", ladoId);
+            }
 
             return novoMovimento;
         } catch (e) {
@@ -394,10 +408,6 @@ module.exports = class Jogo {
             this.tabuleiro = tabuleiroAntesAlteracoes;
             throw e;
         }
-    }
-
-    recuperaTabuleiro() {
-        return this.tabuleiro;
     }
 
     verificaReiLadoAtualCheque() {
