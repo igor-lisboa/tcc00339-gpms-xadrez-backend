@@ -35,7 +35,10 @@ module.exports = {
         const jogo = this.encontra(jogoId);
         const { jogadaRealizada, ladoAdversario } = jogo.realizaJogada(ladoId, casaOrigem, casaDestino);
 
-        universalEmitter.emit("jogadaRealizada", { jogadaRealizada, jogo, ladoAdversario });
+        // so dispara evento se o lado atual eh o lado adversario
+        if (ladoAdversario.id == jogo.ladoIdAtual) {
+            universalEmitter.emit("jogadaRealizada", { jogadaRealizada, jogo, ladoAdversario });
+        }
 
         return jogadaRealizada;
     }, executaJogadas(jogadas = []) {

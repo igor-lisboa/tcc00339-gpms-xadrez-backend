@@ -397,7 +397,7 @@ module.exports = class Jogo {
 
             this.recuperaPecaDaCasa(casaPara).incluiMovimentoRealizado(novoMovimento);
 
-            this.recuperaLadoPeloId(this.ladoIdAtual).insereJogadaRealizada(novoMovimento);
+            lado.insereJogadaRealizada(novoMovimento);
 
             // trata promocao do peao
             if (jogadaEscolhida.nome == "Promoção do Peão") {
@@ -405,7 +405,7 @@ module.exports = class Jogo {
                     casaPeao: casaPara,
                     jogadaPromocao: novoMovimento
                 };
-                this.defineNovaAcaoSolicitada("promocaoPeao", ladoId);
+                this.defineNovaAcaoSolicitada("promocaoPeao", ladoId, { ladoId: lado.id, jogoId: this.id });
             }
 
             return novoMovimento;

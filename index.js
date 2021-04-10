@@ -121,6 +121,10 @@ emitter.on("jogadorEntrou", (args) => {
             if (verbose) {
                 console.log("Enviando mensagem de adversarioEntrou para " + destinoEvento.identificador + "...");
             }
+        } else {
+            if (verbose) {
+                console.log("A mensagem de jogadorEntrou não foi enviada para " + jogadorIdentificador + " pois o mesmo não está na lista de jogadores conectados (" + JSON.stringify(jogadoresConectados) + ")...");
+            }
         }
     } else {
         if (verbose) {
@@ -150,6 +154,10 @@ emitter.on("acoesSolicitadas", (args) => {
                 if (verbose) {
                     console.log("Enviando mensagem de " + acaoSolicitada.acaoItem.acao + " para " + destinoEvento.identificador + "...");
                 }
+            } else {
+                if (verbose) {
+                    console.log("A mensagem de " + acaoSolicitada.acaoItem.acao + " não foi enviada para " + jogadorIdentificador + " pois o mesmo não está na lista de jogadores conectados (" + JSON.stringify(jogadoresConectados) + ")...");
+                }
             }
         });
     } else {
@@ -161,37 +169,30 @@ emitter.on("acoesSolicitadas", (args) => {
 
 emitter.on("jogadaRealizada", (args) => {
     if ("jogadaRealizada" in args && "jogo" in args && "ladoAdversario" in args) {
-        // verifica se o adversario eh o lado atual
-        if (args.ladoAdversario.id == args.jogo.ladoIdAtual) {
-            let jogadorIdentificador = "I.A.";
+        let jogadorIdentificador = "I.A.";
 
-            // define parametro q sera usado p buscar socket do adversario
-            if (args.ladoAdversario.tipo != null) {
-                if (args.ladoAdversario.tipo.id == 0) {
-                    jogadorIdentificador = args.jogo.id + "-" + args.ladoAdversario.id;
-                }
+        // define parametro q sera usado p buscar socket do adversario
+        if (args.ladoAdversario.tipo != null) {
+            if (args.ladoAdversario.tipo.id == 0) {
+                jogadorIdentificador = args.jogo.id + "-" + args.ladoAdversario.id;
             }
+        }
 
-            // procura o adversario na lista de jogadores conectados
-            const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
+        // procura o adversario na lista de jogadores conectados
+        const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
 
-            // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
-            if (destinoEvento != undefined) {
-                io.to(destinoEvento.socketId).emit("jogadaRealizada", {
-                    jogadaRealizada: args.jogadaRealizada,
-                    jogo: args.jogo
-                });
-                if (verbose) {
-                    console.log("Enviando mensagem de jogadaRealizada para " + destinoEvento.identificador + "...");
-                }
-            } else {
-                if (verbose) {
-                    console.log("A mensagem de jogadaRealizada não foi enviada para " + jogadorIdentificador + " pois o mesmo não está na lista de jogadores conectados (" + JSON.stringify(jogadoresConectados) + ")...");
-                }
+        // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
+        if (destinoEvento != undefined) {
+            io.to(destinoEvento.socketId).emit("jogadaRealizada", {
+                jogadaRealizada: args.jogadaRealizada,
+                jogo: args.jogo
+            });
+            if (verbose) {
+                console.log("Enviando mensagem de jogadaRealizada para " + destinoEvento.identificador + "...");
             }
         } else {
             if (verbose) {
-                console.log("O evento jogadaRealizada não pode mandar mensagem para o jogador adversário pois ainda não está na vez do mesmo...");
+                console.log("A mensagem de jogadaRealizada não foi enviada para " + jogadorIdentificador + " pois o mesmo não está na lista de jogadores conectados (" + JSON.stringify(jogadoresConectados) + ")...");
             }
         }
     } else {

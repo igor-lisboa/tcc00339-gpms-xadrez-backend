@@ -21,6 +21,13 @@ socket.on("uncaughtException", function (err) {
     console.log(err);
 });
 
+socket.on("promocaoPeao", async function (args) {
+    if (verbose) {
+        console.log("Promoção de peão solicitada para o lado " + args.ladoId + " do jogo " + args.jogoId + "...");
+    }
+    await promovePeao(args.jogoId, args.ladoId);
+});
+
 socket.on("jogoCriado", async function () {
     if (verbose) {
         console.log("Novo jogo criado...");
@@ -81,6 +88,49 @@ const escolhePossivelJogada = (possiveisJogadas) => {
 
     // escolhe item no array de possiveisJogadas aleatoriamente
     return possiveisJogadas[Math.floor(Math.random() * possiveisJogadas.length)];
+}
+
+const promovePeao = async (jogoId, ladoId) => {
+    // espera 3 segundos pra executar
+    await sleep(3000);
+    api.get(
+        "/tipos-de-peca/promocao-peao"
+    ).then((response) => {
+
+        let idsPecasParaSeremEscolhidas = [];
+
+        // se retorno tiver sucesso
+        if (response.data.success) {
+
+            // percorre pecas
+            response.data.data.forEach((peca) => {
+                idsPecasParaSeremEscolhidas.push(peca.id);
+            });
+
+            const idPecaEscolhida = idsPecasParaSeremEscolhidas[Math.floor(Math.random() * idsPecasParaSeremEscolhidas.length)];
+
+            // realiza jogadas listadas
+            api.post(
+                "/jogos/" + jogoId + "/promove-peao/" + idPecaEscolhida,
+                {},
+                {
+                    headers: {
+                        lado: ladoId
+                    }
+                }
+            ).then((responsePromocao) => {
+                if (verbose) {
+                    console.log(responsePromocao.data);
+                }
+            }).catch((errorPromocao) => {
+                console.log(errorPromocao.response.data.message);
+            });
+        } else {
+            console.log(response.data.message);
+        }
+    }).catch((e) => {
+        console.log(e);
+    });
 }
 
 const ia = async () => {
