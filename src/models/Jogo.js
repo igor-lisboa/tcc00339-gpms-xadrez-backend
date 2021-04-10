@@ -6,6 +6,9 @@ const Bispo = require("./Bispo");
 const Rei = require("./Rei");
 const Rainha = require("./Rainha");
 
+const pecasTipos = { Torre, Peao, Cavalo, Bispo, Rei, Rainha };
+
+
 const db = require("../database.json");
 const PossivelJogada = require("./PossivelJogada");
 const MovimentoRealizado = require("./MovimentoRealizado");
@@ -264,8 +267,7 @@ module.exports = class Jogo {
                 const pecaEscolhida = TipoPecaService.listaPromocaoPeao().find(tipoPeca => tipoPeca.id == pecaEscolhidaId);
                 if (pecaEscolhida != undefined) {
                     // atualiza a peca
-                    const pecaClass = pecaEscolhida.classe;
-                    const pecaPromovida = new pecaClass(ladoId);
+                    const pecaPromovida = new pecasTipos[pecaEscolhida.classe](ladoId);
                     const pecaDaCasaDePromocao = this.recuperaPecaDaCasa(this.casaPeaoPromocao.casaPeao);
 
                     [...pecaDaCasaDePromocao.jogadasRealizadas].forEach(jogadasRealizadas => {
@@ -281,6 +283,10 @@ module.exports = class Jogo {
 
                     // passa a vez p outro jogador
                     this.defineLadoIdAtual(ladoAdversario.id);
+
+                    // remove acao da lista de solicitadas
+                    const indexAcaoSolicitada = this.acoesSolicitadas.indexOf(acaoPromovePeao);
+                    this.acoesSolicitadas.splice(indexAcaoSolicitada, 1);
 
                     this.salva();
 
