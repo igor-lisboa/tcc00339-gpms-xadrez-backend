@@ -804,10 +804,20 @@ module.exports = class Jogo {
         // se a peca for um rei verifica os roques
         if (peca.tipo == "Rei") {
             if ((opcoes.includes("brancoRoqueMenor") || opcoes.includes("pretoRoqueMenor")) && casas == 2) {
-                nomeJogada = "Roque Menor";
+                if(peca.ladoId == 0 && vizinhoDesejado == 'direita'){
+                    nomeJogada = "Roque Menor";
+                }
+                if(peca.ladoId == 1 && vizinhoDesejado == 'esquerda'){
+                    nomeJogada = "Roque Menor";
+                }   
             }
             if ((opcoes.includes("brancoRoqueMaior") || opcoes.includes("pretoRoqueMaior")) && casas == 2) {
-                nomeJogada = "Roque Maior";
+                if(peca.ladoId == 0 && vizinhoDesejado == 'esquerda'){
+                    nomeJogada = "Roque Maior";
+                }
+                if(peca.ladoId == 1 && vizinhoDesejado == 'direita'){
+                    nomeJogada = "Roque Maior";
+                }
             }
         }
 
