@@ -168,7 +168,7 @@ emitter.on("acoesSolicitadas", (args) => {
 });
 
 emitter.on("jogadaRealizada", (args) => {
-    if ("jogadaRealizada" in args && "jogo" in args && "ladoAdversario" in args) {
+    if ("jogadaRealizada" in args && "jogo" in args && "ladoAdversario" in args && "pecaPromovida" in args) {
         let jogadorIdentificador = "I.A.";
 
         // define parametro q sera usado p buscar socket do adversario
@@ -185,7 +185,8 @@ emitter.on("jogadaRealizada", (args) => {
         if (destinoEvento != undefined) {
             io.to(destinoEvento.socketId).emit("jogadaRealizada", {
                 jogadaRealizada: args.jogadaRealizada,
-                jogo: args.jogo
+                jogo: args.jogo,
+                promocaoPara: args.pecaPromovida ? args.pecaPromovida.tipo : args.pecaPromovida
             });
             if (verbose) {
                 console.log("Enviando mensagem de jogadaRealizada para " + destinoEvento.identificador + "...");
