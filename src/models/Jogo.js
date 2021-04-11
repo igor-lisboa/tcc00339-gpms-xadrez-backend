@@ -668,6 +668,11 @@ module.exports = class Jogo {
         const possiveisMovimentosAdversario = this.filtraPossiveisMovimentos(pecasAdversario, true);
 
         possiveisMovimentos.forEach(possivelMovimento => {
+
+            if(this.chequeLadoAtual && this.tabuleiro[possivelMovimento.casaOrigem.linha][possivelMovimento.casaOrigem.coluna].tipo != "Rei"){
+                return;
+            }
+
             const capturantesAdversarios = possiveisMovimentosAdversario.filter(possivelMovimentoAdversario => possivelMovimentoAdversario.casaDestino == possivelMovimento.casaDestino);
             const capturavel = capturantesAdversarios.length > 0;
 
