@@ -67,7 +67,45 @@ module.exports = class Jogo {
 
         this.casaPeaoPromocao = null;
 
+        this.empatePropostoPeloLadoId = null;
+
         this.defineTipoJogo(tipoJogoId);
+    }
+
+    propoeEmpate(ladoId) {
+        if (this.empatePropostoPeloLadoId == null) {
+            this.empatePropostoPeloLadoId = ladoId;
+            const ladoAdversario = this.recuperaLadoAdversarioPeloId(ladoId);
+            this.defineNovaAcaoSolicitada("responderPropostaEmpate", ladoAdversario.id, { ladoId: ladoAdversario.id, jogoId: this.id });
+            return ladoAdversario;
+        } else {
+            throw "Já tem um empate proposto pelo lado " + this.recuperaLadoPeloId(this.empatePropostoPeloLadoId).lado;
+        }
+    }
+
+    respondeEmpateProposto(ladoId, resposta) {
+        if (this.empatePropostoPeloLadoId != null) {
+            const acaoRespondePropostaEmpate = this.acoesSolicitadas.find(acaoRespondeEmpateProposto => acaoRespondeEmpateProposto.acao == "responderPropostaEmpate" && acaoRespondeEmpateProposto.ladoId == ladoId);
+            if (acaoRespondePropostaEmpate != undefined) {
+                const ladoAdversario = this.recuperaLadoAdversarioPeloId(ladoId);
+                if (resposta) {
+                    // empate comum acordo
+                    this.defineFinalizado(5);
+                } else {
+                    this.empatePropostoPeloLadoId = null;
+                }
+
+                // remove acao da lista de solicitadas
+                const indexAcaoSolicitada = this.acoesSolicitadas.indexOf(acaoRespondePropostaEmpate);
+                this.acoesSolicitadas.splice(indexAcaoSolicitada, 1);
+
+                return ladoAdversario;
+            } else {
+                throw "Não foi possível encontrar uma proposta de empate para responder";
+            }
+        } else {
+            throw "Nenhum empate foi proposto"
+        }
     }
 
     defineNovaAcaoSolicitada(acao, ladoId, data = null) {

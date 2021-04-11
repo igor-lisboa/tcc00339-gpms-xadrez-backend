@@ -18,6 +18,25 @@ module.exports = {
         universalEmitter.emit("jogadaRealizada", { jogo, jogadaRealizada, ladoAdversario });
 
         return pecaPromovida;
+    }, propoeEmpate(jogoId, ladoId) {
+        const jogo = this.encontra(jogoId);
+        const ladoAdversario = jogo.propoeEmpate(ladoId);
+
+        universalEmitter.emit("empateProposto", {
+            jogo,
+            ladoAdversario
+        });
+    }, respondeEmpateProposto(jogoId, ladoId, resposta) {
+        const jogo = this.encontra(jogoId);
+        const ladoAdversario = jogo.respondeEmpateProposto(ladoId, resposta);
+
+        // se a reposta tiver sido negativa p empate avisa o adversario caso contrario o evento d finalizacao d jogo avisara
+        if (!resposta) {
+            universalEmitter.emit("empatePropostoResposta", {
+                jogo,
+                ladoAdversario
+            });
+        }
     }, insereJogador(jogoId, ladoId, tipoId) {
         const jogo = this.encontra(jogoId);
         const lado = jogo.defineJogador(ladoId, db.ladoTipos[tipoId]);

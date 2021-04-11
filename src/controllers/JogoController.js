@@ -50,6 +50,44 @@ module.exports = {
                 success: false
             });
         }
+    },
+    propoeEmpate(req, res) {
+        try {
+            const { jogoId } = req.params;
+            const ladoId = req.headers.lado;
+            JogoService.propoeEmpate(jogoId, ladoId);
+            return res.json({
+                message: "Empate proposto ao lado adversário com sucesso!",
+                data: null,
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
+    }, respondePropostaEmpate(req, res) {
+        try {
+            const { jogoId } = req.params;
+            const ladoId = req.headers.lado;
+            const { resposta } = req.body;
+            JogoService.respondeEmpateProposto(jogoId, ladoId, resposta);
+            return res.json({
+                message: "Empate proposto respondido com sucesso!",
+                data: null,
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
     }, recuperaLadoAtual(req, res) {
         try {
             const { jogoId } = req.params;
