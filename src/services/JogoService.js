@@ -142,7 +142,7 @@ module.exports = {
         }
         throw "O lado solicitado não é uma I.A."
     }, recuperaMovimentosPossiveisConsolidado(jogo, ladoId) {
-        const possiveisJogadas = jogo.recuperaLadoPeloId(ladoId).possiveisJogadas;
+        const possiveisJogadas = jogo.filtraPossiveisJogadasLadoPraNaoPorReiEmCheque(ladoId);
 
         let possiveisJogadasIa = [];
 
@@ -163,7 +163,7 @@ module.exports = {
         if (jogo.ladoIdAtual != ladoId) {
             throw "Aguarde sua vez de interagir com suas peças";
         }
-        return jogo.filtraPossiveisJogadasPraNaoPorReiEmCheque(ladoId, casaNome);
+        return jogo.filtraPossiveisJogadasCasaPraNaoPorReiEmCheque(ladoId, casaNome);
     }, recuperaPecaReiAdversario(jogoId, ladoId) {
         const jogo = this.encontra(jogoId);
         if (jogo.ladoIdAtual != ladoId) {

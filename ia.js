@@ -154,14 +154,17 @@ const ia = async () => {
                 if (ladoIa != undefined) {
                     // escolhe uma jogada para realizar
                     const jogadaEscolhida = escolhePossivelJogada(ladoIa.possiveisJogadas);
-
-                    // insere jogada escolhida no array de jogadasParaSeremFeitasPelaIa
-                    jogadasParaSeremFeitasPelaIa.push({
-                        "jogoId": jogoIa.jogo.id,
-                        "casaOrigem": jogadaEscolhida.de,
-                        "casaDestino": jogadaEscolhida.para,
-                        "ladoId": ladoIa.lado.id
-                    });
+                    
+                    // se escolheu alguma jogada... adiciona na lista de jogadas p executar
+                    if (jogadaEscolhida != undefined) {
+                        // insere jogada escolhida no array de jogadasParaSeremFeitasPelaIa
+                        jogadasParaSeremFeitasPelaIa.push({
+                            "jogoId": jogoIa.jogo.id,
+                            "casaOrigem": jogadaEscolhida.de,
+                            "casaDestino": jogadaEscolhida.para,
+                            "ladoId": ladoIa.lado.id
+                        });
+                    }
                 }
             });
 

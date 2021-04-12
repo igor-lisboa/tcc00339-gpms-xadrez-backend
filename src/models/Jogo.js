@@ -300,7 +300,7 @@ module.exports = class Jogo {
         return this;
     }
 
-    filtraPossiveisJogadasPraNaoPorReiEmCheque(ladoId, casa) {
+    filtraPossiveisJogadasCasaPraNaoPorReiEmCheque(ladoId, casa) {
         casa = this.recuperaCasaLinhaColuna(casa);
         const lado = this.recuperaLadoPeloId(ladoId);
 
@@ -308,6 +308,14 @@ module.exports = class Jogo {
 
         const possiveisJogadas = lado.possiveisJogadas.filter(possivelJogada => possivelJogada.casaOrigem.casa == pecaDoLado.casa);
 
+        return this.filtraPossiveisJogadasPraNaoPorReiEmCheque(possiveisJogadas, ladoId);
+    }
+
+    filtraPossiveisJogadasLadoPraNaoPorReiEmCheque(ladoId) {
+        return this.filtraPossiveisJogadasPraNaoPorReiEmCheque(this.recuperaLadoPeloId(ladoId).possiveisJogadas, ladoId);
+    }
+
+    filtraPossiveisJogadasPraNaoPorReiEmCheque(possiveisJogadas, ladoId) {
         let possiveisJogadasValidas = [];
         possiveisJogadas.forEach(possivelJogada => {
             try {
