@@ -153,6 +153,7 @@ module.exports = {
             possivelJogadaIa.para = possivelJogada.casaDestino.casa;
             possivelJogadaIa.capturavel = possivelJogada.capturavel;
             possivelJogadaIa.captura = possivelJogada.captura;
+            possivelJogadaIa.nome = possivelJogada.nome;
 
             possiveisJogadasIa.push(possivelJogadaIa);
         });

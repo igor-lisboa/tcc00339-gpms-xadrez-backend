@@ -677,6 +677,10 @@ module.exports = class Jogo {
                         break;
                     }
 
+                    if (!pecasMesmoLado && !movimentoPossivelDirecao.movimentoPossivel.captura && pecaCasaDestino != null) {
+                        break;
+                    }
+
                     const quebraRegraNaoCaptura = (pecaCasaDestino != null && !movimentoPossivelDirecao.movimentoPossivel.captura);
                     const quebraRegraNaoAnda = (pecaCasaDestino == null && !movimentoPossivelDirecao.movimentoPossivel.anda);
 
