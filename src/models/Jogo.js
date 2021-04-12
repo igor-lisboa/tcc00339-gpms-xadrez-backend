@@ -52,7 +52,7 @@ module.exports = class Jogo {
          * possui modos de se defender obstruindo o ataque em questao
          * com outra peca ou se movendo
          */
-        this.chequeLadoAtual = this.verificaReiLadoAtualCheque();
+        this.chequeLadoAtual = this.verificaReiLadoCheque(this.ladoIdAtual);
 
         /**
          * Objeto contendo a casa de captura do enPassant e a casa onde a peca se encontra
@@ -226,7 +226,7 @@ module.exports = class Jogo {
         }
 
         // verifica se a jogada colocou o rei do adversario em cheque
-        this.chequeLadoAtual = this.verificaReiLadoAtualCheque();
+        this.chequeLadoAtual = this.verificaReiLadoCheque(this.ladoIdAtual);
 
         this.salva();
 
@@ -243,7 +243,7 @@ module.exports = class Jogo {
             this[chave] = jogo[chave];
         }
 
-        this.chequeLadoAtual = this.verificaReiLadoAtualCheque();
+        this.chequeLadoAtual = this.verificaReiLadoCheque(this.ladoIdAtual);
 
         this.verificaTempoRestanteLados();
 
@@ -448,7 +448,7 @@ module.exports = class Jogo {
             }
 
             // verifica se a jogada colocou o rei em cheque
-            const reiEmCheque = this.verificaReiLadoAtualCheque();
+            const reiEmCheque = this.verificaReiLadoCheque(this.ladoIdAtual);
 
             if (reiEmCheque) {
                 throw "A jogada não pode ser realizada pois coloca seu rei em cheque";
@@ -495,10 +495,10 @@ module.exports = class Jogo {
         }
     }
 
-    verificaReiLadoAtualCheque() {
+    verificaReiLadoCheque(ladoId) {
         this.atualizaPecasDosLados();
 
-        const reiLadoAtual = this.recuperaLadoPeloId(this.ladoIdAtual).pecas.find(peca => peca.peca.tipo == "Rei");
+        const reiLadoAtual = this.recuperaLadoPeloId(ladoId).pecas.find(peca => peca.peca.tipo == "Rei");
 
         return this.verificaCasaCapturavelPeloAdversario(reiLadoAtual.casa, reiLadoAtual.peca.ladoId);
         // se o rei do lado atual estiver em cheque e n tiver nenhum movimento p impedir o cheque e o rei n tiver como fugir o lado adversario ganha
