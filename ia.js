@@ -28,6 +28,13 @@ socket.on("promocaoPeao", async function (args) {
     await promovePeao(args.jogoId, args.ladoId);
 });
 
+socket.on("empateProposto", async function (args) {
+    if (verbose) {
+        console.log("Solicitação de responder a um empate proposto do jogo " + args.jogoId + "...");
+    }
+    await respondePropostaEmpate(args.jogoId, args.ladoId);
+});
+
 socket.on("jogoCriado", async function () {
     if (verbose) {
         console.log("Novo jogo criado...");
@@ -88,6 +95,30 @@ const escolhePossivelJogada = (possiveisJogadas) => {
 
     // escolhe item no array de possiveisJogadas aleatoriamente
     return possiveisJogadas[Math.floor(Math.random() * possiveisJogadas.length)];
+}
+
+const respondePropostaEmpate = async (jogoId, ladoId) => {
+    // espera 3 segundos pra executar
+    await sleep(3000);
+    const respostas = [true, false];
+    const respostaEscolhida = respostas[Math.floor(Math.random() * respostas.length)];
+    api.post(
+        "/jogos/" + jogoId + "/empate/responde",
+        {
+            resposta: respostaEscolhida
+        },
+        {
+            headers: {
+                lado: ladoId
+            }
+        }
+    ).then((response) => {
+        if (verbose) {
+            console.log(response.data);
+        }
+    }).catch((error) => {
+        console.log(error.response.data.message);
+    });
 }
 
 const promovePeao = async (jogoId, ladoId) => {
@@ -154,7 +185,7 @@ const ia = async () => {
                 if (ladoIa != undefined) {
                     // escolhe uma jogada para realizar
                     const jogadaEscolhida = escolhePossivelJogada(ladoIa.possiveisJogadas);
-                    
+
                     // se escolheu alguma jogada... adiciona na lista de jogadas p executar
                     if (jogadaEscolhida != undefined) {
                         // insere jogada escolhida no array de jogadasParaSeremFeitasPelaIa

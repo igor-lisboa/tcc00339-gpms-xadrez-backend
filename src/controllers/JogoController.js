@@ -77,7 +77,7 @@ module.exports = {
             JogoService.respondeEmpateProposto(jogoId, ladoId, resposta);
             return res.json({
                 message: "Empate proposto respondido com sucesso!",
-                data: null,
+                data: { resposta },
                 success: true
             });
         } catch (e) {

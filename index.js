@@ -167,6 +167,76 @@ emitter.on("acoesSolicitadas", (args) => {
     }
 });
 
+emitter.on("empatePropostoResposta", (args) => {
+    if ("jogo" in args && "ladoAdversario" in args) {
+        let jogadorIdentificador = "I.A.";
+
+        // define parametro q sera usado p buscar socket do adversario
+        if (args.ladoAdversario.tipo != null) {
+            if (args.ladoAdversario.tipo.id == 0) {
+                jogadorIdentificador = args.jogo.id + "-" + args.ladoAdversario.id;
+            }
+        }
+
+        // procura o adversario na lista de jogadores conectados
+        const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
+
+        // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
+        if (destinoEvento != undefined) {
+            // caso o usuario receba essa resposta eh pq o empate proposto foi negado caso contrario ele receberia o evento de jogo finalizado
+            io.to(destinoEvento.socketId).emit("empatePropostoResposta", {
+                jogo: args.jogo
+            });
+            if (verbose) {
+                console.log("Enviando mensagem de empatePropostoResposta para " + destinoEvento.identificador + "...");
+            }
+        } else {
+            if (verbose) {
+                console.log("A mensagem de empatePropostoResposta não foi enviada para " + jogadorIdentificador + " pois o mesmo não está na lista de jogadores conectados (" + JSON.stringify(jogadoresConectados) + ")...");
+            }
+        }
+    } else {
+        if (verbose) {
+            console.log("O evento empatePropostoResposta não tinha a propriedade jogo ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
+        }
+    }
+});
+
+emitter.on("empateProposto", (args) => {
+    if ("jogo" in args && "ladoAdversario" in args) {
+        let jogadorIdentificador = "I.A.";
+
+        // define parametro q sera usado p buscar socket do adversario
+        if (args.ladoAdversario.tipo != null) {
+            if (args.ladoAdversario.tipo.id == 0) {
+                jogadorIdentificador = args.jogo.id + "-" + args.ladoAdversario.id;
+            }
+        }
+
+        // procura o adversario na lista de jogadores conectados
+        const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
+
+        // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
+        if (destinoEvento != undefined) {
+            io.to(destinoEvento.socketId).emit("empateProposto", {
+                jogoId: args.jogo.id,
+                ladoId: args.ladoAdversario.id
+            });
+            if (verbose) {
+                console.log("Enviando mensagem de empateProposto para " + destinoEvento.identificador + "...");
+            }
+        } else {
+            if (verbose) {
+                console.log("A mensagem de empateProposto não foi enviada para " + jogadorIdentificador + " pois o mesmo não está na lista de jogadores conectados (" + JSON.stringify(jogadoresConectados) + ")...");
+            }
+        }
+    } else {
+        if (verbose) {
+            console.log("O evento empateProposto não tinha a propriedade jogo ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
+        }
+    }
+});
+
 emitter.on("jogadaRealizada", (args) => {
     if ("jogadaRealizada" in args && "jogo" in args && "ladoAdversario" in args && "pecaPromovida" in args) {
         let jogadorIdentificador = "I.A.";
