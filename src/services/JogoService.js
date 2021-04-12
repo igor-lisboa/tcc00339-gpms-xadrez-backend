@@ -54,12 +54,9 @@ module.exports = {
         const jogo = this.encontra(jogoId);
         const { jogadaRealizada, ladoAdversario } = jogo.realizaJogada(ladoId, casaOrigem, casaDestino);
 
-        // variável inserida para promoção do peão em outro emit
-        let pecaPromovida = null;
-
         // so dispara evento se o lado atual eh o lado adversario
         if (ladoAdversario.id == jogo.ladoIdAtual) {
-            universalEmitter.emit("jogadaRealizada", { jogadaRealizada, jogo, ladoAdversario, pecaPromovida });
+            universalEmitter.emit("jogadaRealizada", { jogadaRealizada, jogo, ladoAdversario, pecaPromovida: null });
         }
 
         return jogadaRealizada;
@@ -166,12 +163,7 @@ module.exports = {
         if (jogo.ladoIdAtual != ladoId) {
             throw "Aguarde sua vez de interagir com suas peças";
         }
-        const lado = jogo.recuperaLadoPeloId(ladoId);
-        const pecaDoLado = lado.pecas.find(peca => peca.casa.trim().toUpperCase() == casaNome.trim().toUpperCase());
-        if (pecaDoLado == undefined) {
-            throw "Nenhuma peça pertencente a você foi encontrada na casa procurada";
-        }
-        return lado.possiveisJogadas.filter(possiveisJogadasPeca => possiveisJogadasPeca.casaOrigem.casa.trim().toUpperCase() == pecaDoLado.casa.trim().toUpperCase());
+        return jogo.filtraPossiveisJogadasPraNaoPorReiEmCheque(ladoId, casaNome);
     }, recuperaPecaReiAdversario(jogoId, ladoId) {
         const jogo = this.encontra(jogoId);
         if (jogo.ladoIdAtual != ladoId) {

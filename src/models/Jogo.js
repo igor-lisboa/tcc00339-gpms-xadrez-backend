@@ -17,6 +17,7 @@ const TipoJogoService = require("../services/TipoJogoService");
 const AcaoSolicitada = require("./AcaoSolicitada");
 const Turno = require("./Turno");
 const TipoPecaService = require("../services/TipoPecaService");
+const Tabuleiro = require("./Tabuleiro");
 
 module.exports = class Jogo {
     constructor(tipoJogoId = 0, tempoDeTurnoEmMilisegundos = -1) {
@@ -24,7 +25,8 @@ module.exports = class Jogo {
 
         this.ladoBranco = new Lado(db.lados[0]);
         this.ladoPreto = new Lado(db.lados[1]);
-        this.tabuleiro = [
+
+        this.tabuleiro = new Tabuleiro([
             [new Torre(this.ladoPreto.id), new Cavalo(this.ladoPreto.id), new Bispo(this.ladoPreto.id), new Rainha(this.ladoPreto.id), new Rei(this.ladoPreto.id), new Bispo(this.ladoPreto.id), new Cavalo(this.ladoPreto.id), new Torre(this.ladoPreto.id)],
             [new Peao(this.ladoPreto.id), new Peao(this.ladoPreto.id), new Peao(this.ladoPreto.id), new Peao(this.ladoPreto.id), new Peao(this.ladoPreto.id), new Peao(this.ladoPreto.id), new Peao(this.ladoPreto.id), new Peao(this.ladoPreto.id)],
             [null, null, null, null, null, null, null, null],
@@ -33,7 +35,7 @@ module.exports = class Jogo {
             [null, null, null, null, null, null, null, null],
             [new Peao(this.ladoBranco.id), new Peao(this.ladoBranco.id), new Peao(this.ladoBranco.id), new Peao(this.ladoBranco.id), new Peao(this.ladoBranco.id), new Peao(this.ladoBranco.id), new Peao(this.ladoBranco.id), new Peao(this.ladoBranco.id)],
             [new Torre(this.ladoBranco.id), new Cavalo(this.ladoBranco.id), new Bispo(this.ladoBranco.id), new Rainha(this.ladoBranco.id), new Rei(this.ladoBranco.id), new Bispo(this.ladoBranco.id), new Cavalo(this.ladoBranco.id), new Torre(this.ladoBranco.id)],
-        ];
+        ]);
 
         this.turnos = [];
 
@@ -298,6 +300,28 @@ module.exports = class Jogo {
         return this;
     }
 
+    filtraPossiveisJogadasPraNaoPorReiEmCheque(ladoId, casa) {
+        casa = this.recuperaCasaLinhaColuna(casa);
+        const lado = this.recuperaLadoPeloId(ladoId);
+
+        const pecaDoLado = this.recuperaCasaPecaDeUmLadoPelaCasaNome(ladoId, casa);
+
+        const possiveisJogadas = lado.possiveisJogadas.filter(possivelJogada => possivelJogada.casaOrigem.casa == pecaDoLado.casa);
+
+        let possiveisJogadasValidas = [];
+        possiveisJogadas.forEach(possivelJogada => {
+            try {
+                this.move(possivelJogada.casaOrigem, possivelJogada.casaDestino, ladoId, true);
+                possiveisJogadasValidas.push(possivelJogada);
+                this.atualizaPecasDosLados();
+            } catch (e) {
+                // se deu erro eh pq colocou rei em cheque
+            }
+        });
+        this.salva();
+        return possiveisJogadasValidas;
+    }
+
     promovePeao(ladoId, pecaEscolhidaId) {
         if (this.casaPeaoPromocao != null) {
             const acaoPromovePeao = this.acoesSolicitadas.find(acaoPromovePeao => acaoPromovePeao.acao == "promocaoPeao" && acaoPromovePeao.ladoId == ladoId);
@@ -311,7 +335,7 @@ module.exports = class Jogo {
                     [...pecaDaCasaDePromocao.jogadasRealizadas].forEach(jogadasRealizadas => {
                         pecaPromovida.incluiMovimentoRealizado(jogadasRealizadas);
                     });
-                    this.tabuleiro[this.casaPeaoPromocao.casaPeao.linha][this.casaPeaoPromocao.casaPeao.coluna] = pecaPromovida;
+                    this.tabuleiro.atualizaCasa(this.casaPeaoPromocao.casaPeao.linha, this.casaPeaoPromocao.casaPeao.coluna, pecaPromovida);
 
                     const jogadaRealizada = this.casaPeaoPromocao.jogadaPromocao;
 
@@ -340,7 +364,7 @@ module.exports = class Jogo {
         }
     }
 
-    move(casaDe, casaPara, ladoId) {
+    move(casaDe, casaPara, ladoId, apenasTesteReiEmRiscoAposMovimento = false) {
         casaDe = this.recuperaCasaLinhaColuna(casaDe);
         casaPara = this.recuperaCasaLinhaColuna(casaPara);
 
@@ -354,7 +378,7 @@ module.exports = class Jogo {
 
         let pecaCapturada = casaDestino;
 
-        const tabuleiroAntesAlteracoes = [...this.tabuleiro];
+        const tabuleiroAntesAlteracoes = new Tabuleiro([...this.tabuleiro.recuperaTabuleiro()]);
 
         let movimentosEspeciaisExecutados = [];
 
@@ -362,15 +386,15 @@ module.exports = class Jogo {
 
         try {
             // realiza movimento
-            this.tabuleiro[casaDe.linha][casaDe.coluna] = null;
-            this.tabuleiro[casaPara.linha][casaPara.coluna] = peca;
+            this.tabuleiro.atualizaCasa(casaDe.linha, casaDe.coluna, null);
+            this.tabuleiro.atualizaCasa(casaPara.linha, casaPara.coluna, peca);
 
             if (this.enPassantCasaCaptura != null) {
                 if (casaPara == this.enPassantCasaCaptura.casaCaptura) {
                     const pecaCasaPeaoEnPassant = this.recuperaPecaDaCasa(this.enPassantCasaCaptura.casaPeao);
                     if (pecaCasaPeaoEnPassant != null) {
                         pecaCapturada = pecaCasaPeaoEnPassant;
-                        this.tabuleiro[this.enPassantCasaCaptura.casaPeao.linha][this.enPassantCasaCaptura.casaPeao.coluna] = null;
+                        this.tabuleiro.atualizaCasa(this.enPassantCasaCaptura.casaPeao.linha, this.enPassantCasaCaptura.casaPeao.coluna, null);
                     }
                 }
             }
@@ -400,8 +424,8 @@ module.exports = class Jogo {
                     const destinoTorre = this.recuperaCasaLinhaColuna(casaTorreDestino);
                     const origemTorre = this.recuperaCasaLinhaColuna(casaTorreOrigem);
 
-                    this.tabuleiro[origemTorre.linha][origemTorre.coluna] = null;
-                    this.tabuleiro[destinoTorre.linha][destinoTorre.coluna] = torre;
+                    this.tabuleiro.atualizaCasa(origemTorre.linha, origemTorre.coluna, null);
+                    this.tabuleiro.atualizaCasa(destinoTorre.linha, destinoTorre.coluna, torre);
 
                     const movimentoEspecialExecutado = new MovimentoRealizado(identificadorMovimento, origemTorre, destinoTorre, null, jogadaEscolhida.nome, []);
                     movimentosEspeciaisExecutados.push(movimentoEspecialExecutado);
@@ -419,6 +443,13 @@ module.exports = class Jogo {
 
             if (reiEmCheque) {
                 throw "A jogada não pode ser realizada pois coloca seu rei em cheque";
+            }
+
+            // caso seja apenas um teste volta tabuleiro para estado anterior e retorna
+            if (apenasTesteReiEmRiscoAposMovimento) {
+                this.tabuleiro = new Tabuleiro([...tabuleiroAntesAlteracoes.recuperaTabuleiro()]);
+
+                return;
             }
 
             // se passar da validacao do rei define enPassantCasaCaptura como null
@@ -450,6 +481,7 @@ module.exports = class Jogo {
         } catch (e) {
             // desfaz alteracoes
             this.tabuleiro = tabuleiroAntesAlteracoes;
+            this.salva();
             throw e;
         }
     }
@@ -580,8 +612,8 @@ module.exports = class Jogo {
 
     trataJogadasPossiveis() {
         // preenche possiveis jogadas
-        this.ladoBranco.definePossiveisJogadas(this.montaPossiveisJogadas(this.ladoBranco.pecas, this.ladoPreto.pecas));
-        this.ladoPreto.definePossiveisJogadas(this.montaPossiveisJogadas(this.ladoPreto.pecas, this.ladoBranco.pecas));
+        this.ladoBranco.definePossiveisJogadas(this.montaPossiveisJogadas(this.ladoBranco.id));
+        this.ladoPreto.definePossiveisJogadas(this.montaPossiveisJogadas(this.ladoPreto.id));
     }
 
     filtraPossiveisMovimentos(pecas, apenasParaChecarAmeacas = false) {
@@ -660,7 +692,10 @@ module.exports = class Jogo {
         return possiveisJogadas;
     }
 
-    montaPossiveisJogadas(pecas, pecasAdversario) {
+    montaPossiveisJogadas(ladoId) {
+
+        const pecas = this.recuperaLadoPeloId(ladoId).pecas;
+        const pecasAdversario = this.recuperaLadoAdversarioPeloId(ladoId).pecas;
 
         let possiveisJogadas = [];
 
@@ -668,10 +703,6 @@ module.exports = class Jogo {
         const possiveisMovimentosAdversario = this.filtraPossiveisMovimentos(pecasAdversario, true);
 
         possiveisMovimentos.forEach(possivelMovimento => {
-
-            if(this.chequeLadoAtual && this.tabuleiro[possivelMovimento.casaOrigem.linha][possivelMovimento.casaOrigem.coluna].tipo != "Rei"){
-                return;
-            }
 
             const capturantesAdversarios = possiveisMovimentosAdversario.filter(possivelMovimentoAdversario => possivelMovimentoAdversario.casaDestino == possivelMovimento.casaDestino);
             const capturavel = capturantesAdversarios.length > 0;
@@ -740,7 +771,7 @@ module.exports = class Jogo {
 
     recuperaPecasDeUmLado(ladoId) {
         let pecas = [];
-        this.tabuleiro.forEach((linha, linhaIndice) => {
+        this.tabuleiro.casas.forEach((linha, linhaIndice) => {
             linha.forEach((coluna, colunaIndice) => {
                 // verifica se a casa esta vazia ou nao
                 if (coluna != null) {
@@ -809,18 +840,18 @@ module.exports = class Jogo {
         // se a peca for um rei verifica os roques
         if (peca.tipo == "Rei") {
             if ((opcoes.includes("brancoRoqueMenor") || opcoes.includes("pretoRoqueMenor")) && casas == 2) {
-                if(peca.ladoId == 0 && vizinhoDesejado == 'direita'){
+                if (peca.ladoId == 0 && vizinhoDesejado == 'direita') {
                     nomeJogada = "Roque Menor";
                 }
-                if(peca.ladoId == 1 && vizinhoDesejado == 'esquerda'){
+                if (peca.ladoId == 1 && vizinhoDesejado == 'esquerda') {
                     nomeJogada = "Roque Menor";
-                }   
+                }
             }
             if ((opcoes.includes("brancoRoqueMaior") || opcoes.includes("pretoRoqueMaior")) && casas == 2) {
-                if(peca.ladoId == 0 && vizinhoDesejado == 'esquerda'){
+                if (peca.ladoId == 0 && vizinhoDesejado == 'esquerda') {
                     nomeJogada = "Roque Maior";
                 }
-                if(peca.ladoId == 1 && vizinhoDesejado == 'direita'){
+                if (peca.ladoId == 1 && vizinhoDesejado == 'direita') {
                     nomeJogada = "Roque Maior";
                 }
             }
@@ -832,7 +863,7 @@ module.exports = class Jogo {
 
     recuperaPecaDaCasa(casa) {
         casa = this.recuperaCasaLinhaColuna(casa);
-        return this.tabuleiro[casa.linha][casa.coluna];
+        return this.tabuleiro.recuperaCasa(casa.linha, casa.coluna);
     }
 
     recuperaMovimentosPossiveisDaPecaDaCasa(casa) {
@@ -1003,8 +1034,9 @@ module.exports = class Jogo {
         return casaEncontrada;
     }
 
-    recuperaCasaPecaDeUmLadoPelaCasaNome(ladoId, casaNome) {
-        const casaPeca = this.recuperaLadoPeloId(ladoId).pecas.find(casasPeca => casasPeca.casa.trim().toUpperCase() == casaNome.trim().toUpperCase());
+    recuperaCasaPecaDeUmLadoPelaCasaNome(ladoId, casa) {
+        casa = this.recuperaCasaLinhaColuna(casa);
+        const casaPeca = this.recuperaLadoPeloId(ladoId).pecas.find(casasPeca => casasPeca.casa == casa.casa);
         if (casaPeca == undefined) {
             throw "Não foi possível encontrar a peça na casa desejada";
         }

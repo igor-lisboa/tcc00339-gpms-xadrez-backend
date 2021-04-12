@@ -10,6 +10,8 @@ module.exports = class Lado {
         this.tempoMilisegundosRestante = null;
 
         this.possiveisJogadas = [];
+
+        this.pecas = [];
     }
 
     definePossiveisJogadas(possiveisJogadas) {
