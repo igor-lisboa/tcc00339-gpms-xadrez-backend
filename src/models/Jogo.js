@@ -76,6 +76,9 @@ module.exports = class Jogo {
 
     propoeEmpate(ladoId) {
         if (this.empatePropostoPeloLadoId == null) {
+            if (this.ladoIdAtual != ladoId) {
+                throw "Aguarde sua vez para propor um empate";
+            }
             this.empatePropostoPeloLadoId = ladoId;
             const ladoAdversario = this.recuperaLadoAdversarioPeloId(ladoId);
             this.defineNovaAcaoSolicitada("responderPropostaEmpate", ladoAdversario.id, { ladoId: ladoAdversario.id, jogoId: this.id });
