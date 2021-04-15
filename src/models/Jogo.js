@@ -619,7 +619,30 @@ module.exports = class Jogo {
     atualizaPecasDosLados() {
         this.ladoBranco.definePecas(this.recuperaPecasDeUmLado(this.ladoBranco.id));
         this.ladoPreto.definePecas(this.recuperaPecasDeUmLado(this.ladoPreto.id));
+        this.verificaPecasMinimas();
         this.trataJogadasPossiveis();
+    }
+
+    verificaPecasMinimas() {
+        this.verificaPecasMinimasLado(this.ladoBranco.id);
+        this.verificaPecasMinimasLado(this.ladoPreto.id);
+    }
+
+    verificaPecasMinimasLado(ladoId) {
+        const lado = this.recuperaLadoPeloId(ladoId);
+        const ladoAdversario = this.recuperaLadoAdversarioPeloId(ladoId);
+        // se tem so 1 eh pq eh o rei
+        if (lado.pecas.length == 1) {
+            // se tem 2 pecas 1 eh o rei e a outra nao pode ser cavalo nem bispo
+            if (ladoAdversario.pecas.length <= 2) {
+                const cavalo = ladoAdversario.pecas.find(pecaLado => pecaLado.peca.tipo == "Cavalo");
+                const bispo = ladoAdversario.pecas.find(pecaLado => pecaLado.peca.tipo == "Bispo");
+                if (cavalo != undefined || bispo != undefined) {
+                    // empata por Insuficiência material
+                    this.defineFinalizado(3);
+                }
+            }
+        }
     }
 
     trataJogadasPossiveis() {

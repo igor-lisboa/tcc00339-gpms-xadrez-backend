@@ -75,7 +75,7 @@ emitter.on("jogoFinalizado", (args) => {
         }
 
         destinos.forEach(destino => {
-            io.to(destino.socketId).emit("jogoFinalizado", { jogo: args.jogo });
+            io.to(destino.socketId).emit("jogoFinalizado", { jogoFinalizacao: args.jogo.finalizado });
             if (verbose) {
                 console.log("Enviando mensagem de jogoFinalizado para o jogador " + destino.identificador + "...");
             }
