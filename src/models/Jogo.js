@@ -12,13 +12,13 @@ const Turno = require("./Turno");
 const Tabuleiro = require("./Tabuleiro");
 
 module.exports = class Jogo {
-    constructor(tipoJogoId = 0, tempoDeTurnoEmMilisegundos = -1) {
+    constructor(tipoJogoId = 0, tempoDeTurnoEmMilisegundos = -1, tabuleiroCasas = []) {
         this.id = null;
 
         this.ladoBranco = new Lado(db.lados[0]);
         this.ladoPreto = new Lado(db.lados[1]);
 
-        this.tabuleiro = new Tabuleiro(this.ladoBranco.id, this.ladoPreto.id);
+        this.tabuleiro = new Tabuleiro(this.ladoBranco.id, this.ladoPreto.id, tabuleiroCasas);
 
         this.turnos = [];
 
