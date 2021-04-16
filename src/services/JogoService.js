@@ -15,7 +15,7 @@ module.exports = {
         return novoJogo;
     }, cria(tipoJogoId, tempoDeTurnoEmMilisegundos = -1) {
         const jogo = new Jogo(tipoJogoId, tempoDeTurnoEmMilisegundos).cria();
-        universalEmitter.emit("jogoCriado", { jogo });
+        universalEmitter.emit("jogoCriado");
         return jogo;
     }, promovePeao(jogoId, ladoId, pecaEscolhida) {
         const jogo = this.encontra(jogoId);

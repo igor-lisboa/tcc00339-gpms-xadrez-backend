@@ -37,18 +37,10 @@ io.on("connection", (socket) => {
 
 // instancia tratador de eventos do node
 const emitter = new events();
-emitter.on("jogoCriado", (args) => {
-    if ("jogo" in args) {
-        io.emit("jogoCriado", {
-            jogo: args.jogo
-        });
-        if (verbose) {
-            console.log("Enviando mensagem de jogoCriado para todos os jogadores conectados...");
-        }
-    } else {
-        if (verbose) {
-            console.log("O evento jogoCriado não tinha a propriedade jogo (" + JSON.stringify(args) + ")...");
-        }
+emitter.on("jogoCriado", () => {
+    io.emit("jogoCriado");
+    if (verbose) {
+        console.log("Enviando mensagem de jogoCriado para todos os jogadores conectados...");
     }
 });
 
