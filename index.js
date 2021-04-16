@@ -71,8 +71,8 @@ emitter.on("jogoResetado", (args) => {
 });
 
 emitter.on("jogoFinalizado", (args) => {
-    if ("jogo" in args) {
-        const identificadores = [args.jogo.id + "-0", args.jogo.id + "-1"];
+    if ("jogoId" in args && "jogoFinalizado" in args) {
+        const identificadores = [args.jogoId + "-0", args.jogoId + "-1"];
 
         let destinos = [];
 
@@ -84,14 +84,14 @@ emitter.on("jogoFinalizado", (args) => {
         });
 
         destinos.forEach(destino => {
-            io.to(destino.socketId).emit("jogoFinalizado", { jogoFinalizacao: args.jogo.finalizado });
+            io.to(destino.socketId).emit("jogoFinalizado", { jogoFinalizacao: args.jogoFinalizado });
             if (verbose) {
                 console.log("Enviando mensagem de jogoFinalizado para o jogador " + destino.identificador + "...");
             }
         });
     } else {
         if (verbose) {
-            console.log("O evento jogoFinalizado não tinha a propriedade jogo (" + JSON.stringify(args) + ")...");
+            console.log("O evento jogoFinalizado não tinha a propriedade jogoId ou a propriedade jogoFinalizado (" + JSON.stringify(args) + ")...");
         }
     }
 });

@@ -279,7 +279,7 @@ module.exports = class Jogo {
 
     verificaFinalizado() {
         if (this.finalizado != null) {
-            universalEmitter.emit("jogoFinalizado", { jogo: this });
+            universalEmitter.emit("jogoFinalizado", { jogoId: this.id, jogoFinalizado: this.finalizado.tipo });
         }
     }
 
