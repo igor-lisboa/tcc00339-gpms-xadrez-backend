@@ -96,11 +96,15 @@ module.exports = class Jogo {
         }
     }
 
-
     propoeEmpate(ladoId) {
         if (this.empatePropostoPeloLadoId == null) {
             if (this.ladoIdAtual != ladoId) {
                 throw "Aguarde sua vez para propor um empate";
+            }
+            // 1 lance = 2 turnos entao 50 lances == 100 turnos
+            if (this.tabuleiro.qtdTurnosSemCapturaOuMovimentoDePeao >= 100) {
+                // Empate: Regra 50 movimentos
+                this.defineFinalizado(2);
             }
             this.empatePropostoPeloLadoId = ladoId;
             const ladoAdversario = this.recuperaLadoAdversarioPeloId(ladoId);
@@ -255,7 +259,7 @@ module.exports = class Jogo {
         this.chequeLadoAtual = this.verificaReiLadoCheque(this.ladoIdAtual);
 
         this.tabuleiro.fotografaTabuleiro();
-        this.verificaSeTabuleiroRepetiuEstadoTresVezes();
+        this.verificaTabuleiro();
 
         this.salva();
 
@@ -325,7 +329,7 @@ module.exports = class Jogo {
         this.verificaAcoesSolicitadas();
     }
 
-    verificaSeTabuleiroRepetiuEstadoTresVezes() {
+    verificaTabuleiro() {
         const fotografiaRepetidaTresVezesOuMais = this.tabuleiro.fotografiasTabuleiro.find(estado => estado.qtdOcorrencias >= 3);
         if (fotografiaRepetidaTresVezesOuMais != undefined) {
             // Empate: Regra das 3 posições
@@ -522,6 +526,13 @@ module.exports = class Jogo {
                     jogadaPromocao: novoMovimento
                 };
                 this.defineNovaAcaoSolicitada("promocaoPeao", ladoId, { ladoId: lado.id, jogoId: this.id });
+            }
+
+            // se a peca movimentada for peao ou tiver captura entao zera a contagem
+            if (peca.tipo == "Peão" || pecaCapturada != null) {
+                this.tabuleiro.qtdTurnosSemCapturaOuMovimentoDePeao = 0;
+            } else {
+                this.tabuleiro.qtdTurnosSemCapturaOuMovimentoDePeao++;
             }
 
             this.tabuleiro.limpaEstadoAnterior();

@@ -17,6 +17,7 @@ module.exports = class Tabuleiro {
         }
         this.setCasas(casas);
         this.fotografiasTabuleiro = [];
+        this.qtdTurnosSemCapturaOuMovimentoDePeao = 0;
     }
 
     setCasas(casas = []) {
@@ -33,7 +34,7 @@ module.exports = class Tabuleiro {
             [null, null, null, null, null, null, null, null],
             [null, null, null, null, null, null, null, null],
             [null, null, null, null, null, null, null, null],
-            [null, null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null, null]
         ];
     }
 
@@ -119,7 +120,7 @@ module.exports = class Tabuleiro {
         let indexFografiaJaRegistrada = null;
 
         this.fotografiasTabuleiro.forEach((fotografia, index) => {
-            if (this.tabuleiroIgual(fotografia.tabuleiro, novaFotografia.tabuleiro)) {
+            if (JSON.stringify(fotografia.tabuleiro) == JSON.stringify(novaFotografia.tabuleiro)) {
                 indexFografiaJaRegistrada = index;
             }
         });
@@ -129,10 +130,6 @@ module.exports = class Tabuleiro {
         } else {
             this.fotografiasTabuleiro[indexFografiaJaRegistrada].qtdOcorrencias++;
         }
-    }
-
-    tabuleiroIgual(a, b) {
-        return JSON.stringify(a) == JSON.stringify(b);
     }
 
     prencheTabuleiro(tabuleiro) {
