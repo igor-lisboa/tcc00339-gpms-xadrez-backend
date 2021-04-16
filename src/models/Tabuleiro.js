@@ -16,10 +16,16 @@ module.exports = class Tabuleiro {
             casas = this.tabuleiroCasasInicio(ladoBrancoId, ladoPretoId);
         }
         this.setCasas(casas);
+        this.fotografiasTabuleiro = [];
     }
 
     setCasas(casas = []) {
-        this.casas = [
+        this.casas = this.montaTabuleiroVazio();
+        this.transformaObjetosDasCasasEmPecas(casas);
+    }
+
+    montaTabuleiroVazio() {
+        return [
             [null, null, null, null, null, null, null, null],
             [null, null, null, null, null, null, null, null],
             [null, null, null, null, null, null, null, null],
@@ -29,8 +35,6 @@ module.exports = class Tabuleiro {
             [null, null, null, null, null, null, null, null],
             [null, null, null, null, null, null, null, null],
         ];
-
-        this.transformaObjetosDasCasasEmPecas(casas);
     }
 
     tabuleiroCasasInicio(ladoBrancoId, ladoPretoId) {
@@ -47,13 +51,17 @@ module.exports = class Tabuleiro {
     }
 
     guardaEstado() {
-        this.estadoAnterior = null;
+        this.limpaEstadoAnterior();
         this.estadoAnterior = JSON.stringify(this);
+    }
+
+    limpaEstadoAnterior() {
+        this.estadoAnterior = null;
     }
 
     reverteEstadoAnterior() {
         this.prencheTabuleiro(JSON.parse(this.estadoAnterior));
-        this.estadoAnterior = null;
+        this.limpaEstadoAnterior();
     }
 
     atualizaCasa(linha, coluna, novoItem) {
@@ -88,12 +96,59 @@ module.exports = class Tabuleiro {
 
                         this.casas[linhaIndex][colunaIndex] = pecaClasse;
                     } else {
-                        throw "Esse o tipo de peça escolhido para casa da linha:" + linhaIndex + " e coluna:" + colunaIndex + " é inválido (" + JSON.stringify(pecaObjeto) + ")";
+                        throw "Esse tipo de peça escolhido para casa da linha:" + linhaIndex + " e coluna:" + colunaIndex + " é inválido (" + JSON.stringify(pecaObjeto) + ")";
                     }
                 }
 
             });
         });
+    }
+
+    fotografaTabuleiro() {
+        let novaFotografia = {
+            tabuleiro: this.montaTabuleiroVazio(),
+            qtdOcorrencias: 1
+        };
+
+        this.casas.forEach((linha, linhaIndex) => {
+            linha.forEach((pecaObjeto, colunaIndex) => {
+
+                if (pecaObjeto != null) {
+                    novaFotografia.tabuleiro[linhaIndex][colunaIndex] = pecaObjeto.tipo + "-" + pecaObjeto.ladoId;
+                }
+
+            });
+        });
+
+        let indexFografiaJaRegistrada = null;
+
+        this.fotografiasTabuleiro.forEach((fotografia, index) => {
+            if (this.arrayIgual(fotografia.tabuleiro, novaFotografia.tabuleiro)) {
+                indexFografiaJaRegistrada = index;
+            }
+        });
+
+        if (indexFografiaJaRegistrada == null) {
+            this.fotografiasTabuleiro.push(novaFotografia);
+        } else {
+            this.fotografiasTabuleiro[indexFografiaJaRegistrada].qtdOcorrencias++;
+        }
+    }
+
+    arrayIgual(a, b) {
+        if (a === b) return true;
+        if (a == null || b == null) return false;
+        if (a.length !== b.length) return false;
+
+        for (var i = 0; i < a.length; ++i) {
+
+            if (Array.isArray(a[i]) && Array.isArray(b[i])) {
+                if (!this.arrayIgual(a[i], b[i])) return false;
+            }
+
+            if (a[i] !== b[i]) return false;
+        }
+        return true;
     }
 
     prencheTabuleiro(tabuleiro) {

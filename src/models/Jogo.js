@@ -214,6 +214,8 @@ module.exports = class Jogo {
         // verifica se a jogada colocou o rei do adversario em cheque
         this.chequeLadoAtual = this.verificaReiLadoCheque(this.ladoIdAtual);
 
+        this.tabuleiro.fotografaTabuleiro();
+
         this.salva();
 
         return { jogadaRealizada, ladoAdversario };
@@ -468,6 +470,8 @@ module.exports = class Jogo {
                 };
                 this.defineNovaAcaoSolicitada("promocaoPeao", ladoId, { ladoId: lado.id, jogoId: this.id });
             }
+
+            this.tabuleiro.limpaEstadoAnterior();
 
             return novoMovimento;
         } catch (e) {
