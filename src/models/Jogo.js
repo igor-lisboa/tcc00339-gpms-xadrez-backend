@@ -215,6 +215,7 @@ module.exports = class Jogo {
         this.chequeLadoAtual = this.verificaReiLadoCheque(this.ladoIdAtual);
 
         this.tabuleiro.fotografaTabuleiro();
+        this.verificaSeTabuleiroRepetiuEstadoTresVezes();
 
         this.salva();
 
@@ -282,7 +283,17 @@ module.exports = class Jogo {
         this.verificaAcoesSolicitadas();
     }
 
+    verificaSeTabuleiroRepetiuEstadoTresVezes() {
+        const fotografiaRepetidaTresVezesOuMais = this.tabuleiro.fotografiasTabuleiro.find(estado => estado.qtdOcorrencias >= 3);
+        if (fotografiaRepetidaTresVezesOuMais != undefined) {
+            // Empate: Regra das 3 posições
+            this.defineFinalizado(6);
+        }
+    }
+
     cria() {
+        // registra estado inicial do tabuleiro
+        this.tabuleiro.fotografaTabuleiro();
         this.salva();
         return this;
     }

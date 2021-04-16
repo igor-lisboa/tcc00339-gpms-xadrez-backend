@@ -74,10 +74,6 @@ module.exports = class Tabuleiro {
         return this.casas[linha][coluna];
     }
 
-    recuperaTabuleiro() {
-        return this.casas;
-    }
-
     transformaObjetosDasCasasEmPecas(casas = []) {
         const pecasClasses = TipoPecaService.lista();
 
@@ -123,7 +119,7 @@ module.exports = class Tabuleiro {
         let indexFografiaJaRegistrada = null;
 
         this.fotografiasTabuleiro.forEach((fotografia, index) => {
-            if (this.arrayIgual(fotografia.tabuleiro, novaFotografia.tabuleiro)) {
+            if (this.tabuleiroIgual(fotografia.tabuleiro, novaFotografia.tabuleiro)) {
                 indexFografiaJaRegistrada = index;
             }
         });
@@ -135,20 +131,11 @@ module.exports = class Tabuleiro {
         }
     }
 
-    arrayIgual(a, b) {
-        if (a === b) return true;
-        if (a == null || b == null) return false;
-        if (a.length !== b.length) return false;
-
-        for (var i = 0; i < a.length; ++i) {
-
-            if (Array.isArray(a[i]) && Array.isArray(b[i])) {
-                if (!this.arrayIgual(a[i], b[i])) return false;
-            }
-
-            if (a[i] !== b[i]) return false;
-        }
-        return true;
+    tabuleiroIgual(a, b) {
+        a = JSON.stringify(a);
+        b = JSON.stringify(b);
+        let retorno = a == b;
+        return retorno;
     }
 
     prencheTabuleiro(tabuleiro) {
