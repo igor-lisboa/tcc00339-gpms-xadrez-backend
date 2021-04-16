@@ -132,10 +132,7 @@ module.exports = class Tabuleiro {
     }
 
     tabuleiroIgual(a, b) {
-        a = JSON.stringify(a);
-        b = JSON.stringify(b);
-        let retorno = a == b;
-        return retorno;
+        return JSON.stringify(a) == JSON.stringify(b);
     }
 
     prencheTabuleiro(tabuleiro) {
