@@ -30,7 +30,7 @@ module.exports = {
         const ladoAdversario = jogo.propoeReset(ladoId);
 
         universalEmitter.emit("resetProposto", {
-            jogo,
+            jogoId: jogo.id,
             ladoAdversario
         });
     }, respondeResetProposto(jogoId, ladoId, resposta) {
@@ -42,7 +42,7 @@ module.exports = {
             this.resetJogo(jogoId);
         } else {
             universalEmitter.emit("resetPropostoResposta", {
-                jogo,
+                jogoId: jogo.id,
                 ladoAdversario
             });
         }
@@ -52,7 +52,7 @@ module.exports = {
         const ladoAdversario = jogo.propoeEmpate(ladoId);
 
         universalEmitter.emit("empateProposto", {
-            jogo,
+            jogoId: jogo.id,
             ladoAdversario
         });
     }, respondeEmpateProposto(jogoId, ladoId, resposta) {
@@ -62,7 +62,7 @@ module.exports = {
         // se a reposta tiver sido negativa p empate avisa o adversario caso contrario o evento d finalizacao d jogo avisara
         if (!resposta) {
             universalEmitter.emit("empatePropostoResposta", {
-                jogo,
+                jogoId: jogo.id,
                 ladoAdversario
             });
         }

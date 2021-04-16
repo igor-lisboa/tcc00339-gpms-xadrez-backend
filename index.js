@@ -137,7 +137,7 @@ emitter.on("jogadorEntrou", (args) => {
         }
     } else {
         if (verbose) {
-            console.log("O evento jogadorEntrou não tinha a propriedade jogo ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
+            console.log("O evento jogadorEntrou não tinha a propriedade jogoId ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
         }
     }
 });
@@ -177,13 +177,13 @@ emitter.on("acoesSolicitadas", (args) => {
 });
 
 emitter.on("resetPropostoResposta", (args) => {
-    if ("jogo" in args && "ladoAdversario" in args) {
+    if ("jogoId" in args && "ladoAdversario" in args) {
         let jogadorIdentificador = "I.A.";
 
         // define parametro q sera usado p buscar socket do adversario
         if (args.ladoAdversario.tipo != null) {
             if (args.ladoAdversario.tipo.id == 0) {
-                jogadorIdentificador = args.jogo.id + "-" + args.ladoAdversario.id;
+                jogadorIdentificador = args.jogoId + "-" + args.ladoAdversario.id;
             }
         }
 
@@ -204,19 +204,19 @@ emitter.on("resetPropostoResposta", (args) => {
         }
     } else {
         if (verbose) {
-            console.log("O evento resetPropostoResposta não tinha a propriedade jogo ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
+            console.log("O evento resetPropostoResposta não tinha a propriedade jogoId ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
         }
     }
 });
 
 emitter.on("resetProposto", (args) => {
-    if ("jogo" in args && "ladoAdversario" in args) {
+    if ("jogoId" in args && "ladoAdversario" in args) {
         let jogadorIdentificador = "I.A.";
 
         // define parametro q sera usado p buscar socket do adversario
         if (args.ladoAdversario.tipo != null) {
             if (args.ladoAdversario.tipo.id == 0) {
-                jogadorIdentificador = args.jogo.id + "-" + args.ladoAdversario.id;
+                jogadorIdentificador = args.jogoId + "-" + args.ladoAdversario.id;
             }
         }
 
@@ -226,7 +226,7 @@ emitter.on("resetProposto", (args) => {
         // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
         if (destinoEvento != undefined) {
             io.to(destinoEvento.socketId).emit("resetProposto", {
-                jogoId: args.jogo.id,
+                jogoId: args.jogoId,
                 ladoId: args.ladoAdversario.id
             });
             if (verbose) {
@@ -239,19 +239,19 @@ emitter.on("resetProposto", (args) => {
         }
     } else {
         if (verbose) {
-            console.log("O evento resetProposto não tinha a propriedade jogo ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
+            console.log("O evento resetProposto não tinha a propriedade jogoId ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
         }
     }
 });
 
 emitter.on("empatePropostoResposta", (args) => {
-    if ("jogo" in args && "ladoAdversario" in args) {
+    if ("jogoId" in args && "ladoAdversario" in args) {
         let jogadorIdentificador = "I.A.";
 
         // define parametro q sera usado p buscar socket do adversario
         if (args.ladoAdversario.tipo != null) {
             if (args.ladoAdversario.tipo.id == 0) {
-                jogadorIdentificador = args.jogo.id + "-" + args.ladoAdversario.id;
+                jogadorIdentificador = args.jogoId + "-" + args.ladoAdversario.id;
             }
         }
 
@@ -272,19 +272,19 @@ emitter.on("empatePropostoResposta", (args) => {
         }
     } else {
         if (verbose) {
-            console.log("O evento empatePropostoResposta não tinha a propriedade jogo ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
+            console.log("O evento empatePropostoResposta não tinha a propriedade jogoId ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
         }
     }
 });
 
 emitter.on("empateProposto", (args) => {
-    if ("jogo" in args && "ladoAdversario" in args) {
+    if ("jogoId" in args && "ladoAdversario" in args) {
         let jogadorIdentificador = "I.A.";
 
         // define parametro q sera usado p buscar socket do adversario
         if (args.ladoAdversario.tipo != null) {
             if (args.ladoAdversario.tipo.id == 0) {
-                jogadorIdentificador = args.jogo.id + "-" + args.ladoAdversario.id;
+                jogadorIdentificador = args.jogoId + "-" + args.ladoAdversario.id;
             }
         }
 
@@ -294,7 +294,7 @@ emitter.on("empateProposto", (args) => {
         // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
         if (destinoEvento != undefined) {
             io.to(destinoEvento.socketId).emit("empateProposto", {
-                jogoId: args.jogo.id,
+                jogoId: args.jogoId,
                 ladoId: args.ladoAdversario.id
             });
             if (verbose) {
@@ -307,7 +307,7 @@ emitter.on("empateProposto", (args) => {
         }
     } else {
         if (verbose) {
-            console.log("O evento empateProposto não tinha a propriedade jogo ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
+            console.log("O evento empateProposto não tinha a propriedade jogoId ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
         }
     }
 });
