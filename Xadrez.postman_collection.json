@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "7de16ba2-92ba-4539-8373-9d8d91544cd6",
+		"_postman_id": "d2a60e19-cec1-48b5-ba7d-71fddf4f153b",
 		"name": "Xadrez",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -163,6 +163,72 @@
 							]
 						},
 						{
+							"name": "Reset",
+							"item": [
+								{
+									"name": "Propõe Reset",
+									"request": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "lado",
+												"value": "{{ladoId}}",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/reset/propoe",
+											"host": [
+												"{{API_XADREZ_URL}}"
+											],
+											"path": [
+												"jogos",
+												"{{jogoIndex}}",
+												"reset",
+												"propoe"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Responde Proposta Reset",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "lado",
+												"value": "{{ladoId}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"resposta\": true\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/reset/responde",
+											"host": [
+												"{{API_XADREZ_URL}}"
+											],
+											"path": [
+												"jogos",
+												"{{jogoIndex}}",
+												"reset",
+												"responde"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
 							"name": "Promove Peão",
 							"request": {
 								"method": "POST",
@@ -226,6 +292,25 @@
 									"path": [
 										"jogos",
 										"{{jogoIndex}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Reseta",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/reset",
+									"host": [
+										"{{API_XADREZ_URL}}"
+									],
+									"path": [
+										"jogos",
+										"{{jogoIndex}}",
+										"reset"
 									]
 								}
 							},
@@ -601,37 +686,37 @@
 	],
 	"variable": [
 		{
-			"id": "f1a429d3-d353-46c5-804e-f0002a2b2eae",
+			"id": "d05f0e57-3e39-4ddf-9b33-aa55abde02e1",
 			"key": "casaOrigem",
 			"value": "a2"
 		},
 		{
-			"id": "652e0da7-64f0-424e-a3a8-819bc9188925",
+			"id": "52bcc7ff-1299-48be-b351-023c753df44a",
 			"key": "casaDestino",
 			"value": "a4"
 		},
 		{
-			"id": "45663377-04d4-48d8-9aba-7fb094ea2da8",
+			"id": "8325806e-41c2-4552-8424-aca6af2c73ca",
 			"key": "jogoIndex",
 			"value": "0"
 		},
 		{
-			"id": "2dee856a-6382-4b46-834e-7255a9c574d8",
+			"id": "9d06706c-36ec-47e9-b649-bb69124870a6",
 			"key": "ladoId",
 			"value": "0"
 		},
 		{
-			"id": "eb455125-358a-4aaa-a21e-a718231c7a5e",
+			"id": "0f48d632-276b-447c-a346-b8a38599a789",
 			"key": "tipoJogoId",
 			"value": "0"
 		},
 		{
-			"id": "8dc3b1bd-6cbb-4ade-8e43-91a7635a0ab0",
+			"id": "d88f0a0c-2b8c-4bfc-af39-9c8508ff2b08",
 			"key": "tipoJogadorId",
 			"value": "0"
 		},
 		{
-			"id": "9557a677-ebf5-4df9-aa84-a82be49ed65c",
+			"id": "c6def018-2b27-400d-9526-3e735f31b35c",
 			"key": "pecaIndex",
 			"value": "3"
 		}

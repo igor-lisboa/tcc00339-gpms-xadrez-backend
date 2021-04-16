@@ -52,27 +52,44 @@ emitter.on("jogoCriado", (args) => {
     }
 });
 
-emitter.on("jogoFinalizado", (args) => {
-    if ("jogo" in args) {
-        const identificadorLadoBranco = args.jogo.id + "-0";
-        const identificadorLadoPreto = args.jogo.id + "-1";
-
-
-        // os sockets
-        const destinoEventoLadoBranco = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == identificadorLadoBranco);
-        const destinoEventoLadoPreto = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == identificadorLadoPreto);
+emitter.on("jogoResetado", (args) => {
+    if ("jogoId" in args) {
+        const identificadores = [args.jogoId + "-0", args.jogoId + "-1", "I.A."];
 
         let destinos = [];
 
-        // se encontrar o socket do jogador do lado branco
-        if (destinoEventoLadoBranco != undefined) {
-            destinos.push(destinoEventoLadoBranco);
-        }
+        identificadores.forEach(identificador => {
+            const destino = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == identificador);
+            if (destino != undefined) {
+                destinos.push(destino);
+            }
+        });
 
-        // se encontrar o socket do jogador do lado preto
-        if (destinoEventoLadoPreto != undefined) {
-            destinos.push(destinoEventoLadoPreto);
+        destinos.forEach(destino => {
+            io.to(destino.socketId).emit("jogoResetado");
+            if (verbose) {
+                console.log("Enviando mensagem de jogoResetado para o jogador " + destino.identificador + "...");
+            }
+        });
+    } else {
+        if (verbose) {
+            console.log("O evento jogoResetado não tinha a propriedade jogoId (" + JSON.stringify(args) + ")...");
         }
+    }
+});
+
+emitter.on("jogoFinalizado", (args) => {
+    if ("jogo" in args) {
+        const identificadores = [args.jogo.id + "-0", args.jogo.id + "-1"];
+
+        let destinos = [];
+
+        identificadores.forEach(identificador => {
+            const destino = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == identificador);
+            if (destino != undefined) {
+                destinos.push(destino);
+            }
+        });
 
         destinos.forEach(destino => {
             io.to(destino.socketId).emit("jogoFinalizado", { jogoFinalizacao: args.jogo.finalizado });
@@ -163,6 +180,74 @@ emitter.on("acoesSolicitadas", (args) => {
     } else {
         if (verbose) {
             console.log("O evento acoesSolicitadas não tinha a propriedade acoesSolicitadas ou a propriedade jogoId (" + JSON.stringify(args) + ")...");
+        }
+    }
+});
+
+emitter.on("resetPropostoResposta", (args) => {
+    if ("jogo" in args && "ladoAdversario" in args) {
+        let jogadorIdentificador = "I.A.";
+
+        // define parametro q sera usado p buscar socket do adversario
+        if (args.ladoAdversario.tipo != null) {
+            if (args.ladoAdversario.tipo.id == 0) {
+                jogadorIdentificador = args.jogo.id + "-" + args.ladoAdversario.id;
+            }
+        }
+
+        // procura o adversario na lista de jogadores conectados
+        const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
+
+        // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
+        if (destinoEvento != undefined) {
+            // caso o usuario receba essa resposta eh pq o reset proposto foi negado caso contrario ele receberia o evento de jogo finalizado
+            io.to(destinoEvento.socketId).emit("resetPropostoResposta");
+            if (verbose) {
+                console.log("Enviando mensagem de resetPropostoResposta para " + destinoEvento.identificador + "...");
+            }
+        } else {
+            if (verbose) {
+                console.log("A mensagem de resetPropostoResposta não foi enviada para " + jogadorIdentificador + " pois o mesmo não está na lista de jogadores conectados (" + JSON.stringify(jogadoresConectados) + ")...");
+            }
+        }
+    } else {
+        if (verbose) {
+            console.log("O evento resetPropostoResposta não tinha a propriedade jogo ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
+        }
+    }
+});
+
+emitter.on("resetProposto", (args) => {
+    if ("jogo" in args && "ladoAdversario" in args) {
+        let jogadorIdentificador = "I.A.";
+
+        // define parametro q sera usado p buscar socket do adversario
+        if (args.ladoAdversario.tipo != null) {
+            if (args.ladoAdversario.tipo.id == 0) {
+                jogadorIdentificador = args.jogo.id + "-" + args.ladoAdversario.id;
+            }
+        }
+
+        // procura o adversario na lista de jogadores conectados
+        const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
+
+        // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
+        if (destinoEvento != undefined) {
+            io.to(destinoEvento.socketId).emit("resetProposto", {
+                jogoId: args.jogo.id,
+                ladoId: args.ladoAdversario.id
+            });
+            if (verbose) {
+                console.log("Enviando mensagem de resetProposto para " + destinoEvento.identificador + "...");
+            }
+        } else {
+            if (verbose) {
+                console.log("A mensagem de resetProposto não foi enviada para " + jogadorIdentificador + " pois o mesmo não está na lista de jogadores conectados (" + JSON.stringify(jogadoresConectados) + ")...");
+            }
+        }
+    } else {
+        if (verbose) {
+            console.log("O evento resetProposto não tinha a propriedade jogo ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
         }
     }
 });

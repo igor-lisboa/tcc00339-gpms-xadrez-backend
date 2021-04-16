@@ -6,6 +6,13 @@ module.exports = {
         return db.jogos;
     }, encontra(id) {
         return new Jogo().encontra(id);
+    }, resetJogo(jogoId) {
+        const jogoAntigo = this.encontra(jogoId);
+        const novoJogo = new Jogo(jogoAntigo.tipoJogo.id, jogoAntigo.tempoDeTurnoEmMilisegundos);
+        novoJogo.id = jogoAntigo.id;
+        novoJogo.salva();
+        universalEmitter.emit("jogoResetado", { jogoId: novoJogo.id });
+        return novoJogo;
     }, cria(tipoJogoId, tempoDeTurnoEmMilisegundos = -1) {
         const jogo = new Jogo(tipoJogoId, tempoDeTurnoEmMilisegundos).cria();
         universalEmitter.emit("jogoCriado", { jogo });
@@ -18,7 +25,29 @@ module.exports = {
         universalEmitter.emit("jogadaRealizada", { jogo, jogadaRealizada, ladoAdversario, pecaPromovida });
 
         return pecaPromovida;
-    }, propoeEmpate(jogoId, ladoId) {
+    }, propoeReset(jogoId, ladoId) {
+        const jogo = this.encontra(jogoId);
+        const ladoAdversario = jogo.propoeReset(ladoId);
+
+        universalEmitter.emit("resetProposto", {
+            jogo,
+            ladoAdversario
+        });
+    }, respondeResetProposto(jogoId, ladoId, resposta) {
+        const jogo = this.encontra(jogoId);
+        const ladoAdversario = jogo.respondeResetProposto(ladoId, resposta);
+
+        // se a reposta tiver sido positiva executa o reset
+        if (resposta) {
+            this.resetJogo(jogoId);
+        } else {
+            universalEmitter.emit("resetPropostoResposta", {
+                jogo,
+                ladoAdversario
+            });
+        }
+    },
+    propoeEmpate(jogoId, ladoId) {
         const jogo = this.encontra(jogoId);
         const ladoAdversario = jogo.propoeEmpate(ladoId);
 

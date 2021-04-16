@@ -34,12 +34,67 @@ module.exports = {
             });
         }
     },
+    reset(req, res) {
+        try {
+            const { jogoId } = req.params;
+            return res.json({
+                message: "Jogo resetado com sucesso!",
+                data: JogoService.resetJogo(jogoId),
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
+    },
     cria(req, res) {
         try {
             const { tipoJogo, tempoDeTurnoEmMilisegundos } = req.body;
             return res.json({
                 message: "Jogo incluído com sucesso!",
                 data: JogoService.cria(tipoJogo, tempoDeTurnoEmMilisegundos),
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
+    },
+    propoeReset(req, res) {
+        try {
+            const { jogoId } = req.params;
+            const ladoId = req.headers.lado;
+            JogoService.propoeReset(jogoId, ladoId);
+            return res.json({
+                message: "Reset proposto ao lado adversário com sucesso!",
+                data: null,
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
+    }, respondePropostaReset(req, res) {
+        try {
+            const { jogoId } = req.params;
+            const ladoId = req.headers.lado;
+            const { resposta } = req.body;
+            JogoService.respondeResetProposto(jogoId, ladoId, resposta);
+            return res.json({
+                message: "Reset proposto respondido com sucesso!",
+                data: { resposta },
                 success: true
             });
         } catch (e) {

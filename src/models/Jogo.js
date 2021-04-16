@@ -53,9 +53,49 @@ module.exports = class Jogo {
         this.casaPeaoPromocao = null;
 
         this.empatePropostoPeloLadoId = null;
+        this.resetPropostoPeloLadoId = null;
+
 
         this.defineTipoJogo(tipoJogoId);
     }
+
+    propoeReset(ladoId) {
+        if (this.resetPropostoPeloLadoId == null) {
+            if (this.finalizado == null) {
+                throw "Não é possível resetar um jogo que não foi finalizado";
+            }
+            this.resetPropostoPeloLadoId = ladoId;
+            const ladoAdversario = this.recuperaLadoAdversarioPeloId(ladoId);
+            this.defineNovaAcaoSolicitada("responderPropostaReset", ladoAdversario.id, { ladoId: ladoAdversario.id, jogoId: this.id });
+            this.salva(false);
+            return ladoAdversario;
+        } else {
+            throw "Já tem um reset proposto pelo lado " + this.recuperaLadoPeloId(this.resetPropostoPeloLadoId).lado;
+        }
+    }
+
+    respondeResetProposto(ladoId, resposta) {
+        if (this.resetPropostoPeloLadoId != null) {
+            const acaoRespondePropostaReset = this.acoesSolicitadas.find(acaoRespondeResetProposto => acaoRespondeResetProposto.acao == "responderPropostaReset" && acaoRespondeResetProposto.ladoId == ladoId);
+            if (acaoRespondePropostaReset != undefined) {
+                const ladoAdversario = this.recuperaLadoAdversarioPeloId(ladoId);
+                if (!resposta) {
+                    this.resetPropostoPeloLadoId = null;
+                }
+
+                // remove acao da lista de solicitadas
+                const indexAcaoSolicitada = this.acoesSolicitadas.indexOf(acaoRespondePropostaReset);
+                this.acoesSolicitadas.splice(indexAcaoSolicitada, 1);
+                this.salva(false);
+                return ladoAdversario;
+            } else {
+                throw "Não foi possível encontrar uma proposta de reset para responder";
+            }
+        } else {
+            throw "Nenhum reset foi proposto"
+        }
+    }
+
 
     propoeEmpate(ladoId) {
         if (this.empatePropostoPeloLadoId == null) {
@@ -267,7 +307,7 @@ module.exports = class Jogo {
         }
     }
 
-    salva() {
+    salva(executaVerificacaoFinalizado = true) {
         if (this.id == null) {
             const tamanhoAntesPush = db.jogos.length;
             const tamanhoDepoisPush = db.jogos.push(this);
@@ -279,7 +319,9 @@ module.exports = class Jogo {
         }
         db.jogos[this.id] = this;
 
-        this.verificaFinalizado();
+        if (executaVerificacaoFinalizado) {
+            this.verificaFinalizado();
+        }
         this.verificaAcoesSolicitadas();
     }
 

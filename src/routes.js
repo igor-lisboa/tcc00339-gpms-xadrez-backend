@@ -16,14 +16,14 @@ routes.get("/", (req, res) => {
         message: "Olá, esse é nosso XADREZ!",
         data: {
             grupo: [
-                "Igor Lisboa",
+                "Igor Lisbôa",
                 "Caio Wey",
                 "Victor Marques",
                 "Victor Matheus",
                 "Milena Verissimo",
                 "Matheus Baldas"
             ].sort(),
-            documentacao: "https://documenter.getpostman.com/view/15046943/TzCQaRvP"
+            documentacao: "https://documenter.getpostman.com/view/15046943/TzJrByfx"
         },
         success: true
     });
@@ -34,6 +34,9 @@ routes.post("/jogos", JogoController.cria);
 routes.get("/jogos/ia", JogoController.listaIa);
 routes.post("/jogos/ia", JogoController.executaJogadasIa);
 routes.get("/jogos/:jogoId", JogoController.encontra);
+routes.put("/jogos/:jogoId/reset", JogoController.reset);
+routes.put("/jogos/:jogoId/reset/propoe", JogoController.propoeReset);
+routes.post("/jogos/:jogoId/reset/responde", JogoController.respondePropostaReset);
 routes.put("/jogos/:jogoId/empate/propoe", JogoController.propoeEmpate);
 routes.post("/jogos/:jogoId/empate/responde", JogoController.respondePropostaEmpate);
 routes.post("/jogos/:jogoId/promove-peao/:pecaIdEscolhida", JogoController.promovePeao);
