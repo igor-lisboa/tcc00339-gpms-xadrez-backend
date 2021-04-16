@@ -72,7 +72,7 @@ module.exports = {
         const ladoAdversario = jogo.recuperaLadoAdversarioPeloId(lado.id);
 
         universalEmitter.emit("jogadorEntrou", {
-            jogo,
+            jogoId: jogo.id,
             ladoAdversario
         });
 

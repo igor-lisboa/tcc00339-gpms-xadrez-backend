@@ -111,13 +111,13 @@ emitter.on("forcaIa", () => {
 });
 
 emitter.on("jogadorEntrou", (args) => {
-    if ("jogo" in args && "ladoAdversario" in args) {
+    if ("jogoId" in args && "ladoAdversario" in args) {
         let jogadorIdentificador = "I.A.";
 
         // define parametro q sera usado p buscar socket do adversario
         if (args.ladoAdversario.tipo != null) {
             if (args.ladoAdversario.tipo.id == 0) {
-                jogadorIdentificador = args.jogo.id + "-" + args.ladoAdversario.id;
+                jogadorIdentificador = args.jogoId + "-" + args.ladoAdversario.id;
             }
         }
 
@@ -126,7 +126,7 @@ emitter.on("jogadorEntrou", (args) => {
 
         // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
         if (destinoEvento != undefined) {
-            io.to(destinoEvento.socketId).emit("adversarioEntrou", { jogo: args.jogo });
+            io.to(destinoEvento.socketId).emit("adversarioEntrou");
             if (verbose) {
                 console.log("Enviando mensagem de adversarioEntrou para " + destinoEvento.identificador + "...");
             }
