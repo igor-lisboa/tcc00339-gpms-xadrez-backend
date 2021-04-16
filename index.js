@@ -313,13 +313,13 @@ emitter.on("empateProposto", (args) => {
 });
 
 emitter.on("jogadaRealizada", (args) => {
-    if ("jogadaRealizada" in args && "jogo" in args && "ladoAdversario" in args && "pecaPromovida" in args) {
+    if ("jogadaRealizada" in args && "jogoId" in args && "ladoAdversario" in args && "pecaPromovida" in args && "chequeLadoAtual" in args) {
         let jogadorIdentificador = "I.A.";
 
         // define parametro q sera usado p buscar socket do adversario
         if (args.ladoAdversario.tipo != null) {
             if (args.ladoAdversario.tipo.id == 0) {
-                jogadorIdentificador = args.jogo.id + "-" + args.ladoAdversario.id;
+                jogadorIdentificador = args.jogoId + "-" + args.ladoAdversario.id;
             }
         }
 
@@ -330,7 +330,7 @@ emitter.on("jogadaRealizada", (args) => {
         if (destinoEvento != undefined) {
             io.to(destinoEvento.socketId).emit("jogadaRealizada", {
                 jogadaRealizada: args.jogadaRealizada,
-                jogo: args.jogo,
+                chequeLadoAtual: args.chequeLadoAtual,
                 promocaoPara: args.pecaPromovida ? args.pecaPromovida.tipo : args.pecaPromovida
             });
             if (verbose) {

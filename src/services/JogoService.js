@@ -22,7 +22,7 @@ module.exports = {
         const { pecaPromovida, jogadaRealizada, ladoAdversario } = jogo.promovePeao(ladoId, pecaEscolhida);
 
         // finaliza promocao do peao e fecha jogada de um lado
-        universalEmitter.emit("jogadaRealizada", { jogo, jogadaRealizada, ladoAdversario, pecaPromovida });
+        universalEmitter.emit("jogadaRealizada", { jogoId: jogo.id, jogadaRealizada, ladoAdversario, pecaPromovida, chequeLadoAtual: jogo.chequeLadoAtual });
 
         return pecaPromovida;
     }, propoeReset(jogoId, ladoId) {
@@ -85,7 +85,7 @@ module.exports = {
 
         // so dispara evento se o lado atual eh o lado adversario
         if (ladoAdversario.id == jogo.ladoIdAtual) {
-            universalEmitter.emit("jogadaRealizada", { jogadaRealizada, jogo, ladoAdversario, pecaPromovida: null });
+            universalEmitter.emit("jogadaRealizada", { jogadaRealizada, jogoId: jogo.id, ladoAdversario, pecaPromovida: null, chequeLadoAtual: jogo.chequeLadoAtual });
         }
 
         return jogadaRealizada;
