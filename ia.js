@@ -28,11 +28,18 @@ socket.on("promocaoPeao", async function (args) {
     await promovePeao(args.jogoId, args.ladoId);
 });
 
+socket.on("resetProposto", async function (args) {
+    if (verbose) {
+        console.log("Solicitação de responder a um reset proposto do jogo " + args.jogoId + "...");
+    }
+    await respondeProposta(args.jogoId, args.ladoId, "reset");
+});
+
 socket.on("empateProposto", async function (args) {
     if (verbose) {
         console.log("Solicitação de responder a um empate proposto do jogo " + args.jogoId + "...");
     }
-    await respondePropostaEmpate(args.jogoId, args.ladoId);
+    await respondeProposta(args.jogoId, args.ladoId, "empate");
 });
 
 socket.on("jogoCriado", async function () {
@@ -97,13 +104,13 @@ const escolhePossivelJogada = (possiveisJogadas) => {
     return possiveisJogadas[Math.floor(Math.random() * possiveisJogadas.length)];
 }
 
-const respondePropostaEmpate = async (jogoId, ladoId) => {
+const respondeProposta = async (jogoId, ladoId, tipo) => {
     // espera 3 segundos pra executar
     await sleep(3000);
     const respostas = [true, false];
     const respostaEscolhida = respostas[Math.floor(Math.random() * respostas.length)];
     api.post(
-        "/jogos/" + jogoId + "/empate/responde",
+        "/jogos/" + jogoId + "/" + tipo + "/responde",
         {
             resposta: respostaEscolhida
         },
