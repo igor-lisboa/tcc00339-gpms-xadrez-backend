@@ -184,9 +184,7 @@ emitter.on("empatePropostoResposta", (args) => {
         // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
         if (destinoEvento != undefined) {
             // caso o usuario receba essa resposta eh pq o empate proposto foi negado caso contrario ele receberia o evento de jogo finalizado
-            io.to(destinoEvento.socketId).emit("empatePropostoResposta", {
-                jogo: args.jogo
-            });
+            io.to(destinoEvento.socketId).emit("empatePropostoResposta");
             if (verbose) {
                 console.log("Enviando mensagem de empatePropostoResposta para " + destinoEvento.identificador + "...");
             }
