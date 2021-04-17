@@ -13,8 +13,8 @@ module.exports = {
         novoJogo.salva();
         universalEmitter.emit("jogoResetado", { jogoId: novoJogo.id });
         return novoJogo;
-    }, cria(tipoJogoId, tempoDeTurnoEmMilisegundos = -1) {
-        const jogo = new Jogo(tipoJogoId, tempoDeTurnoEmMilisegundos).cria();
+    }, cria(tipoJogoId, tempoDeTurnoEmMilisegundos = -1, tabuleiroCasas = []) {
+        const jogo = new Jogo(tipoJogoId, tempoDeTurnoEmMilisegundos, tabuleiroCasas).cria();
         universalEmitter.emit("jogoCriado");
         return jogo;
     }, promovePeao(jogoId, ladoId, pecaEscolhida) {

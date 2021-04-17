@@ -53,10 +53,10 @@ module.exports = {
     },
     cria(req, res) {
         try {
-            const { tipoJogo, tempoDeTurnoEmMilisegundos } = req.body;
+            const { tipoJogo, tempoDeTurnoEmMilisegundos, tabuleiroCasas } = req.body;
             return res.json({
                 message: "Jogo incluído com sucesso!",
-                data: JogoService.cria(tipoJogo, tempoDeTurnoEmMilisegundos),
+                data: JogoService.cria(tipoJogo, tempoDeTurnoEmMilisegundos, tabuleiroCasas),
                 success: true
             });
         } catch (e) {
