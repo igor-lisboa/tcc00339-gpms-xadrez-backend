@@ -82,6 +82,26 @@ module.exports = class Tabuleiro {
             linha.forEach((pecaObjeto, colunaIndex) => {
 
                 if (pecaObjeto != null) {
+
+                    if (typeof pecaObjeto == "string") {
+
+                        pecaObjeto = pecaObjeto.split("-");
+                        if (pecaObjeto.length != 2) {
+                            throw "Peça na casa da linha:" + linhaIndex + " e coluna:" + colunaIndex + " inválida (" + JSON.stringify(pecaObjeto) + ")";
+                        }
+
+                        if (pecaObjeto[1] != "1" && pecaObjeto[1] != "0") {
+                            throw "Peça na casa da linha:" + linhaIndex + " e coluna:" + colunaIndex + " tem o lado definido de forma incorreta (" + JSON.stringify(pecaObjeto) + ")";
+                        }
+
+                        pecaObjeto = {
+                            tipo: pecaObjeto[0],
+                            ladoId: pecaObjeto[1],
+                            jogadasRealizadas: []
+                        };
+                    }
+
+
                     const tipoPeca = pecasClasses.find(peca => peca.nome == pecaObjeto.tipo);
 
                     if (tipoPeca != undefined) {
