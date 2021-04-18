@@ -12,7 +12,7 @@ const Turno = require("./Turno");
 const Tabuleiro = require("./Tabuleiro");
 
 module.exports = class Jogo {
-    constructor(tipoJogoId = 0, tempoDeTurnoEmMilisegundos = -1, tabuleiroCasas = []) {
+    constructor(tipoJogoId = 0, tempoDeTurnoEmMilisegundos = -1, tabuleiroCasas = [], ladoId = 0) {
         this.id = null;
 
         this.ladoBranco = new Lado(db.lados[0]);
@@ -28,7 +28,7 @@ module.exports = class Jogo {
         */
         this.tempoDeTurnoEmMilisegundos = tempoDeTurnoEmMilisegundos;
 
-        this.defineLadoIdAtual(this.ladoBranco.id);
+        this.defineLadoIdAtual(ladoId);
 
         /**
          * O REI do lado atual tem pessas q podem captura-lo mas ainda
