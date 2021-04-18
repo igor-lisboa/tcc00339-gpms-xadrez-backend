@@ -261,7 +261,7 @@ module.exports = class Jogo {
         this.tabuleiro.fotografaTabuleiro();
         this.verificaTabuleiro();
 
-        this.salva();
+        this.salva(false);
 
         return { jogadaRealizada, ladoAdversario };
     }
