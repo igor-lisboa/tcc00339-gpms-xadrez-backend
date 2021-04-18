@@ -492,7 +492,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"tipoJogo\": \"{{tipoJogoId}}\",\r\n    \"tempoDeTurnoEmMilisegundos\": \"300000\"\r\n}",
+							"raw": "{\r\n    \"tipoJogo\": \"{{tipoJogoId}}\",\r\n    \"tempoDeTurnoEmMilisegundos\": \"300000\",\r\n    \"tabuleiroCasas\": [\r\n        [\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null\r\n        ],\r\n        [\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null\r\n        ],\r\n        [\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null\r\n        ],\r\n        [\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            \"Rei-1\",\r\n            null,\r\n            null,\r\n            null\r\n        ],\r\n        [\r\n            \"Peão-0\",\r\n            \"Peão-0\",\r\n            null,\r\n            null,\r\n            null,\r\n            \"Bispo-0\",\r\n            null,\r\n            null\r\n        ],\r\n        [\r\n            null,\r\n            null,\r\n            \"Peão-0\",\r\n            \"Peão-0\",\r\n            null,\r\n            null,\r\n            null,\r\n            null\r\n        ],\r\n        [\r\n            \"Torre-0\",\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            \"Peão-0\",\r\n            \"Peão-0\",\r\n            \"Peão-0\"\r\n        ],\r\n        [\r\n            null,\r\n            \"Cavalo-0\",\r\n            null,\r\n            \"Rei-0\",\r\n            null,\r\n            \"Bispo-0\",\r\n            \"Cavalo-0\",\r\n            \"Torre-0\"\r\n        ]\r\n    ]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -686,37 +686,30 @@
 	],
 	"variable": [
 		{
-			"id": "d05f0e57-3e39-4ddf-9b33-aa55abde02e1",
 			"key": "casaOrigem",
 			"value": "a2"
 		},
 		{
-			"id": "52bcc7ff-1299-48be-b351-023c753df44a",
 			"key": "casaDestino",
 			"value": "a4"
 		},
 		{
-			"id": "8325806e-41c2-4552-8424-aca6af2c73ca",
 			"key": "jogoIndex",
 			"value": "0"
 		},
 		{
-			"id": "9d06706c-36ec-47e9-b649-bb69124870a6",
 			"key": "ladoId",
 			"value": "0"
 		},
 		{
-			"id": "0f48d632-276b-447c-a346-b8a38599a789",
 			"key": "tipoJogoId",
-			"value": "0"
+			"value": "1"
 		},
 		{
-			"id": "d88f0a0c-2b8c-4bfc-af39-9c8508ff2b08",
 			"key": "tipoJogadorId",
 			"value": "0"
 		},
 		{
-			"id": "c6def018-2b27-400d-9526-3e735f31b35c",
 			"key": "pecaIndex",
 			"value": "3"
 		}
