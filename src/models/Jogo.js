@@ -781,7 +781,9 @@ module.exports = class Jogo {
                                 casaDestino,
                                 nomeJogada,
                                 podeCapturavel: movimentoPossivelDirecao.movimentoPossivel.podeCapturavel,
-                                pecaCaptura: pecaCasaDestino
+                                pecaCaptura: pecaCasaDestino,
+                                captura: movimentoPossivelDirecao.movimentoPossivel.captura,
+                                anda: movimentoPossivelDirecao.movimentoPossivel.anda
                             }
                         );
                         if (pecaCasaDestino != null && direcao != "especial") {
@@ -806,7 +808,7 @@ module.exports = class Jogo {
 
         possiveisMovimentos.forEach(possivelMovimento => {
 
-            const capturantesAdversarios = possiveisMovimentosAdversario.filter(possivelMovimentoAdversario => possivelMovimentoAdversario.casaDestino == possivelMovimento.casaDestino);
+            const capturantesAdversarios = possiveisMovimentosAdversario.filter(possivelMovimentoAdversario => possivelMovimentoAdversario.casaDestino == possivelMovimento.casaDestino && possivelMovimentoAdversario.captura == true);
             const capturavel = capturantesAdversarios.length > 0;
 
             // regras para o filtro
