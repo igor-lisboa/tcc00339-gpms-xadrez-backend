@@ -109,7 +109,7 @@ module.exports = class Jogo {
             this.empatePropostoPeloLadoId = ladoId;
             const ladoAdversario = this.recuperaLadoAdversarioPeloId(ladoId);
             this.defineNovaAcaoSolicitada("responderPropostaEmpate", ladoAdversario.id, { ladoId: ladoAdversario.id, jogoId: this.id });
-            this.salva();
+            this.salva(false);
             return ladoAdversario;
         } else {
             throw "Já tem um empate proposto pelo lado " + this.recuperaLadoPeloId(this.empatePropostoPeloLadoId).lado;
@@ -131,7 +131,7 @@ module.exports = class Jogo {
                 // remove acao da lista de solicitadas
                 const indexAcaoSolicitada = this.acoesSolicitadas.indexOf(acaoRespondePropostaEmpate);
                 this.acoesSolicitadas.splice(indexAcaoSolicitada, 1);
-                this.salva();
+                this.salva(false);
                 return ladoAdversario;
             } else {
                 throw "Não foi possível encontrar uma proposta de empate para responder";
@@ -176,7 +176,7 @@ module.exports = class Jogo {
             this.defineFinalizado(7);
         }
 
-        this.salva();
+        this.salva(false);
 
         return lado;
     }
