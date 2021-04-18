@@ -35,7 +35,7 @@ module.exports = class Jogo {
          * possui modos de se defender obstruindo o ataque em questao
          * com outra peca ou se movendo
          */
-        this.chequeLadoAtual = this.verificaReiLadoCheque(this.ladoIdAtual, true);
+        this.chequeLadoAtual = this.verificaReiLadoCheque(this.ladoIdAtual);
 
         /**
          * Objeto contendo a casa de captura do enPassant e a casa onde a peca se encontra
@@ -274,7 +274,7 @@ module.exports = class Jogo {
 
         this.prencheJogo(jogo);
 
-        this.chequeLadoAtual = this.verificaReiLadoCheque(this.ladoIdAtual, true);
+        this.chequeLadoAtual = this.verificaReiLadoCheque(this.ladoIdAtual);
 
         this.verificaTempoRestanteLados();
 
@@ -561,7 +561,6 @@ module.exports = class Jogo {
         // se o rei nao tiver jogadas possiveis e for o lado da vez eh o empate de rei afogado
         if (ladoId == this.ladoIdAtual && fazVerificacoesPecas) {
             const possiveisJogadas = this.filtraPossiveisJogadasLadoPraNaoPorReiEmCheque(ladoId);
-
             if (possiveisJogadas.length == 0) {
                 if (capturavel == false) {
                     // Empate: Rei afogado
