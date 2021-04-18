@@ -247,7 +247,7 @@ module.exports = class Jogo {
 
         const jogadaRealizada = this.move(casaOrigem, casaDestino, ladoId);
 
-        const ladoAdversario = this.recuperaLadoAdversarioPeloId(this.ladoIdAtual);
+        const ladoAdversario = this.recuperaLadoAdversarioPeloId(ladoId);
 
         // so define o lado p adversario se n tiver q promover o peao
         if (this.casaPeaoPromocao == null) {
@@ -256,7 +256,7 @@ module.exports = class Jogo {
         }
 
         // verifica se a jogada colocou o rei do adversario em cheque
-        this.chequeLadoAtual = this.verificaReiLadoCheque(this.ladoIdAtual);
+        this.chequeLadoAtual = this.verificaReiLadoCheque(ladoAdversario.id, true);
 
         this.tabuleiro.fotografaTabuleiro();
         this.verificaTabuleiro();
@@ -457,14 +457,14 @@ module.exports = class Jogo {
             if (jogadaEscolhida.nome == "Roque Menor") {
                 casaTorreOrigem = "H1";
                 casaTorreDestino = "F1";
-                if (this.ladoIdAtual != 0) {
+                if (ladoId != 0) {
                     casaTorreOrigem = "H8";
                     casaTorreDestino = "F8";
                 }
             } else if (jogadaEscolhida.nome == "Roque Maior") {
                 casaTorreOrigem = "A1";
                 casaTorreDestino = "D1";
-                if (this.ladoIdAtual != 0) {
+                if (ladoId != 0) {
                     casaTorreOrigem = "A8";
                     casaTorreDestino = "D8";
                 }
@@ -491,7 +491,7 @@ module.exports = class Jogo {
             }
 
             // verifica se a jogada colocou o rei em cheque
-            const reiEmCheque = this.verificaReiLadoCheque(this.ladoIdAtual);
+            const reiEmCheque = this.verificaReiLadoCheque(ladoId);
 
             if (reiEmCheque) {
                 throw "A jogada não pode ser realizada pois coloca seu rei em cheque";
@@ -559,21 +559,24 @@ module.exports = class Jogo {
         const capturavel = this.verificaCasaCapturavelPeloAdversario(reiLadoAtual.casa, reiLadoAtual.peca.ladoId);
 
         // se o rei nao tiver jogadas possiveis e for o lado da vez eh o empate de rei afogado
-        if (ladoId == this.ladoIdAtual && this.recuperaLadoPeloId(this.ladoIdAtual).possiveisJogadas.length == 0) {
-            if (capturavel == false) {
-                // Empate: Rei afogado
-                this.defineFinalizado(4);
-            } else if (capturavel == true) {
-                if (this.ladoIdAtual == 0) {
+        if (ladoId == this.ladoIdAtual && fazVerificacoesPecas) {
+            const possiveisJogadas = this.filtraPossiveisJogadasLadoPraNaoPorReiEmCheque(ladoId);
+
+            if (possiveisJogadas.length == 0) {
+                if (capturavel == false) {
                     // Empate: Rei afogado
-                    this.defineFinalizado(1);
-                } else if (this.ladoIdAtual == 1) {
-                    // Vitória: Branco
-                    this.defineFinalizado(0);
+                    this.defineFinalizado(4);
+                } else if (capturavel == true) {
+                    if (ladoId == 0) {
+                        // Empate: Rei afogado
+                        this.defineFinalizado(1);
+                    } else if (ladoId == 1) {
+                        // Vitória: Branco
+                        this.defineFinalizado(0);
+                    }
+
                 }
-
             }
-
         }
 
         return capturavel;
