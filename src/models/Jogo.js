@@ -365,10 +365,10 @@ module.exports = class Jogo {
             try {
                 this.move(possivelJogada.casaOrigem, possivelJogada.casaDestino, ladoId, true);
                 possiveisJogadasValidas.push(possivelJogada);
-                this.atualizaPecasDosLados();
             } catch (e) {
                 // se deu erro eh pq colocou rei em cheque
             }
+            this.atualizaPecasDosLados();
         });
         return possiveisJogadasValidas;
     }
@@ -558,14 +558,25 @@ module.exports = class Jogo {
 
         const capturavel = this.verificaCasaCapturavelPeloAdversario(reiLadoAtual.casa, reiLadoAtual.peca.ladoId);
 
-        // se o rei nao for capturavel nao tiver jogadas possiveis e for o lado da vez eh o empate de rei afogado
-        if (capturavel == false && ladoId == this.ladoIdAtual && this.recuperaLadoPeloId(this.ladoIdAtual).possiveisJogadas.length == 0) {
-            // Empate: Rei afogado
-            this.defineFinalizado(4);
+        // se o rei nao tiver jogadas possiveis e for o lado da vez eh o empate de rei afogado
+        if (ladoId == this.ladoIdAtual && this.recuperaLadoPeloId(this.ladoIdAtual).possiveisJogadas.length == 0) {
+            if (capturavel == false) {
+                // Empate: Rei afogado
+                this.defineFinalizado(4);
+            } else if (capturavel == true) {
+                if (this.ladoIdAtual == 0) {
+                    // Empate: Rei afogado
+                    this.defineFinalizado(1);
+                } else if (this.ladoIdAtual == 1) {
+                    // Vitória: Branco
+                    this.defineFinalizado(0);
+                }
+
+            }
+
         }
 
         return capturavel;
-        // se o rei do lado atual estiver em cheque e n tiver nenhum movimento p impedir o cheque e o rei n tiver como fugir o lado adversario ganha
     }
 
     verificaCasaCapturavelPeloAdversario(casa, ladoId) {
