@@ -177,7 +177,7 @@ emitter.on("acoesSolicitadas", (args) => {
 });
 
 emitter.on("resetPropostoResposta", (args) => {
-    if ("jogoId" in args && "ladoAdversario" in args) {
+    if ("jogoId" in args && "ladoAdversario" in args && "resposta" in args) {
         let jogadorIdentificador = "I.A.";
 
         // define parametro q sera usado p buscar socket do adversario
@@ -193,7 +193,7 @@ emitter.on("resetPropostoResposta", (args) => {
         // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
         if (destinoEvento != undefined) {
             // caso o usuario receba essa resposta eh pq o reset proposto foi negado caso contrario ele receberia o evento de jogo finalizado
-            io.to(destinoEvento.socketId).emit("resetPropostoResposta");
+            io.to(destinoEvento.socketId).emit("resetPropostoResposta", args.resposta);
             if (verbose) {
                 console.log("Enviando mensagem de resetPropostoResposta para " + destinoEvento.identificador + "...");
             }

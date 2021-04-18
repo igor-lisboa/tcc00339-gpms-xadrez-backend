@@ -40,12 +40,12 @@ module.exports = {
         // se a reposta tiver sido positiva executa o reset
         if (resposta) {
             this.resetJogo(jogoId);
-        } else {
-            universalEmitter.emit("resetPropostoResposta", {
-                jogoId: jogo.id,
-                ladoAdversario
-            });
-        }
+        } 
+        universalEmitter.emit("resetPropostoResposta", {
+            jogoId: jogo.id,
+            ladoAdversario,
+            resposta
+        });
     },
     propoeEmpate(jogoId, ladoId) {
         const jogo = this.encontra(jogoId);
