@@ -5,7 +5,7 @@ module.exports = {
         try {
             return res.json({
                 message: "Tabela de equivalência retornada com sucesso!",
-                data: db.tabelaEquivalencia.reverse(),
+                data: db.tabelaEquivalencia,
                 success: true
             });
         } catch (e) {
