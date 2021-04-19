@@ -51,16 +51,13 @@ emitter.on("jogoResetado", (args) => {
         let destinos = [];
 
         identificadores.forEach(identificador => {
-            const destino = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == identificador);
-            if (destino != undefined) {
-                destinos.push(destino);
-            }
+            destinos = destinos.concat(jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == identificador));
         });
 
         destinos.forEach(destino => {
             io.to(destino.socketId).emit("jogoResetado");
             if (verbose) {
-                console.log("Enviando mensagem de jogoResetado para o jogador " + destino.identificador + "...");
+                console.log("Enviando mensagem de jogoResetado para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
             }
         });
     } else {
@@ -77,16 +74,13 @@ emitter.on("jogoFinalizado", (args) => {
         let destinos = [];
 
         identificadores.forEach(identificador => {
-            const destino = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == identificador);
-            if (destino != undefined) {
-                destinos.push(destino);
-            }
+            destinos = destinos.concat(jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == identificador));
         });
 
         destinos.forEach(destino => {
             io.to(destino.socketId).emit("jogoFinalizado", { jogoFinalizacao: args.jogoFinalizado });
             if (verbose) {
-                console.log("Enviando mensagem de jogoFinalizado para o jogador " + destino.identificador + "...");
+                console.log("Enviando mensagem de jogoFinalizado para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
             }
         });
     } else {
@@ -97,17 +91,12 @@ emitter.on("jogoFinalizado", (args) => {
 });
 
 emitter.on("forcaIa", () => {
-    const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == "I.A.");
-    if (destinoEvento != undefined) {
-        io.to(destinoEvento.socketId).emit("forcaIa");
+    jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == "I.A.").forEach(destino => {
+        io.to(destino.socketId).emit("forcaIa", { jogoFinalizacao: args.jogoFinalizado });
         if (verbose) {
-            console.log("Enviando mensagem de forcaIa para " + destinoEvento.identificador + "...");
+            console.log("Enviando mensagem de forcaIa para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
         }
-    } else {
-        if (verbose) {
-            console.log("A I.A. não está na lista de jogadores conectados (" + JSON.stringify(jogadoresConectados) + ")...");
-        }
-    }
+    });
 });
 
 emitter.on("jogadorEntrou", (args) => {
@@ -121,20 +110,12 @@ emitter.on("jogadorEntrou", (args) => {
             }
         }
 
-        // procura o adversario na lista de jogadores conectados
-        const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
-
-        // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
-        if (destinoEvento != undefined) {
-            io.to(destinoEvento.socketId).emit("adversarioEntrou");
+        jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador).forEach(destino => {
+            io.to(destino.socketId).emit("adversarioEntrou");
             if (verbose) {
-                console.log("Enviando mensagem de adversarioEntrou para " + destinoEvento.identificador + "...");
+                console.log("Enviando mensagem de adversarioEntrou para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
             }
-        } else {
-            if (verbose) {
-                console.log("A mensagem de jogadorEntrou não foi enviada para " + jogadorIdentificador + " pois o mesmo não está na lista de jogadores conectados (" + JSON.stringify(jogadoresConectados) + ")...");
-            }
-        }
+        });
     } else {
         if (verbose) {
             console.log("O evento jogadorEntrou não tinha a propriedade jogoId ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
@@ -154,20 +135,12 @@ emitter.on("acoesSolicitadas", (args) => {
                 }
             }
 
-            // procura o adversario na lista de jogadores conectados
-            const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
-
-            // se encontrar o adversario na lista de jogadores conectados dispara evento p socket
-            if (destinoEvento != undefined) {
-                io.to(destinoEvento.socketId).emit(acaoSolicitada.acaoItem.acao, acaoSolicitada.acaoItem.data);
+            jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador).forEach(destino => {
+                io.to(destino.socketId).emit(acaoSolicitada.acaoItem.acao, acaoSolicitada.acaoItem.data);
                 if (verbose) {
-                    console.log("Enviando mensagem de " + acaoSolicitada.acaoItem.acao + " para " + destinoEvento.identificador + "...");
+                    console.log("Enviando mensagem de " + acaoSolicitada.acaoItem.acao + " para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
                 }
-            } else {
-                if (verbose) {
-                    console.log("A mensagem de " + acaoSolicitada.acaoItem.acao + " não foi enviada para " + jogadorIdentificador + " pois o mesmo não está na lista de jogadores conectados (" + JSON.stringify(jogadoresConectados) + ")...");
-                }
-            }
+            });
         });
     } else {
         if (verbose) {
@@ -187,21 +160,12 @@ emitter.on("resetPropostoResposta", (args) => {
             }
         }
 
-        // procura o adversario na lista de jogadores conectados
-        const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
-
-        // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
-        if (destinoEvento != undefined) {
-            // caso o usuario receba essa resposta eh pq o reset proposto foi negado caso contrario ele receberia o evento de jogo finalizado
-            io.to(destinoEvento.socketId).emit("resetPropostoResposta", args.resposta);
+        jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador).forEach(destino => {
+            io.to(destino.socketId).emit("resetPropostoResposta", args.resposta);
             if (verbose) {
-                console.log("Enviando mensagem de resetPropostoResposta para " + destinoEvento.identificador + "...");
+                console.log("Enviando mensagem de resetPropostoResposta para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
             }
-        } else {
-            if (verbose) {
-                console.log("A mensagem de resetPropostoResposta não foi enviada para " + jogadorIdentificador + " pois o mesmo não está na lista de jogadores conectados (" + JSON.stringify(jogadoresConectados) + ")...");
-            }
-        }
+        });
     } else {
         if (verbose) {
             console.log("O evento resetPropostoResposta não tinha a propriedade jogoId ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
@@ -220,23 +184,15 @@ emitter.on("resetProposto", (args) => {
             }
         }
 
-        // procura o adversario na lista de jogadores conectados
-        const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
-
-        // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
-        if (destinoEvento != undefined) {
-            io.to(destinoEvento.socketId).emit("resetProposto", {
+        jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador).forEach(destino => {
+            io.to(destino.socketId).emit("resetProposto", {
                 jogoId: args.jogoId,
                 ladoId: args.ladoAdversario.id
             });
             if (verbose) {
-                console.log("Enviando mensagem de resetProposto para " + destinoEvento.identificador + "...");
+                console.log("Enviando mensagem de resetProposto para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
             }
-        } else {
-            if (verbose) {
-                console.log("A mensagem de resetProposto não foi enviada para " + jogadorIdentificador + " pois o mesmo não está na lista de jogadores conectados (" + JSON.stringify(jogadoresConectados) + ")...");
-            }
-        }
+        });
     } else {
         if (verbose) {
             console.log("O evento resetProposto não tinha a propriedade jogoId ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
@@ -255,21 +211,12 @@ emitter.on("empatePropostoResposta", (args) => {
             }
         }
 
-        // procura o adversario na lista de jogadores conectados
-        const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
-
-        // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
-        if (destinoEvento != undefined) {
-            // caso o usuario receba essa resposta eh pq o empate proposto foi negado caso contrario ele receberia o evento de jogo finalizado
-            io.to(destinoEvento.socketId).emit("empatePropostoResposta");
+        jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador).forEach(destino => {
+            io.to(destino.socketId).emit("empatePropostoResposta");
             if (verbose) {
-                console.log("Enviando mensagem de empatePropostoResposta para " + destinoEvento.identificador + "...");
+                console.log("Enviando mensagem de empatePropostoResposta para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
             }
-        } else {
-            if (verbose) {
-                console.log("A mensagem de empatePropostoResposta não foi enviada para " + jogadorIdentificador + " pois o mesmo não está na lista de jogadores conectados (" + JSON.stringify(jogadoresConectados) + ")...");
-            }
-        }
+        });
     } else {
         if (verbose) {
             console.log("O evento empatePropostoResposta não tinha a propriedade jogoId ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
@@ -288,23 +235,15 @@ emitter.on("empateProposto", (args) => {
             }
         }
 
-        // procura o adversario na lista de jogadores conectados
-        const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
-
-        // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
-        if (destinoEvento != undefined) {
-            io.to(destinoEvento.socketId).emit("empateProposto", {
+        jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador).forEach(destino => {
+            io.to(destino.socketId).emit("empateProposto", {
                 jogoId: args.jogoId,
                 ladoId: args.ladoAdversario.id
             });
             if (verbose) {
-                console.log("Enviando mensagem de empateProposto para " + destinoEvento.identificador + "...");
+                console.log("Enviando mensagem de empateProposto para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
             }
-        } else {
-            if (verbose) {
-                console.log("A mensagem de empateProposto não foi enviada para " + jogadorIdentificador + " pois o mesmo não está na lista de jogadores conectados (" + JSON.stringify(jogadoresConectados) + ")...");
-            }
-        }
+        });
     } else {
         if (verbose) {
             console.log("O evento empateProposto não tinha a propriedade jogoId ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
@@ -323,24 +262,16 @@ emitter.on("jogadaRealizada", (args) => {
             }
         }
 
-        // procura o adversario na lista de jogadores conectados
-        const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
-
-        // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
-        if (destinoEvento != undefined) {
-            io.to(destinoEvento.socketId).emit("jogadaRealizada", {
+        jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador).forEach(destino => {
+            io.to(destino.socketId).emit("jogadaRealizada", {
                 jogadaRealizada: args.jogadaRealizada,
                 chequeLadoAtual: args.chequeLadoAtual,
                 promocaoPara: args.pecaPromovida ? args.pecaPromovida.tipo : args.pecaPromovida
             });
             if (verbose) {
-                console.log("Enviando mensagem de jogadaRealizada para " + destinoEvento.identificador + "...");
+                console.log("Enviando mensagem de jogadaRealizada para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
             }
-        } else {
-            if (verbose) {
-                console.log("A mensagem de jogadaRealizada não foi enviada para " + jogadorIdentificador + " pois o mesmo não está na lista de jogadores conectados (" + JSON.stringify(jogadoresConectados) + ")...");
-            }
-        }
+        });
     } else {
         if (verbose) {
             console.log("O evento jogadaRealizada não tinha a propriedade jogadaRealizada ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
