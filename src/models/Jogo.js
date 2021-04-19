@@ -209,7 +209,7 @@ module.exports = class Jogo {
 
     incluiNovoTurno() {
         this.verificaTempoRestanteLados();
-        if (this.finalizado != null) {
+        if (this.finalizado == null) {
             this.turnos.push(new Turno(this.ladoIdAtual));
         }
     }
