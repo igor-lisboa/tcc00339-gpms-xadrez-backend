@@ -1,19 +1,41 @@
 module.exports = class PossivelJogada {
     constructor(
-        casa,
-        captura = false,
-        nomeJogada = null,
-        capturavel = undefined,
-        direcao = "especial"
+        casaOrigem,
+        casaDestino,
+        nome = null,
+        pecaCaptura = null,
+        pecasCapturantes = []
     ) {
-        this.casa = casa;
-        this.captura = captura;
-        this.nomeJogada = nomeJogada;
-        this.direcao = direcao;
-        this.setCapturavel(capturavel);
+        this.casaOrigem = casaOrigem;
+        this.casaDestino = casaDestino;
+        this.nome = nome;
+        this.definePecaCaptura(pecaCaptura);
+        this.defineCapturantes(pecasCapturantes);
     }
 
-    setCapturavel(capturavel) {
+    defineCapturantes(capturantes = []) {
+        this.capturantes = capturantes;
+        if (this.capturantes.length > 0) {
+            this.defineCapturavel(true);
+        } else {
+            this.defineCapturavel(false);
+        }
+    }
+
+    verificaCaptura() {
+        if (this.pecaCaptura != null) {
+            this.captura = true;
+        } else {
+            this.captura = false;
+        }
+    }
+
+    defineCapturavel(capturavel) {
         this.capturavel = capturavel;
+    }
+
+    definePecaCaptura(pecaCaptura) {
+        this.pecaCaptura = pecaCaptura;
+        this.verificaCaptura();
     }
 }

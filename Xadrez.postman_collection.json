@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "7de16ba2-92ba-4539-8373-9d8d91544cd6",
+		"_postman_id": "d2a60e19-cec1-48b5-ba7d-71fddf4f153b",
 		"name": "Xadrez",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -97,6 +97,164 @@
 							]
 						},
 						{
+							"name": "Empate",
+							"item": [
+								{
+									"name": "Propõe Empate",
+									"request": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "lado",
+												"value": "{{ladoId}}",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/empate/propoe",
+											"host": [
+												"{{API_XADREZ_URL}}"
+											],
+											"path": [
+												"jogos",
+												"{{jogoIndex}}",
+												"empate",
+												"propoe"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Responde Proposta Empate",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "lado",
+												"value": "{{ladoId}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"resposta\": true\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/empate/responde",
+											"host": [
+												"{{API_XADREZ_URL}}"
+											],
+											"path": [
+												"jogos",
+												"{{jogoIndex}}",
+												"empate",
+												"responde"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Reset",
+							"item": [
+								{
+									"name": "Propõe Reset",
+									"request": {
+										"method": "PUT",
+										"header": [
+											{
+												"key": "lado",
+												"value": "{{ladoId}}",
+												"type": "text"
+											}
+										],
+										"url": {
+											"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/reset/propoe",
+											"host": [
+												"{{API_XADREZ_URL}}"
+											],
+											"path": [
+												"jogos",
+												"{{jogoIndex}}",
+												"reset",
+												"propoe"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Responde Proposta Reset",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "lado",
+												"value": "{{ladoId}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"resposta\": true\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/reset/responde",
+											"host": [
+												"{{API_XADREZ_URL}}"
+											],
+											"path": [
+												"jogos",
+												"{{jogoIndex}}",
+												"reset",
+												"responde"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Promove Peão",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "lado",
+										"value": "{{ladoId}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/promove-peao/{{pecaIndex}}",
+									"host": [
+										"{{API_XADREZ_URL}}"
+									],
+									"path": [
+										"jogos",
+										"{{jogoIndex}}",
+										"promove-peao",
+										"{{pecaIndex}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "Rei Adversário",
 							"request": {
 								"method": "GET",
@@ -134,6 +292,25 @@
 									"path": [
 										"jogos",
 										"{{jogoIndex}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Reseta",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/reset",
+									"host": [
+										"{{API_XADREZ_URL}}"
+									],
+									"path": [
+										"jogos",
+										"{{jogoIndex}}",
+										"reset"
 									]
 								}
 							},
@@ -315,7 +492,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"tipoJogo\": \"{{tipoJogoId}}\",\r\n    \"tempoDeTurnoEmMilisegundos\": \"300000\"\r\n}",
+							"raw": "{\r\n    \"tipoJogo\": \"{{tipoJogoId}}\",\r\n    \"tempoDeTurnoEmMilisegundos\": \"300000\",\r\n    \"ladoId\": 1,\r\n    \"tabuleiroCasas\": [\r\n        [\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null\r\n        ],\r\n        [\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null\r\n        ],\r\n        [\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null\r\n        ],\r\n        [\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            \"Rei-1\",\r\n            null,\r\n            null,\r\n            null\r\n        ],\r\n        [\r\n            \"Peão-0\",\r\n            \"Peão-0\",\r\n            null,\r\n            null,\r\n            null,\r\n            \"Bispo-0\",\r\n            null,\r\n            null\r\n        ],\r\n        [\r\n            null,\r\n            null,\r\n            \"Peão-0\",\r\n            \"Peão-0\",\r\n            null,\r\n            null,\r\n            null,\r\n            null\r\n        ],\r\n        [\r\n            \"Torre-0\",\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            \"Peão-0\",\r\n            \"Peão-0\",\r\n            \"Peão-0\"\r\n        ],\r\n        [\r\n            null,\r\n            \"Cavalo-0\",\r\n            null,\r\n            \"Rei-0\",\r\n            null,\r\n            \"Bispo-0\",\r\n            \"Cavalo-0\",\r\n            \"Torre-0\"\r\n        ]\r\n    ]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -443,6 +620,24 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Lista Promoção Peão",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API_XADREZ_URL}}/tipos-de-peca/promocao-peao",
+							"host": [
+								"{{API_XADREZ_URL}}"
+							],
+							"path": [
+								"tipos-de-peca",
+								"promocao-peao"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -508,11 +703,15 @@
 		},
 		{
 			"key": "tipoJogoId",
-			"value": "0"
+			"value": "1"
 		},
 		{
 			"key": "tipoJogadorId",
 			"value": "0"
+		},
+		{
+			"key": "pecaIndex",
+			"value": "3"
 		}
 	]
 }

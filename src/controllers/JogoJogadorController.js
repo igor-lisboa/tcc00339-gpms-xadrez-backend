@@ -5,16 +5,9 @@ module.exports = {
         try {
             const { jogoId } = req.params;
             const { ladoId, tipoId } = req.body;
-            const lado = JogoService.insereJogador(jogoId, ladoId, tipoId);
-
-            universalEmitter.emit("jogadorEntrou", {
-                lado,
-                jogoId
-            });
-
             return res.json({
                 message: "Definições do jogador atualizadas com sucesso!",
-                data: lado,
+                data: JogoService.insereJogador(jogoId, ladoId, tipoId),
                 success: true
             });
         } catch (e) {
@@ -45,10 +38,9 @@ module.exports = {
     removeJogador(req, res) {
         try {
             const { jogoId, ladoId } = req.params;
-            const jogadorDesistiu = JogoService.removeJogador(jogoId, ladoId);
             return res.json({
                 message: "Desistência do jogador realizada com sucesso!",
-                data: jogadorDesistiu,
+                data: JogoService.removeJogador(jogoId, ladoId),
                 success: true
             });
         } catch (e) {

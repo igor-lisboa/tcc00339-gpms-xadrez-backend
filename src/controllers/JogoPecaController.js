@@ -25,7 +25,7 @@ module.exports = {
             const ladoId = req.headers.lado;
             return res.json({
                 message: "Possíveis jogadas da peça na casa informada retornadas com sucesso!",
-                data: JogoService.recuperaPossiveisMovimentosDaPecaDeUmLado(jogoId, ladoId, casaNome),
+                data: JogoService.recuperaPossiveisJogadasDaPecaDeUmLado(jogoId, ladoId, casaNome),
                 success: true
             });
         } catch (e) {
@@ -41,13 +41,9 @@ module.exports = {
         try {
             const { jogoId, casaOrigem, casaDestino } = req.params;
             const ladoId = req.headers.lado;
-            const jogadaRealizada = JogoService.realizaJogada(jogoId, ladoId, casaOrigem, casaDestino);
-
-            universalEmitter.emit("jogadaRealizada", { jogadaRealizada, jogoId, ladoId });
-
             return res.json({
                 message: "Jogada realizada com sucesso!",
-                data: jogadaRealizada,
+                data: JogoService.realizaJogada(jogoId, ladoId, casaOrigem, casaDestino),
                 success: true
             });
         } catch (e) {

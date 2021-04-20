@@ -8,35 +8,35 @@ module.exports = class Rei extends Peca {
             [
                 {
                     direcao: "frente",
-                    opcoes: []
+                    opcoes: ["anda", "captura"]
                 },
                 {
                     direcao: "tras",
-                    opcoes: []
+                    opcoes: ["anda", "captura"]
                 },
                 {
                     direcao: "esquerda",
-                    opcoes: []
+                    opcoes: ["anda", "captura", "pretoRoqueMenor", "brancoRoqueMaior"]
                 },
                 {
                     direcao: "direita",
-                    opcoes: []
+                    opcoes: ["anda", "captura", "brancoRoqueMenor", "pretoRoqueMaior"]
                 },
                 {
                     direcao: "frenteEsquerda",
-                    opcoes: []
+                    opcoes: ["anda", "captura"]
                 },
                 {
                     direcao: "frenteDireita",
-                    opcoes: []
+                    opcoes: ["anda", "captura"]
                 },
                 {
                     direcao: "trasEsquerda",
-                    opcoes: []
+                    opcoes: ["anda", "captura"]
                 },
                 {
                     direcao: "trasDireita",
-                    opcoes: []
+                    opcoes: ["anda", "captura"]
                 }
             ],
             1,

@@ -6,7 +6,7 @@ module.exports = class Peca {
         passosHabilitados = 8,
         valor = 0
     ) {
-        this.movimentosRealizados = [];
+        this.jogadasRealizadas = [];
 
         this.ladoId = ladoId;
         this.tipo = tipo;
@@ -19,7 +19,7 @@ module.exports = class Peca {
     }
 
     incluiMovimentoRealizado(movimento) {
-        this.movimentosRealizados.push(movimento);
+        this.jogadasRealizadas.push(movimento);
     }
 
     movimentosEspeciais(linha, coluna) {

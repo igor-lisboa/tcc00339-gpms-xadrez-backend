@@ -1,7 +1,4 @@
-const MovimentoDestino = require("./MovimentoDestino");
 const Peca = require("./Peca");
-
-const db = require("../database.json");
 
 module.exports = class Peao extends Peca {
     constructor(ladoId) {
@@ -11,30 +8,19 @@ module.exports = class Peao extends Peca {
             [
                 {
                     direcao: "frente",
-                    opcoes: ["somenteAnda"]
+                    opcoes: ["anda", "primeiroMovimentoPeao"]
                 },
                 {
                     direcao: "frenteEsquerda",
-                    opcoes: ["somenteCaptura"]
+                    opcoes: ["captura"]
                 },
                 {
                     direcao: "frenteDireita",
-                    opcoes: ["somenteCaptura"]
+                    opcoes: ["captura"]
                 }
             ],
             1,
             1
         );
-    }
-
-    // retorna possiveis posicoes de movimento
-    movimentosEspeciais(linha, coluna) {
-        let movimentosPossiveis = [];
-        // pega o movimento de andar 2 vezes do peao
-        if (this.movimentosRealizados.length == 0) {
-            const linhaDaCaptura = linha + (1 * (db.lados[this.ladoId].cabecaPraBaixo ? -1 : 1));
-            movimentosPossiveis.push(new MovimentoDestino({ "linha": linhaDaCaptura + (1 * (db.lados[this.ladoId].cabecaPraBaixo ? -1 : 1)), "coluna": coluna }, "Primeiro Movimento Peão", true));
-        }
-        return movimentosPossiveis;
     }
 }

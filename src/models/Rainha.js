@@ -8,35 +8,35 @@ module.exports = class Rainha extends Peca {
             [
                 {
                     direcao: "frente",
-                    opcoes: []
+                    opcoes: ["anda", "captura"]
                 },
                 {
                     direcao: "tras",
-                    opcoes: []
+                    opcoes: ["anda", "captura"]
                 },
                 {
                     direcao: "esquerda",
-                    opcoes: []
+                    opcoes: ["anda", "captura"]
                 },
                 {
                     direcao: "direita",
-                    opcoes: []
+                    opcoes: ["anda", "captura"]
                 },
                 {
                     direcao: "frenteEsquerda",
-                    opcoes: []
+                    opcoes: ["anda", "captura"]
                 },
                 {
                     direcao: "frenteDireita",
-                    opcoes: []
+                    opcoes: ["anda", "captura"]
                 },
                 {
                     direcao: "trasEsquerda",
-                    opcoes: []
+                    opcoes: ["anda", "captura"]
                 },
                 {
                     direcao: "trasDireita",
-                    opcoes: []
+                    opcoes: ["anda", "captura"]
                 }
             ],
             8,

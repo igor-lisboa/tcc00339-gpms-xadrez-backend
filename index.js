@@ -1,18 +1,16 @@
-require('dotenv').config();
+require("dotenv").config();
 const express = require("express");
 
 const cors = require("cors");
 const routes = require("./src/routes");
 
-const events = require('events').EventEmitter;
+const events = require("events").EventEmitter;
 
 const app = express();
 const http = require("http").createServer(app);
 const io = require("socket.io")(http, { cors: true });
 
 const verbose = process.env.APP_VERBOSE || true;
-
-const JogoService = require('./src/services/JogoService');
 
 let jogadoresConectados = [];
 
@@ -25,7 +23,7 @@ io.on("connection", (socket) => {
         console.log("O jogador " + socket.handshake.query.jogador + " se conectou...");
     }
 
-    socket.on('disconnect', () => {
+    socket.on("disconnect", () => {
         let index = jogadoresConectados.indexOf({
             "socketId": socket.id,
             "identificador": socket.handshake.query.jogador
@@ -39,136 +37,244 @@ io.on("connection", (socket) => {
 
 // instancia tratador de eventos do node
 const emitter = new events();
-emitter.on("jogoCriado", (args) => {
-    if ("jogo" in args) {
-        io.emit("jogoCriado", {
-            jogo: args.jogo
+emitter.on("jogoCriado", () => {
+    io.emit("jogoCriado");
+    if (verbose) {
+        console.log("Enviando mensagem de jogoCriado para todos os jogadores conectados...");
+    }
+});
+
+emitter.on("jogoResetado", (args) => {
+    if ("jogoId" in args) {
+        const identificadores = [args.jogoId + "-0", args.jogoId + "-1", "I.A."];
+
+        let destinos = [];
+
+        identificadores.forEach(identificador => {
+            destinos = destinos.concat(jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == identificador));
         });
+
+        destinos.forEach(destino => {
+            io.to(destino.socketId).emit("jogoResetado");
+            if (verbose) {
+                console.log("Enviando mensagem de jogoResetado para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
+            }
+        });
+    } else {
+        if (verbose) {
+            console.log("O evento jogoResetado não tinha a propriedade jogoId (" + JSON.stringify(args) + ")...");
+        }
     }
 });
 
 emitter.on("jogoFinalizado", (args) => {
-    if ("jogo" in args) {
-        const jogoId = args.jogo.id;
-        const identificadorLadoBranco = jogoId + "-0";
-        const identificadorLadoPreto = jogoId + "-1";
+    if ("jogoId" in args && "jogoFinalizado" in args) {
+        const identificadores = [args.jogoId + "-0", args.jogoId + "-1"];
 
+        let destinos = [];
 
-        // os sockets
-        const destinoEventoLadoBranco = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == identificadorLadoBranco);
-        const destinoEventoLadoPreto = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == identificadorLadoPreto);
+        identificadores.forEach(identificador => {
+            destinos = destinos.concat(jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == identificador));
+        });
 
-
-        // se encontrar o socket do jogador do lado branco
-        if (destinoEventoLadoBranco != undefined) {
+        destinos.forEach(destino => {
+            io.to(destino.socketId).emit("jogoFinalizado", { jogoFinalizacao: args.jogoFinalizado });
             if (verbose) {
-                console.log("Enviando mensagem de jogoFinalizado para o jogador " + destinoEventoLadoBranco.identificador + "...");
+                console.log("Enviando mensagem de jogoFinalizado para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
             }
-            io.to(destinoEventoLadoBranco.socketId).emit('jogoFinalizado');
-        }
-
-        // se encontrar o socket do jogador do lado preto
-        if (destinoEventoLadoPreto != undefined) {
-            if (verbose) {
-                console.log("Enviando mensagem de jogoFinalizado para o jogador " + destinoEventoLadoPreto.identificador + "...");
-            }
-            io.to(destinoEventoLadoPreto.socketId).emit('jogoFinalizado');
+        });
+    } else {
+        if (verbose) {
+            console.log("O evento jogoFinalizado não tinha a propriedade jogoId ou a propriedade jogoFinalizado (" + JSON.stringify(args) + ")...");
         }
     }
 });
 
 emitter.on("forcaIa", () => {
-    const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == "I.A.");
-    if (destinoEvento != undefined) {
-        io.to(destinoEvento.socketId).emit('forcaIa');
+    jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == "I.A.").forEach(destino => {
+        io.to(destino.socketId).emit("forcaIa", { jogoFinalizacao: args.jogoFinalizado });
         if (verbose) {
-            console.log("Enviando mensagem de forcaIa para " + destinoEvento.identificador + "...");
+            console.log("Enviando mensagem de forcaIa para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
         }
-    }
+    });
 });
 
 emitter.on("jogadorEntrou", (args) => {
-    if ("lado" in args && "jogoId" in args) {
-        // recupera lado adversario
-        const ladoAdversario = JogoService.recuperaLadoTipo(args.jogoId, JogoService.recuperaIdLadoAdversarioPeloId(args.lado.id));
-
+    if ("jogoId" in args && "ladoAdversario" in args) {
         let jogadorIdentificador = "I.A.";
 
         // define parametro q sera usado p buscar socket do adversario
-        if (ladoAdversario.tipoId == 0) {
-            jogadorIdentificador = args.jogoId + "-" + ladoAdversario.ladoId;
+        if (args.ladoAdversario.tipo != null) {
+            if (args.ladoAdversario.tipo.id == 0) {
+                jogadorIdentificador = args.jogoId + "-" + args.ladoAdversario.id;
+            }
         }
 
-        // procura o adversario na lista de jogadores conectados
-        const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
-
-        // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
-        if (destinoEvento != undefined) {
-            io.to(destinoEvento.socketId).emit('adversarioEntrou');
+        jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador).forEach(destino => {
+            io.to(destino.socketId).emit("adversarioEntrou");
             if (verbose) {
-                console.log("Enviando mensagem de adversarioEntrou para " + destinoEvento.identificador + "...");
+                console.log("Enviando mensagem de adversarioEntrou para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
             }
+        });
+    } else {
+        if (verbose) {
+            console.log("O evento jogadorEntrou não tinha a propriedade jogoId ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
         }
     }
 });
 
-emitter.on("jogadasExecutadasIa", (args) => {
-    if ("jogadasExecutadas" in args) {
-        // para cada jogada executada avisa o adversario caso ele esteja conectado
-        args.jogadasExecutadas.forEach((jogadaRealizada) => {
-            const tabuleiro = JogoService.recuperaTabuleiro(jogadaRealizada.jogoId);
-
+emitter.on("acoesSolicitadas", (args) => {
+    if ("acoesSolicitadas" in args && "jogoId" in args) {
+        args.acoesSolicitadas.forEach(acaoSolicitada => {
             let jogadorIdentificador = "I.A.";
 
-            // define parametro q sera usado p buscar socket do adversario
-            if (jogadaRealizada.ladoAdversario.tipoId == 0) {
-                jogadorIdentificador = jogadaRealizada.jogoId + "-" + jogadaRealizada.ladoAdversario.ladoId;
-            }
-
-            // procura o adversario na lista de jogadores conectados
-            const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
-
-            // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
-            if (destinoEvento != undefined) {
-                io.to(destinoEvento.socketId).emit('jogadaRealizada', {
-                    jogadaRealizada: jogadaRealizada.jogada,
-                    tabuleiro
-                });
-                if (verbose) {
-                    console.log("Enviando mensagem de jogadaRealizada para " + destinoEvento.identificador + "...");
+            // define parametro q sera usado p buscar socket
+            if (acaoSolicitada.lado.tipo != null) {
+                if (acaoSolicitada.lado.tipo.id == 0) {
+                    jogadorIdentificador = args.jogoId + "-" + acaoSolicitada.lado.id;
                 }
             }
+
+            jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador).forEach(destino => {
+                io.to(destino.socketId).emit(acaoSolicitada.acaoItem.acao, acaoSolicitada.acaoItem.data);
+                if (verbose) {
+                    console.log("Enviando mensagem de " + acaoSolicitada.acaoItem.acao + " para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
+                }
+            });
         });
+    } else {
+        if (verbose) {
+            console.log("O evento acoesSolicitadas não tinha a propriedade acoesSolicitadas ou a propriedade jogoId (" + JSON.stringify(args) + ")...");
+        }
+    }
+});
+
+emitter.on("resetPropostoResposta", (args) => {
+    if ("jogoId" in args && "ladoAdversario" in args && "resposta" in args) {
+        let jogadorIdentificador = "I.A.";
+
+        // define parametro q sera usado p buscar socket do adversario
+        if (args.ladoAdversario.tipo != null) {
+            if (args.ladoAdversario.tipo.id == 0) {
+                jogadorIdentificador = args.jogoId + "-" + args.ladoAdversario.id;
+            }
+        }
+
+        jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador).forEach(destino => {
+            io.to(destino.socketId).emit("resetPropostoResposta", args.resposta);
+            if (verbose) {
+                console.log("Enviando mensagem de resetPropostoResposta para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
+            }
+        });
+    } else {
+        if (verbose) {
+            console.log("O evento resetPropostoResposta não tinha a propriedade jogoId ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
+        }
+    }
+});
+
+emitter.on("resetProposto", (args) => {
+    if ("jogoId" in args && "ladoAdversario" in args) {
+        let jogadorIdentificador = "I.A.";
+
+        // define parametro q sera usado p buscar socket do adversario
+        if (args.ladoAdversario.tipo != null) {
+            if (args.ladoAdversario.tipo.id == 0) {
+                jogadorIdentificador = args.jogoId + "-" + args.ladoAdversario.id;
+            }
+        }
+
+        jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador).forEach(destino => {
+            io.to(destino.socketId).emit("resetProposto", {
+                jogoId: args.jogoId,
+                ladoId: args.ladoAdversario.id
+            });
+            if (verbose) {
+                console.log("Enviando mensagem de resetProposto para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
+            }
+        });
+    } else {
+        if (verbose) {
+            console.log("O evento resetProposto não tinha a propriedade jogoId ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
+        }
+    }
+});
+
+emitter.on("empatePropostoResposta", (args) => {
+    if ("jogoId" in args && "ladoAdversario" in args) {
+        let jogadorIdentificador = "I.A.";
+
+        // define parametro q sera usado p buscar socket do adversario
+        if (args.ladoAdversario.tipo != null) {
+            if (args.ladoAdversario.tipo.id == 0) {
+                jogadorIdentificador = args.jogoId + "-" + args.ladoAdversario.id;
+            }
+        }
+
+        jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador).forEach(destino => {
+            io.to(destino.socketId).emit("empatePropostoResposta");
+            if (verbose) {
+                console.log("Enviando mensagem de empatePropostoResposta para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
+            }
+        });
+    } else {
+        if (verbose) {
+            console.log("O evento empatePropostoResposta não tinha a propriedade jogoId ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
+        }
+    }
+});
+
+emitter.on("empateProposto", (args) => {
+    if ("jogoId" in args && "ladoAdversario" in args) {
+        let jogadorIdentificador = "I.A.";
+
+        // define parametro q sera usado p buscar socket do adversario
+        if (args.ladoAdversario.tipo != null) {
+            if (args.ladoAdversario.tipo.id == 0) {
+                jogadorIdentificador = args.jogoId + "-" + args.ladoAdversario.id;
+            }
+        }
+
+        jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador).forEach(destino => {
+            io.to(destino.socketId).emit("empateProposto", {
+                jogoId: args.jogoId,
+                ladoId: args.ladoAdversario.id
+            });
+            if (verbose) {
+                console.log("Enviando mensagem de empateProposto para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
+            }
+        });
+    } else {
+        if (verbose) {
+            console.log("O evento empateProposto não tinha a propriedade jogoId ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
+        }
     }
 });
 
 emitter.on("jogadaRealizada", (args) => {
-    if ("jogadaRealizada" in args && "jogoId" in args && "ladoId" in args) {
-        // recupera lado adversario
-        const jogo = JogoService.encontra(args.jogoId);
-
-        const ladoAdversario = jogo.recuperaLadoPeloId(JogoService.recuperaIdLadoAdversarioPeloId(args.ladoId));
-        const tabuleiro = jogo.recuperaTabuleiro();
-
+    if ("jogadaRealizada" in args && "jogoId" in args && "ladoAdversario" in args && "pecaPromovida" in args && "chequeLadoAtual" in args) {
         let jogadorIdentificador = "I.A.";
 
         // define parametro q sera usado p buscar socket do adversario
-        if (ladoAdversario.tipo.id == 0) {
-            jogadorIdentificador = args.jogoId + "-" + ladoAdversario.id;
+        if (args.ladoAdversario.tipo != null) {
+            if (args.ladoAdversario.tipo.id == 0) {
+                jogadorIdentificador = args.jogoId + "-" + args.ladoAdversario.id;
+            }
         }
 
-        // procura o adversario na lista de jogadores conectados
-        const destinoEvento = jogadoresConectados.find(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador);
-
-        // se encontrar o adversario na lista de jogadores conectados dispara evento p socket do adversario
-        if (destinoEvento != undefined) {
-            io.to(destinoEvento.socketId).emit('jogadaRealizada', {
+        jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador).forEach(destino => {
+            io.to(destino.socketId).emit("jogadaRealizada", {
                 jogadaRealizada: args.jogadaRealizada,
-                tabuleiro
+                chequeLadoAtual: args.chequeLadoAtual,
+                promocaoPara: args.pecaPromovida ? args.pecaPromovida.tipo : args.pecaPromovida
             });
             if (verbose) {
-                console.log("Enviando mensagem de jogadaRealizada para " + destinoEvento.identificador + "...");
+                console.log("Enviando mensagem de jogadaRealizada para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
             }
+        });
+    } else {
+        if (verbose) {
+            console.log("O evento jogadaRealizada não tinha a propriedade jogadaRealizada ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
         }
     }
 });

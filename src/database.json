@@ -125,34 +125,9 @@
     ],
     "tabelaEquivalencia": [
         {
-            "casa": "A1",
+            "casa": "H1",
             "linha": 7,
-            "coluna": 0
-        },
-        {
-            "casa": "B1",
-            "linha": 7,
-            "coluna": 1
-        },
-        {
-            "casa": "C1",
-            "linha": 7,
-            "coluna": 2
-        },
-        {
-            "casa": "D1",
-            "linha": 7,
-            "coluna": 3
-        },
-        {
-            "casa": "E1",
-            "linha": 7,
-            "coluna": 4
-        },
-        {
-            "casa": "F1",
-            "linha": 7,
-            "coluna": 5
+            "coluna": 7
         },
         {
             "casa": "G1",
@@ -160,44 +135,34 @@
             "coluna": 6
         },
         {
-            "casa": "H1",
+            "casa": "F1",
             "linha": 7,
-            "coluna": 7
-        },
-        {
-            "casa": "A2",
-            "linha": 6,
-            "coluna": 0
-        },
-        {
-            "casa": "B2",
-            "linha": 6,
-            "coluna": 1
-        },
-        {
-            "casa": "C2",
-            "linha": 6,
-            "coluna": 2
-        },
-        {
-            "casa": "D2",
-            "linha": 6,
-            "coluna": 3
-        },
-        {
-            "casa": "E2",
-            "linha": 6,
-            "coluna": 4
-        },
-        {
-            "casa": "F2",
-            "linha": 6,
             "coluna": 5
         },
         {
-            "casa": "G2",
-            "linha": 6,
-            "coluna": 6
+            "casa": "E1",
+            "linha": 7,
+            "coluna": 4
+        },
+        {
+            "casa": "D1",
+            "linha": 7,
+            "coluna": 3
+        },
+        {
+            "casa": "C1",
+            "linha": 7,
+            "coluna": 2
+        },
+        {
+            "casa": "B1",
+            "linha": 7,
+            "coluna": 1
+        },
+        {
+            "casa": "A1",
+            "linha": 7,
+            "coluna": 0
         },
         {
             "casa": "H2",
@@ -205,39 +170,39 @@
             "coluna": 7
         },
         {
-            "casa": "A3",
-            "linha": 5,
-            "coluna": 0
+            "casa": "G2",
+            "linha": 6,
+            "coluna": 6
         },
         {
-            "casa": "B3",
-            "linha": 5,
-            "coluna": 1
-        },
-        {
-            "casa": "C3",
-            "linha": 5,
-            "coluna": 2
-        },
-        {
-            "casa": "D3",
-            "linha": 5,
-            "coluna": 3
-        },
-        {
-            "casa": "E3",
-            "linha": 5,
-            "coluna": 4
-        },
-        {
-            "casa": "F3",
-            "linha": 5,
+            "casa": "F2",
+            "linha": 6,
             "coluna": 5
         },
         {
-            "casa": "G3",
-            "linha": 5,
-            "coluna": 6
+            "casa": "E2",
+            "linha": 6,
+            "coluna": 4
+        },
+        {
+            "casa": "D2",
+            "linha": 6,
+            "coluna": 3
+        },
+        {
+            "casa": "C2",
+            "linha": 6,
+            "coluna": 2
+        },
+        {
+            "casa": "B2",
+            "linha": 6,
+            "coluna": 1
+        },
+        {
+            "casa": "A2",
+            "linha": 6,
+            "coluna": 0
         },
         {
             "casa": "H3",
@@ -245,39 +210,39 @@
             "coluna": 7
         },
         {
-            "casa": "A4",
-            "linha": 4,
-            "coluna": 0
+            "casa": "G3",
+            "linha": 5,
+            "coluna": 6
         },
         {
-            "casa": "B4",
-            "linha": 4,
-            "coluna": 1
-        },
-        {
-            "casa": "C4",
-            "linha": 4,
-            "coluna": 2
-        },
-        {
-            "casa": "D4",
-            "linha": 4,
-            "coluna": 3
-        },
-        {
-            "casa": "E4",
-            "linha": 4,
-            "coluna": 4
-        },
-        {
-            "casa": "F4",
-            "linha": 4,
+            "casa": "F3",
+            "linha": 5,
             "coluna": 5
         },
         {
-            "casa": "G4",
-            "linha": 4,
-            "coluna": 6
+            "casa": "E3",
+            "linha": 5,
+            "coluna": 4
+        },
+        {
+            "casa": "D3",
+            "linha": 5,
+            "coluna": 3
+        },
+        {
+            "casa": "C3",
+            "linha": 5,
+            "coluna": 2
+        },
+        {
+            "casa": "B3",
+            "linha": 5,
+            "coluna": 1
+        },
+        {
+            "casa": "A3",
+            "linha": 5,
+            "coluna": 0
         },
         {
             "casa": "H4",
@@ -285,39 +250,39 @@
             "coluna": 7
         },
         {
-            "casa": "A5",
-            "linha": 3,
-            "coluna": 0
+            "casa": "G4",
+            "linha": 4,
+            "coluna": 6
         },
         {
-            "casa": "B5",
-            "linha": 3,
-            "coluna": 1
-        },
-        {
-            "casa": "C5",
-            "linha": 3,
-            "coluna": 2
-        },
-        {
-            "casa": "D5",
-            "linha": 3,
-            "coluna": 3
-        },
-        {
-            "casa": "E5",
-            "linha": 3,
-            "coluna": 4
-        },
-        {
-            "casa": "F5",
-            "linha": 3,
+            "casa": "F4",
+            "linha": 4,
             "coluna": 5
         },
         {
-            "casa": "G5",
-            "linha": 3,
-            "coluna": 6
+            "casa": "E4",
+            "linha": 4,
+            "coluna": 4
+        },
+        {
+            "casa": "D4",
+            "linha": 4,
+            "coluna": 3
+        },
+        {
+            "casa": "C4",
+            "linha": 4,
+            "coluna": 2
+        },
+        {
+            "casa": "B4",
+            "linha": 4,
+            "coluna": 1
+        },
+        {
+            "casa": "A4",
+            "linha": 4,
+            "coluna": 0
         },
         {
             "casa": "H5",
@@ -325,39 +290,39 @@
             "coluna": 7
         },
         {
-            "casa": "A6",
-            "linha": 2,
-            "coluna": 0
+            "casa": "G5",
+            "linha": 3,
+            "coluna": 6
         },
         {
-            "casa": "B6",
-            "linha": 2,
-            "coluna": 1
-        },
-        {
-            "casa": "C6",
-            "linha": 2,
-            "coluna": 2
-        },
-        {
-            "casa": "D6",
-            "linha": 2,
-            "coluna": 3
-        },
-        {
-            "casa": "E6",
-            "linha": 2,
-            "coluna": 4
-        },
-        {
-            "casa": "F6",
-            "linha": 2,
+            "casa": "F5",
+            "linha": 3,
             "coluna": 5
         },
         {
-            "casa": "G6",
-            "linha": 2,
-            "coluna": 6
+            "casa": "E5",
+            "linha": 3,
+            "coluna": 4
+        },
+        {
+            "casa": "D5",
+            "linha": 3,
+            "coluna": 3
+        },
+        {
+            "casa": "C5",
+            "linha": 3,
+            "coluna": 2
+        },
+        {
+            "casa": "B5",
+            "linha": 3,
+            "coluna": 1
+        },
+        {
+            "casa": "A5",
+            "linha": 3,
+            "coluna": 0
         },
         {
             "casa": "H6",
@@ -365,39 +330,39 @@
             "coluna": 7
         },
         {
-            "casa": "A7",
-            "linha": 1,
-            "coluna": 0
+            "casa": "G6",
+            "linha": 2,
+            "coluna": 6
         },
         {
-            "casa": "B7",
-            "linha": 1,
-            "coluna": 1
-        },
-        {
-            "casa": "C7",
-            "linha": 1,
-            "coluna": 2
-        },
-        {
-            "casa": "D7",
-            "linha": 1,
-            "coluna": 3
-        },
-        {
-            "casa": "E7",
-            "linha": 1,
-            "coluna": 4
-        },
-        {
-            "casa": "F7",
-            "linha": 1,
+            "casa": "F6",
+            "linha": 2,
             "coluna": 5
         },
         {
-            "casa": "G7",
-            "linha": 1,
-            "coluna": 6
+            "casa": "E6",
+            "linha": 2,
+            "coluna": 4
+        },
+        {
+            "casa": "D6",
+            "linha": 2,
+            "coluna": 3
+        },
+        {
+            "casa": "C6",
+            "linha": 2,
+            "coluna": 2
+        },
+        {
+            "casa": "B6",
+            "linha": 2,
+            "coluna": 1
+        },
+        {
+            "casa": "A6",
+            "linha": 2,
+            "coluna": 0
         },
         {
             "casa": "H7",
@@ -405,34 +370,44 @@
             "coluna": 7
         },
         {
-            "casa": "A8",
-            "linha": 0,
-            "coluna": 0
+            "casa": "G7",
+            "linha": 1,
+            "coluna": 6
         },
         {
-            "casa": "B8",
-            "linha": 0,
-            "coluna": 1
+            "casa": "F7",
+            "linha": 1,
+            "coluna": 5
         },
         {
-            "casa": "C8",
-            "linha": 0,
-            "coluna": 2
-        },
-        {
-            "casa": "D8",
-            "linha": 0,
-            "coluna": 3
-        },
-        {
-            "casa": "E8",
-            "linha": 0,
+            "casa": "E7",
+            "linha": 1,
             "coluna": 4
         },
         {
-            "casa": "F8",
+            "casa": "D7",
+            "linha": 1,
+            "coluna": 3
+        },
+        {
+            "casa": "C7",
+            "linha": 1,
+            "coluna": 2
+        },
+        {
+            "casa": "B7",
+            "linha": 1,
+            "coluna": 1
+        },
+        {
+            "casa": "A7",
+            "linha": 1,
+            "coluna": 0
+        },
+        {
+            "casa": "H8",
             "linha": 0,
-            "coluna": 5
+            "coluna": 7
         },
         {
             "casa": "G8",
@@ -440,9 +415,34 @@
             "coluna": 6
         },
         {
-            "casa": "H8",
+            "casa": "F8",
             "linha": 0,
-            "coluna": 7
+            "coluna": 5
+        },
+        {
+            "casa": "E8",
+            "linha": 0,
+            "coluna": 4
+        },
+        {
+            "casa": "D8",
+            "linha": 0,
+            "coluna": 3
+        },
+        {
+            "casa": "C8",
+            "linha": 0,
+            "coluna": 2
+        },
+        {
+            "casa": "B8",
+            "linha": 0,
+            "coluna": 1
+        },
+        {
+            "casa": "A8",
+            "linha": 0,
+            "coluna": 0
         }
     ]
 }
