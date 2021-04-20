@@ -335,6 +335,7 @@ module.exports = class Jogo {
             // Empate: Regra das 3 posições
             this.defineFinalizado(6);
         }
+        this.verificaPecasMinimas();
     }
 
     cria() {
@@ -700,24 +701,35 @@ module.exports = class Jogo {
     }
 
     verificaPecasMinimas() {
-        this.verificaPecasMinimasLado(this.ladoBranco.id);
-        this.verificaPecasMinimasLado(this.ladoPreto.id);
+        if (!this.temQtdMinumaPecas(this.ladoBranco.id) && !this.temQtdMinumaPecas(this.ladoPreto.id)) {
+            // empata por Insuficiência material
+            this.defineFinalizado(3);
+        }
     }
 
-    verificaPecasMinimasLado(ladoId) {
+    temQtdMinumaPecas(ladoId) {
         const lado = this.recuperaLadoPeloId(ladoId);
-        const ladoAdversario = this.recuperaLadoAdversarioPeloId(ladoId);
-        // se tem so 1 eh pq eh o rei
-        if (lado.pecas.length == 1) {
-            // se tem 2 pecas 1 eh o rei e a outra nao pode ser cavalo nem bispo
-            if (ladoAdversario.pecas.length <= 2) {
-                const cavalo = ladoAdversario.pecas.find(pecaLado => pecaLado.peca.tipo == "Cavalo");
-                const bispo = ladoAdversario.pecas.find(pecaLado => pecaLado.peca.tipo == "Bispo");
-                if (cavalo != undefined || bispo != undefined) {
-                    // empata por Insuficiência material
-                    this.defineFinalizado(3);
-                }
+        const cavalos = lado.pecas.filter(pecaLado => pecaLado.peca.tipo == "Cavalo");
+        const bispos = lado.pecas.filter(pecaLado => pecaLado.peca.tipo == "Bispo");
+        const peoes = lado.pecas.filter(pecaLado => pecaLado.peca.tipo == "Peão");
+        const torres = lado.pecas.filter(pecaLado => pecaLado.peca.tipo == "Torre");
+        const rainha = lado.pecas.filter(pecaLado => pecaLado.peca.tipo == "Rainha");
+        if (lado.pecas.length < 2) {
+            return false;
+        } else if (lado.pecas.length == 2) {
+            if (rainha.length > 0 || torres.length > 0 || peoes.length > 0) {
+                return true;
+            } else {
+                return false;
             }
+        } else if (lado.pecas.length == 3) {
+            if (bispos.length == 2 || (bispos.length > 0 && cavalos.length > 0)) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return true;
         }
     }
 
