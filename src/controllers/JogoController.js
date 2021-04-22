@@ -87,6 +87,44 @@ module.exports = {
             });
         }
     },
+    recuperaTurnos(req, res) {
+        try {
+            const { jogoId } = req.params;
+            return res.json({
+                message: "Turnos do Jogo retornados com sucesso!",
+                data: JogoService.encontra(jogoId).turnos,
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
+    },
+    recuperaLados(req, res) {
+        try {
+            const { jogoId } = req.params;
+            const jogo = JogoService.encontra(jogoId);
+            let lados = {};
+            lados.branco = jogo.ladoBranco;
+            lados.preto = jogo.ladoPreto;
+            return res.json({
+                message: "Lados do Jogo retornados com sucesso!",
+                data: lados,
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
+    },
     reset(req, res) {
         try {
             const { jogoId } = req.params;

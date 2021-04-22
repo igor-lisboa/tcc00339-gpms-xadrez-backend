@@ -343,6 +343,44 @@
 							"response": []
 						},
 						{
+							"name": "Recupera Lados",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/lados",
+									"host": [
+										"{{API_XADREZ_URL}}"
+									],
+									"path": [
+										"jogos",
+										"{{jogoIndex}}",
+										"lados"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Recupera Turnos",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/turnos",
+									"host": [
+										"{{API_XADREZ_URL}}"
+									],
+									"path": [
+										"jogos",
+										"{{jogoIndex}}",
+										"turnos"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "Reseta",
 							"request": {
 								"method": "PUT",

@@ -37,6 +37,8 @@ routes.post("/jogos/ia/executa", JogoController.executaJogadasIaAlone);
 routes.post("/jogos/:jogoId/ia/promove-peao", JogoController.iaPromovePeao);
 routes.get("/jogos/:jogoId", JogoController.encontra);
 routes.get("/jogos/:jogoId/simples", JogoController.encontraSimples);
+routes.get("/jogos/:jogoId/turnos", JogoController.recuperaTurnos);
+routes.get("/jogos/:jogoId/lados", JogoController.recuperaLados);
 routes.put("/jogos/:jogoId/reset", JogoController.reset);
 routes.put("/jogos/:jogoId/reset/propoe", JogoController.propoeReset);
 routes.post("/jogos/:jogoId/reset/responde", JogoController.respondePropostaReset);
