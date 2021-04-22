@@ -34,6 +34,59 @@ module.exports = {
             });
         }
     },
+    encontraSimples(req, res) {
+        try {
+            const { jogoId } = req.params;
+            const jogo = JogoService.encontra(jogoId);
+
+            let retorno = {};
+            retorno.id = jogo.id;
+            retorno.ladoIdAtual = jogo.ladoIdAtual;
+            retorno.tempoDeTurnoEmMilisegundos = jogo.tempoDeTurnoEmMilisegundos;
+            retorno.chequeLadoAtual = jogo.chequeLadoAtual;
+            retorno.acoesSolicitadas = jogo.acoesSolicitadas;
+            retorno.casaPeaoPromocao = jogo.casaPeaoPromocao;
+            retorno.empatePropostoPeloLadoId = jogo.empatePropostoPeloLadoId;
+            retorno.resetPropostoPeloLadoId = jogo.resetPropostoPeloLadoId;
+
+            let enPassantCasaCaptura = null;
+            if (jogo.enPassantCasaCaptura != null) {
+                enPassantCasaCaptura = {
+                    casaCaptura: jogo.enPassantCasaCaptura.casaCaptura.casa,
+                    casaPeao: jogo.enPassantCasaCaptura.casaPeao.casa
+                };
+            }
+            retorno.enPassantCasaCaptura = enPassantCasaCaptura;
+
+            let finalizado = null;
+            if (jogo.finalizado != null) {
+                finalizado = jogo.finalizado.tipo;
+            }
+            retorno.finalizado = finalizado;
+
+            let tipoJogo = "";
+            jogo.tipoJogo.integranteLadoTipo.forEach(tipo => {
+                tipoJogo += (tipoJogo != "" ? " X " : "") + tipo.nome;
+            });
+            retorno.tipoJogo = tipoJogo;
+
+            retorno.tabuleiro = jogo.tabuleiro.recuperaTabuleiroCasasSimplificado();
+
+
+            return res.json({
+                message: "Jogo simplificado retornado com sucesso!",
+                data: retorno,
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
+    },
     reset(req, res) {
         try {
             const { jogoId } = req.params;

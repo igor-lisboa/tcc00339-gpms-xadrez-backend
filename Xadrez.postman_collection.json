@@ -324,6 +324,25 @@
 							"response": []
 						},
 						{
+							"name": "Encontra Simplificado",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/simples",
+									"host": [
+										"{{API_XADREZ_URL}}"
+									],
+									"path": [
+										"jogos",
+										"{{jogoIndex}}",
+										"simples"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "Reseta",
 							"request": {
 								"method": "PUT",

@@ -121,6 +121,27 @@ module.exports = class Tabuleiro {
         });
     }
 
+    recuperaTabuleiroCasasSimplificado() {
+        let tabuleiro = this.montaTabuleiroVazio();
+
+        this.casas.forEach((linha, linhaIndex) => {
+            linha.forEach((pecaObjeto, colunaIndex) => {
+
+                if (pecaObjeto != null) {
+                    let pecaObjSimples = {};
+                    pecaObjSimples.tipo = pecaObjeto.tipo;
+                    pecaObjSimples.ladoId = pecaObjeto.ladoId;
+                    pecaObjSimples.jogadasRealizadasLength = pecaObjeto.jogadasRealizadas.length;
+                    pecaObjSimples.valor = pecaObjeto.valor;
+                    tabuleiro[linhaIndex][colunaIndex] = pecaObjSimples;
+                }
+
+            });
+        });
+
+        return tabuleiro;
+    }
+
     fotografaTabuleiro() {
         let novaFotografia = {
             tabuleiro: this.montaTabuleiroVazio(),
