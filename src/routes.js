@@ -33,6 +33,8 @@ routes.get("/jogos", JogoController.lista);
 routes.post("/jogos", JogoController.cria);
 routes.get("/jogos/ia", JogoController.listaIa);
 routes.post("/jogos/ia", JogoController.executaJogadasIa);
+routes.post("/jogos/ia/executa", JogoController.executaJogadasIaAlone);
+routes.post("/jogos/:jogoId/ia/promove-peao", JogoController.iaPromovePeao);
 routes.get("/jogos/:jogoId", JogoController.encontra);
 routes.put("/jogos/:jogoId/reset", JogoController.reset);
 routes.put("/jogos/:jogoId/reset/propoe", JogoController.propoeReset);
