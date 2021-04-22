@@ -255,6 +255,32 @@
 							"response": []
 						},
 						{
+							"name": "I.A. Promove Peão",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "lado",
+										"value": "{{ladoId}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/ia/promove-peao",
+									"host": [
+										"{{API_XADREZ_URL}}"
+									],
+									"path": [
+										"jogos",
+										"{{jogoIndex}}",
+										"ia",
+										"promove-peao"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "Rei Adversário",
 							"request": {
 								"method": "GET",
@@ -486,13 +512,32 @@
 					"response": []
 				},
 				{
+					"name": "Executa Jogadas I.A. Sozinho",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{API_XADREZ_URL}}/jogos/ia/executa",
+							"host": [
+								"{{API_XADREZ_URL}}"
+							],
+							"path": [
+								"jogos",
+								"ia",
+								"executa"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Cria",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"tipoJogo\": \"{{tipoJogoId}}\",\r\n    \"tempoDeTurnoEmMilisegundos\": \"300000\",\r\n    \"ladoId\": 1,\r\n    \"tabuleiroCasas\": [\r\n        [\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null\r\n        ],\r\n        [\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null\r\n        ],\r\n        [\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null\r\n        ],\r\n        [\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            \"Rei-1\",\r\n            null,\r\n            null,\r\n            null\r\n        ],\r\n        [\r\n            \"Peão-0\",\r\n            \"Peão-0\",\r\n            null,\r\n            null,\r\n            null,\r\n            \"Bispo-0\",\r\n            null,\r\n            null\r\n        ],\r\n        [\r\n            null,\r\n            null,\r\n            \"Peão-0\",\r\n            \"Peão-0\",\r\n            null,\r\n            null,\r\n            null,\r\n            null\r\n        ],\r\n        [\r\n            \"Torre-0\",\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            \"Peão-0\",\r\n            \"Peão-0\",\r\n            \"Peão-0\"\r\n        ],\r\n        [\r\n            null,\r\n            \"Cavalo-0\",\r\n            null,\r\n            \"Rei-0\",\r\n            null,\r\n            \"Bispo-0\",\r\n            \"Cavalo-0\",\r\n            \"Torre-0\"\r\n        ]\r\n    ]\r\n}",
+							"raw": "{\r\n    \"tipoJogo\": \"{{tipoJogoId}}\",\r\n    \"tempoDeTurnoEmMilisegundos\": \"300000\",\r\n    \"ladoId\": 1,\r\n    \"tabuleiroCasas\": [\r\n        [\r\n            \"Torre-1\",\r\n            \"Cavalo-1\",\r\n            \"Bispo-1\",\r\n            \"Rainha-1\",\r\n            \"Rei-1\",\r\n            \"Bispo-1\",\r\n            \"Cavalo-1\",\r\n            \"Torre-1\"\r\n        ],\r\n        [\r\n            null,\r\n            \"Peão-1\",\r\n            \"Peão-1\",\r\n            null,\r\n            \"Peão-1\",\r\n            \"Rainha-0\",\r\n            \"Peão-1\",\r\n            \"Peão-1\"\r\n        ],\r\n        [\r\n            null,\r\n            null,\r\n            null,\r\n            \"Peão-1\",\r\n            null,\r\n            null,\r\n            null,\r\n            null\r\n        ],\r\n        [\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null\r\n        ],\r\n        [\r\n            null,\r\n            null,\r\n            \"Bispo-0\",\r\n            null,\r\n            \"Peão-0\",\r\n            null,\r\n            null,\r\n            null\r\n        ],\r\n        [\r\n            \"Peão-1\",\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null,\r\n            null\r\n        ],\r\n        [\r\n            \"Peão-0\",\r\n            \"Peão-0\",\r\n            \"Peão-0\",\r\n            \"Peão-0\",\r\n            null,\r\n            \"Peão-0\",\r\n            \"Peão-0\",\r\n            \"Peão-0\"\r\n        ],\r\n        [\r\n            \"Torre-0\",\r\n            \"Cavalo-0\",\r\n            \"Bispo-0\",\r\n            null,\r\n            null,\r\n            \"Rei-0\",\r\n            \"Cavalo-0\",\r\n            \"Torre-0\"\r\n        ]\r\n    ]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
