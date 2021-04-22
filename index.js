@@ -92,7 +92,7 @@ emitter.on("jogoFinalizado", (args) => {
 
 emitter.on("forcaIa", () => {
     jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == "I.A.").forEach(destino => {
-        io.to(destino.socketId).emit("forcaIa", { jogoFinalizacao: args.jogoFinalizado });
+        io.to(destino.socketId).emit("forcaIa");
         if (verbose) {
             console.log("Enviando mensagem de forcaIa para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
         }

@@ -5,9 +5,10 @@ module.exports = {
         try {
             const { jogoId } = req.params;
             const ladoId = req.headers.lado;
+            const jogo = JogoService.encontra(jogoId);
             return res.json({
                 message: "Peças retornadas com sucesso!",
-                data: JogoService.recuperaTodasAsPecasDeUmLado(jogoId, ladoId),
+                data: jogo.recuperaLadoPeloId(ladoId).pecas,
                 success: true
             });
         } catch (e) {

@@ -146,9 +146,10 @@ module.exports = {
     }, recuperaLadoAtual(req, res) {
         try {
             const { jogoId } = req.params;
+            const jogo = JogoService.encontra(jogoId);
             return res.json({
                 message: "Lado atual do jogo retornado com sucesso!",
-                data: JogoService.encontra(jogoId).recuperaLadoPeloId(jogo.ladoIdAtual),
+                data: jogo.recuperaLadoPeloId(jogo.ladoIdAtual),
                 success: true
             });
         } catch (e) {
