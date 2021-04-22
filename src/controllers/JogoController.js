@@ -176,6 +176,23 @@ module.exports = {
                 success: false
             });
         }
+    }, iaPromovePeao(req, res) {
+        try {
+            const { jogoId } = req.params;
+            const ladoId = req.headers.lado;
+            return res.json({
+                message: "Peão promovido com sucesso!",
+                data: JogoService.iaPromovePeao(jogoId, ladoId),
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
     }, recuperaPecaReiAdversario(req, res) {
         try {
             const { jogoId } = req.params;
@@ -246,6 +263,21 @@ module.exports = {
             return res.json({
                 message: "Jogadas solicitadas pela I.A. executadas com sucesso!",
                 data: JogoService.executaJogadas(jogadas),
+                success: true
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).json({
+                message: e,
+                data: null,
+                success: false
+            });
+        }
+    }, executaJogadasIaAlone(req, res) {
+        try {
+            return res.json({
+                message: "Jogadas da I.A. executadas com sucesso!",
+                data: JogoService.executaJogadasIa(),
                 success: true
             });
         } catch (e) {

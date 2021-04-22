@@ -1,5 +1,6 @@
 const db = require("../database.json");
 const Jogo = require("../models/Jogo");
+const TipoPecaService = require("./TipoPecaService");
 
 module.exports = {
     lista() {
@@ -17,6 +18,18 @@ module.exports = {
         const jogo = new Jogo(tipoJogoId, tempoDeTurnoEmMilisegundos, tabuleiroCasas, ladoId).cria();
         universalEmitter.emit("jogoCriado");
         return jogo;
+    }, iaPromovePeao(jogoId, ladoId) {
+        const pecas = TipoPecaService.listaPromocaoPeao();
+
+        let idsPecasParaSeremEscolhidas = [];
+
+        // percorre pecas
+        pecas.forEach((peca) => {
+            idsPecasParaSeremEscolhidas.push(peca.id);
+        });
+
+        const pecaIdEscolhida = idsPecasParaSeremEscolhidas[Math.floor(Math.random() * idsPecasParaSeremEscolhidas.length)];
+        return this.promovePeao(jogoId, ladoId, pecaIdEscolhida);
     }, promovePeao(jogoId, ladoId, pecaEscolhida) {
         const jogo = this.encontra(jogoId);
         const { pecaPromovida, jogadaRealizada, ladoAdversario } = jogo.promovePeao(ladoId, pecaEscolhida);
@@ -40,7 +53,7 @@ module.exports = {
         // se a reposta tiver sido positiva executa o reset
         if (resposta) {
             this.resetJogo(jogoId);
-        } 
+        }
         universalEmitter.emit("resetPropostoResposta", {
             jogoId: jogo.id,
             ladoAdversario,
@@ -89,6 +102,69 @@ module.exports = {
         }
 
         return jogadaRealizada;
+    }, executaJogadasIa() {
+        const jogosIa = this.listaIa();
+
+        let jogadasParaSeremFeitasPelaIa = [];
+
+        // percorre jogos
+        jogosIa.forEach((jogoIa) => {
+            // recupera lado atual do jogo
+            const ladoIa = jogoIa.ladosIa.find(ladoIa => ladoIa.lado.id == jogoIa.jogo.ladoIdAtual);
+
+            // checa se o ladoIa foi encontrado
+            if (ladoIa != undefined) {
+
+                // escolhe uma jogada para realizar
+                let novasPossibilidadesJogadas = [];
+                let possiveisJogadas = ladoIa.possiveisJogadas;
+
+                // escolhePossivelJogada
+
+                // capturar pecas (se possivel)
+                novasPossibilidadesJogadas = possiveisJogadas.filter(possivelJogada =>
+                    possivelJogada.captura == true
+                );
+                // se com o filtro as novasPossibilidadesJogadas estiverem diferente de 0 define possiveisJogadas
+                if (novasPossibilidadesJogadas.length != 0) {
+                    possiveisJogadas = novasPossibilidadesJogadas;
+                }
+
+                // evitar se mover p um lugar onde possa ser capturado (se possivel)
+                novasPossibilidadesJogadas = possiveisJogadas.filter(possivelJogada =>
+                    possivelJogada.capturavel == false
+                );
+                // se com o filtro as novasPossibilidadesJogadas estiverem diferente de 0 define possiveisJogadas
+                if (novasPossibilidadesJogadas.length != 0) {
+                    possiveisJogadas = novasPossibilidadesJogadas;
+                }
+
+                // evitar deixar pecas q podem ser capturadas nas casas onde estao
+                novasPossibilidadesJogadas = possiveisJogadas.filter(possivelJogada =>
+                    possivelJogada.pecaAmeacadaNaPosicaoAtual == true
+                );
+                // se com o filtro as novasPossibilidadesJogadas estiverem diferente de 0 define possiveisJogadas
+                if (novasPossibilidadesJogadas.length != 0) {
+                    possiveisJogadas = novasPossibilidadesJogadas;
+                }
+
+                // escolhe item no array de possiveisJogadas aleatoriamente
+                const jogadaEscolhida = possiveisJogadas[Math.floor(Math.random() * possiveisJogadas.length)];
+
+                // se escolheu alguma jogada... adiciona na lista de jogadas p executar
+                if (jogadaEscolhida != undefined) {
+                    // insere jogada escolhida no array de jogadasParaSeremFeitasPelaIa
+                    jogadasParaSeremFeitasPelaIa.push({
+                        "jogoId": jogoIa.jogo.id,
+                        "casaOrigem": jogadaEscolhida.de,
+                        "casaDestino": jogadaEscolhida.para,
+                        "ladoId": ladoIa.lado.id
+                    });
+                }
+            }
+        });
+
+        return this.executaJogadas(jogadasParaSeremFeitasPelaIa);
     }, executaJogadas(jogadas = []) {
         let jogadasExecutadas = [];
         let jogadasErros = [];

@@ -3,6 +3,8 @@ const axios = require("axios").default;
 
 const verbose = process.env.APP_VERBOSE || true;
 const apiUrl = process.env.APP_URL || "http://localhost:3333";
+// espera 3 segundos
+const tempoWait = 3000;
 
 const api = axios.create({
     baseURL: apiUrl
@@ -70,43 +72,8 @@ socket.on("forcaIa", async function () {
     await ia();
 });
 
-const escolhePossivelJogada = (possiveisJogadas) => {
-    let novasPossibilidadesJogadas = [];
-
-    // capturar pecas (se possivel)
-    novasPossibilidadesJogadas = possiveisJogadas.filter(possivelJogada =>
-        possivelJogada.captura == true
-    );
-    // se com o filtro as novasPossibilidadesJogadas estiverem diferente de 0 define possiveisJogadas
-    if (novasPossibilidadesJogadas.length != 0) {
-        possiveisJogadas = novasPossibilidadesJogadas;
-    }
-
-    // evitar se mover p um lugar onde possa ser capturado (se possivel)
-    novasPossibilidadesJogadas = possiveisJogadas.filter(possivelJogada =>
-        possivelJogada.capturavel == false
-    );
-    // se com o filtro as novasPossibilidadesJogadas estiverem diferente de 0 define possiveisJogadas
-    if (novasPossibilidadesJogadas.length != 0) {
-        possiveisJogadas = novasPossibilidadesJogadas;
-    }
-
-    // evitar deixar pecas q podem ser capturadas nas casas onde estao
-    novasPossibilidadesJogadas = possiveisJogadas.filter(possivelJogada =>
-        possivelJogada.pecaAmeacadaNaPosicaoAtual == true
-    );
-    // se com o filtro as novasPossibilidadesJogadas estiverem diferente de 0 define possiveisJogadas
-    if (novasPossibilidadesJogadas.length != 0) {
-        possiveisJogadas = novasPossibilidadesJogadas;
-    }
-
-    // escolhe item no array de possiveisJogadas aleatoriamente
-    return possiveisJogadas[Math.floor(Math.random() * possiveisJogadas.length)];
-}
-
 const respondeProposta = async (jogoId, ladoId, tipo) => {
-    // espera 3 segundos pra executar
-    await sleep(3000);
+    await sleep(tempoWait);
     const respostas = [true, false];
     const respostaEscolhida = respostas[Math.floor(Math.random() * respostas.length)];
     api.post(
@@ -129,42 +96,18 @@ const respondeProposta = async (jogoId, ladoId, tipo) => {
 }
 
 const promovePeao = async (jogoId, ladoId) => {
-    // espera 3 segundos pra executar
-    await sleep(3000);
-    api.get(
-        "/tipos-de-peca/promocao-peao"
+    await sleep(tempoWait);
+    api.post(
+        "/jogos/" + jogoId + "/ia/promove-peao",
+        {},
+        {
+            headers: {
+                lado: ladoId
+            }
+        }
     ).then((response) => {
-
-        let idsPecasParaSeremEscolhidas = [];
-
-        // se retorno tiver sucesso
-        if (response.data.success) {
-
-            // percorre pecas
-            response.data.data.forEach((peca) => {
-                idsPecasParaSeremEscolhidas.push(peca.id);
-            });
-
-            const idPecaEscolhida = idsPecasParaSeremEscolhidas[Math.floor(Math.random() * idsPecasParaSeremEscolhidas.length)];
-
-            // realiza jogadas listadas
-            api.post(
-                "/jogos/" + jogoId + "/promove-peao/" + idPecaEscolhida,
-                {},
-                {
-                    headers: {
-                        lado: ladoId
-                    }
-                }
-            ).then((responsePromocao) => {
-                if (verbose) {
-                    console.log(responsePromocao.data);
-                }
-            }).catch((errorPromocao) => {
-                console.log(errorPromocao.response.data.message);
-            });
-        } else {
-            console.log(response.data.message);
+        if (verbose) {
+            console.log(response.data);
         }
     }).catch((e) => {
         console.log(e);
@@ -173,54 +116,12 @@ const promovePeao = async (jogoId, ladoId) => {
 
 const ia = async () => {
     // espera 3 segundos pra executar
-    await sleep(3000);
-    api.get(
-        "/jogos/ia"
+    await sleep(tempoWait);
+    api.post(
+        "/jogos/ia/executa"
     ).then((response) => {
-
-        let jogadasParaSeremFeitasPelaIa = [];
-
-        // se retorno tiver sucesso
-        if (response.data.success) {
-
-            // percorre jogos
-            response.data.data.forEach((jogoIa) => {
-                // recupera lado atual do jogo
-                const ladoIa = jogoIa.ladosIa.find(ladoIa => ladoIa.lado.id == jogoIa.jogo.ladoIdAtual);
-
-                // checa se o ladoIa foi encontrado
-                if (ladoIa != undefined) {
-                    // escolhe uma jogada para realizar
-                    const jogadaEscolhida = escolhePossivelJogada(ladoIa.possiveisJogadas);
-
-                    // se escolheu alguma jogada... adiciona na lista de jogadas p executar
-                    if (jogadaEscolhida != undefined) {
-                        // insere jogada escolhida no array de jogadasParaSeremFeitasPelaIa
-                        jogadasParaSeremFeitasPelaIa.push({
-                            "jogoId": jogoIa.jogo.id,
-                            "casaOrigem": jogadaEscolhida.de,
-                            "casaDestino": jogadaEscolhida.para,
-                            "ladoId": ladoIa.lado.id
-                        });
-                    }
-                }
-            });
-
-            // realiza jogadas listadas
-            api.post(
-                "/jogos/ia",
-                {
-                    "jogadas": jogadasParaSeremFeitasPelaIa
-                }
-            ).then((responseJogada) => {
-                if (verbose) {
-                    console.log(responseJogada.data);
-                }
-            }).catch((errorJogada) => {
-                console.log(errorJogada.response.data.message);
-            });
-        } else {
-            console.log(response.data.message);
+        if (verbose) {
+            console.log(response.data);
         }
     }).catch((e) => {
         console.log(e);
