@@ -3,8 +3,7 @@ const axios = require("axios").default;
 
 const verbose = process.env.APP_VERBOSE || true;
 const apiUrl = process.env.APP_URL || "http://localhost:3333";
-// espera 3 segundos
-const tempoWait = 3000;
+const tempoWait = process.env.APP_WAIT_MS || 3000;
 
 const api = axios.create({
     baseURL: apiUrl
@@ -115,7 +114,6 @@ const promovePeao = async (jogoId, ladoId) => {
 }
 
 const ia = async () => {
-    // espera 3 segundos pra executar
     await sleep(tempoWait);
     api.post(
         "/jogos/ia/executa"
