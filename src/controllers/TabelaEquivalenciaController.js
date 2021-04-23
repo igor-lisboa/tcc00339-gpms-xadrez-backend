@@ -1,11 +1,11 @@
-const db = require("../database.json");
+const TabelaEquivalenciaService = require("../services/TabelaEquivalenciaService");
 
 module.exports = {
     lista(req, res) {
         try {
             return res.json({
                 message: "Tabela de equivalência retornada com sucesso!",
-                data: db.tabelaEquivalencia.reverse(),
+                data: TabelaEquivalenciaService.listaReverse(),
                 success: true
             });
         } catch (e) {

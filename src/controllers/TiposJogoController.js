@@ -1,11 +1,11 @@
-const tipoJogoService = require("../services/TipoJogoService");
+const TipoJogoService = require("../services/TipoJogoService");
 
 module.exports = {
     lista(req, res) {
         try {
             return res.json({
                 message: "Tipos de jogo retornados com sucesso!",
-                data: tipoJogoService.lista(),
+                data: TipoJogoService.lista(),
                 success: true
             });
         } catch (e) {

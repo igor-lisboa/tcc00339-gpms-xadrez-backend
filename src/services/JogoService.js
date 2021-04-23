@@ -7,6 +7,51 @@ module.exports = {
         return db.jogos;
     }, encontra(id) {
         return new Jogo().encontra(id);
+    }, encontraSimples(id) {
+        const jogo = this.encontra(id);
+
+        let retorno = {};
+        retorno.id = jogo.id;
+        retorno.ladoIdAtual = jogo.ladoIdAtual;
+        retorno.tempoDeTurnoEmMilisegundos = jogo.tempoDeTurnoEmMilisegundos;
+        retorno.chequeLadoAtual = jogo.chequeLadoAtual;
+        retorno.acoesSolicitadas = jogo.acoesSolicitadas;
+        retorno.casaPeaoPromocao = jogo.casaPeaoPromocao;
+        retorno.empatePropostoPeloLadoId = jogo.empatePropostoPeloLadoId;
+        retorno.resetPropostoPeloLadoId = jogo.resetPropostoPeloLadoId;
+
+        let enPassantCasaCaptura = null;
+        if (jogo.enPassantCasaCaptura != null) {
+            enPassantCasaCaptura = {
+                casaCaptura: jogo.enPassantCasaCaptura.casaCaptura.casa,
+                casaPeao: jogo.enPassantCasaCaptura.casaPeao.casa
+            };
+        }
+        retorno.enPassantCasaCaptura = enPassantCasaCaptura;
+
+        let finalizado = null;
+        if (jogo.finalizado != null) {
+            finalizado = jogo.finalizado.tipo;
+        }
+        retorno.finalizado = finalizado;
+
+        let tipoJogo = "";
+        jogo.tipoJogo.integranteLadoTipo.forEach(tipo => {
+            tipoJogo += (tipoJogo != "" ? " X " : "") + tipo.nome;
+        });
+        retorno.tipoJogo = tipoJogo;
+
+        retorno.tabuleiro = jogo.tabuleiro.recuperaTabuleiroCasasSimplificado();
+
+        return retorno;
+    }, recuperaTurnos(jogoId) {
+        return this.encontra(jogoId).turnos;
+    }, recuperaLados(jogoId) {
+        const jogo = this.encontra(jogoId);
+        let lados = {};
+        lados.branco = jogo.ladoBranco;
+        lados.preto = jogo.ladoPreto;
+        return lados;
     }, resetJogo(jogoId) {
         const jogoAntigo = this.encontra(jogoId);
         const novoJogo = new Jogo(jogoAntigo.tipoJogo.id, jogoAntigo.tempoDeTurnoEmMilisegundos);
@@ -46,6 +91,12 @@ module.exports = {
             jogoId: jogo.id,
             ladoAdversario
         });
+    }, recuperaLadoAtual(jogoId) {
+        const jogo = this.encontra(jogoId);
+        return jogo.recuperaLadoPeloId(jogo.ladoIdAtual);
+    }, listaPecasDeUmLado(jogoId, ladoId) {
+        const jogo = this.encontra(jogoId);
+        return jogo.recuperaLadoPeloId(ladoId).pecas;
     }, respondeResetProposto(jogoId, ladoId, resposta) {
         const jogo = this.encontra(jogoId);
         const ladoAdversario = jogo.respondeResetProposto(ladoId, resposta);
