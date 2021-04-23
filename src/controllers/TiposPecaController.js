@@ -1,11 +1,11 @@
-const tipoPecaService = require("../services/TipoPecaService");
+const TipoPecaService = require("../services/TipoPecaService");
 
 module.exports = {
     lista(req, res) {
         try {
             return res.json({
                 message: "Tipos de peça retornados com sucesso!",
-                data: tipoPecaService.lista(),
+                data: TipoPecaService.lista(),
                 success: true
             });
         } catch (e) {
@@ -21,7 +21,7 @@ module.exports = {
         try {
             return res.json({
                 message: "Possíveis peças para promover um peão retornadas com sucesso!",
-                data: tipoPecaService.listaPromocaoPeao(),
+                data: TipoPecaService.listaPromocaoPeao(),
                 success: true
             });
         } catch (e) {

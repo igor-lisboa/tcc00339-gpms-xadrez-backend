@@ -1,11 +1,11 @@
-const db = require("../database.json");
+const LadoService = require("../services/LadoService");
 
 module.exports = {
     lista(req, res) {
         try {
             return res.json({
                 message: "Lados do jogo retornados com sucesso!",
-                data: db.lados,
+                data: LadoService.lista(),
                 success: true
             });
         } catch (e) {

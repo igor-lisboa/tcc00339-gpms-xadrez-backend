@@ -37,45 +37,9 @@ module.exports = {
     encontraSimples(req, res) {
         try {
             const { jogoId } = req.params;
-            const jogo = JogoService.encontra(jogoId);
-
-            let retorno = {};
-            retorno.id = jogo.id;
-            retorno.ladoIdAtual = jogo.ladoIdAtual;
-            retorno.tempoDeTurnoEmMilisegundos = jogo.tempoDeTurnoEmMilisegundos;
-            retorno.chequeLadoAtual = jogo.chequeLadoAtual;
-            retorno.acoesSolicitadas = jogo.acoesSolicitadas;
-            retorno.casaPeaoPromocao = jogo.casaPeaoPromocao;
-            retorno.empatePropostoPeloLadoId = jogo.empatePropostoPeloLadoId;
-            retorno.resetPropostoPeloLadoId = jogo.resetPropostoPeloLadoId;
-
-            let enPassantCasaCaptura = null;
-            if (jogo.enPassantCasaCaptura != null) {
-                enPassantCasaCaptura = {
-                    casaCaptura: jogo.enPassantCasaCaptura.casaCaptura.casa,
-                    casaPeao: jogo.enPassantCasaCaptura.casaPeao.casa
-                };
-            }
-            retorno.enPassantCasaCaptura = enPassantCasaCaptura;
-
-            let finalizado = null;
-            if (jogo.finalizado != null) {
-                finalizado = jogo.finalizado.tipo;
-            }
-            retorno.finalizado = finalizado;
-
-            let tipoJogo = "";
-            jogo.tipoJogo.integranteLadoTipo.forEach(tipo => {
-                tipoJogo += (tipoJogo != "" ? " X " : "") + tipo.nome;
-            });
-            retorno.tipoJogo = tipoJogo;
-
-            retorno.tabuleiro = jogo.tabuleiro.recuperaTabuleiroCasasSimplificado();
-
-
             return res.json({
                 message: "Jogo simplificado retornado com sucesso!",
-                data: retorno,
+                data: JogoService.encontraSimples(jogoId),
                 success: true
             });
         } catch (e) {
@@ -92,7 +56,7 @@ module.exports = {
             const { jogoId } = req.params;
             return res.json({
                 message: "Turnos do Jogo retornados com sucesso!",
-                data: JogoService.encontra(jogoId).turnos,
+                data: JogoService.recuperaTurnos(jogoId),
                 success: true
             });
         } catch (e) {
@@ -107,13 +71,9 @@ module.exports = {
     recuperaLados(req, res) {
         try {
             const { jogoId } = req.params;
-            const jogo = JogoService.encontra(jogoId);
-            let lados = {};
-            lados.branco = jogo.ladoBranco;
-            lados.preto = jogo.ladoPreto;
             return res.json({
                 message: "Lados do Jogo retornados com sucesso!",
-                data: lados,
+                data: JogoService.recuperaLados(jogoId),
                 success: true
             });
         } catch (e) {
@@ -237,10 +197,9 @@ module.exports = {
     }, recuperaLadoAtual(req, res) {
         try {
             const { jogoId } = req.params;
-            const jogo = JogoService.encontra(jogoId);
             return res.json({
                 message: "Lado atual do jogo retornado com sucesso!",
-                data: jogo.recuperaLadoPeloId(jogo.ladoIdAtual),
+                data: JogoService.recuperaLadoAtual(jogoId),
                 success: true
             });
         } catch (e) {
