@@ -31,13 +31,6 @@ module.exports = class Jogo {
         this.defineLadoIdAtual(ladoId);
 
         /**
-         * O REI do lado atual tem pessas q podem captura-lo mas ainda
-         * possui modos de se defender obstruindo o ataque em questao
-         * com outra peca ou se movendo
-         */
-        this.chequeLadoAtual = this.verificaReiLadoCheque(this.ladoIdAtual);
-
-        /**
          * Objeto contendo a casa de captura do enPassant e a casa onde a peca se encontra
          * so eh valida por 1 jogada nessa jogada em questao o jogador adversario caso tenha
          * alguma peca q pode ir ate a casa armazenada nessa variavel ira realizar a captura
@@ -254,9 +247,6 @@ module.exports = class Jogo {
             // passa a vez p outro jogador
             this.defineLadoIdAtual(ladoAdversario.id);
         }
-
-        // verifica se a jogada colocou o rei do adversario em cheque
-        this.chequeLadoAtual = this.verificaReiLadoCheque(ladoAdversario.id, true);
 
         this.tabuleiro.fotografaTabuleiro();
         this.verificaTabuleiro();
@@ -876,6 +866,9 @@ module.exports = class Jogo {
                 this.incluiNovoTurno();
             }
         }
+
+        // verifica se a jogada colocou o rei em cheque
+        this.chequeLadoAtual = this.verificaReiLadoCheque(ladoId, true);
     }
 
     recuperaLadoPeloId(ladoId) {
