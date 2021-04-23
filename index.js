@@ -253,7 +253,14 @@ emitter.on("empateProposto", (args) => {
 
 emitter.on("jogadaRealizada", (args) => {
     if ("jogadaRealizada" in args && "jogoId" in args && "ladoAdversario" in args && "pecaPromovida" in args && "chequeLadoAtual" in args) {
-        let identificadores = ["I.A.", args.jogoId + "-" + args.ladoAdversario.id];
+        let identificadores = [args.jogoId + "-" + args.ladoAdversario.id];
+
+        // define parametro q sera usado p buscar socket do adversario
+        if (args.ladoAdversario.tipo != null) {
+            if (args.ladoAdversario.tipo.id != 0) {
+                identificadores.push("I.A.");
+            }
+        }
 
         let destinos = [];
 
