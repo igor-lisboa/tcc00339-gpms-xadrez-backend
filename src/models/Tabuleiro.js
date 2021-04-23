@@ -121,18 +121,25 @@ module.exports = class Tabuleiro {
         });
     }
 
-    recuperaTabuleiroCasasSimplificado() {
+    recuperaTabuleiroCasasSimplificado(superSimples = false) {
         let tabuleiro = this.montaTabuleiroVazio();
 
         this.casas.forEach((linha, linhaIndex) => {
             linha.forEach((pecaObjeto, colunaIndex) => {
 
                 if (pecaObjeto != null) {
-                    let pecaObjSimples = {};
-                    pecaObjSimples.tipo = pecaObjeto.tipo;
-                    pecaObjSimples.ladoId = pecaObjeto.ladoId;
-                    pecaObjSimples.jogadasRealizadasLength = pecaObjeto.jogadasRealizadas.length;
-                    pecaObjSimples.valor = pecaObjeto.valor;
+                    let pecaObjSimples = null;
+
+                    if (superSimples) {
+                        pecaObjSimples = pecaObjeto.tipo + "-" + pecaObjeto.ladoId;
+                    } else {
+                        pecaObjSimples = {};
+                        pecaObjSimples.tipo = pecaObjeto.tipo;
+                        pecaObjSimples.ladoId = pecaObjeto.ladoId;
+                        pecaObjSimples.jogadasRealizadasLength = pecaObjeto.jogadasRealizadas.length;
+                        pecaObjSimples.valor = pecaObjeto.valor;
+                    }
+
                     tabuleiro[linhaIndex][colunaIndex] = pecaObjSimples;
                 }
 
@@ -144,19 +151,9 @@ module.exports = class Tabuleiro {
 
     fotografaTabuleiro() {
         let novaFotografia = {
-            tabuleiro: this.montaTabuleiroVazio(),
+            tabuleiro: this.recuperaTabuleiroCasasSimplificado(true),
             qtdOcorrencias: 1
         };
-
-        this.casas.forEach((linha, linhaIndex) => {
-            linha.forEach((pecaObjeto, colunaIndex) => {
-
-                if (pecaObjeto != null) {
-                    novaFotografia.tabuleiro[linhaIndex][colunaIndex] = pecaObjeto.tipo + "-" + pecaObjeto.ladoId;
-                }
-
-            });
-        });
 
         let indexFografiaJaRegistrada = null;
 

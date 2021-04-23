@@ -37,9 +37,27 @@ module.exports = {
     encontraSimples(req, res) {
         try {
             const { jogoId } = req.params;
+            let { tabuleiroSuperSimplificado } = req.query;
+            // valida string passada na query
+            if (tabuleiroSuperSimplificado == undefined) {
+                tabuleiroSuperSimplificado = false;
+            } else if (typeof tabuleiroSuperSimplificado == "string") {
+                tabuleiroSuperSimplificado = JSON.parse(tabuleiroSuperSimplificado.toLowerCase());
+            } else if (typeof tabuleiroSuperSimplificado == "number") {
+                if (tabuleiroSuperSimplificado == 0) {
+                    tabuleiroSuperSimplificado = false;
+                } else {
+                    tabuleiroSuperSimplificado = true;
+                }
+            }
+            // se apos validacoes o tipo n for boolean define false
+            if (typeof tabuleiroSuperSimplificado != "boolean") {
+                tabuleiroSuperSimplificado = false;
+            }
+
             return res.json({
                 message: "Jogo simplificado retornado com sucesso!",
-                data: JogoService.encontraSimples(jogoId),
+                data: JogoService.encontraSimples(jogoId, tabuleiroSuperSimplificado),
                 success: true
             });
         } catch (e) {
