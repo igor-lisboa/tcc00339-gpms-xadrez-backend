@@ -101,16 +101,22 @@ emitter.on("forcaIa", () => {
 
 emitter.on("jogadorEntrou", (args) => {
     if ("jogoId" in args && "ladoAdversario" in args) {
-        let jogadorIdentificador = "I.A.";
+        let identificadores = [args.jogoId + "-" + args.ladoAdversario.id];
 
         // define parametro q sera usado p buscar socket do adversario
         if (args.ladoAdversario.tipo != null) {
-            if (args.ladoAdversario.tipo.id == 0) {
-                jogadorIdentificador = args.jogoId + "-" + args.ladoAdversario.id;
+            if (args.ladoAdversario.tipo.id != 0) {
+                identificadores.push("I.A.");
             }
         }
 
-        jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador).forEach(destino => {
+        let destinos = [];
+
+        identificadores.forEach(identificador => {
+            destinos = destinos.concat(jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == identificador));
+        });
+
+        destinos.forEach(destino => {
             io.to(destino.socketId).emit("adversarioEntrou");
             if (verbose) {
                 console.log("Enviando mensagem de adversarioEntrou para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
@@ -126,16 +132,22 @@ emitter.on("jogadorEntrou", (args) => {
 emitter.on("acoesSolicitadas", (args) => {
     if ("acoesSolicitadas" in args && "jogoId" in args) {
         args.acoesSolicitadas.forEach(acaoSolicitada => {
-            let jogadorIdentificador = "I.A.";
+            let identificadores = [args.jogoId + "-" + acaoSolicitada.lado.id];
 
-            // define parametro q sera usado p buscar socket
+            // define parametro q sera usado p buscar socket do adversario
             if (acaoSolicitada.lado.tipo != null) {
-                if (acaoSolicitada.lado.tipo.id == 0) {
-                    jogadorIdentificador = args.jogoId + "-" + acaoSolicitada.lado.id;
+                if (acaoSolicitada.lado.tipo.id != 0) {
+                    identificadores.push("I.A.");
                 }
             }
 
-            jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador).forEach(destino => {
+            let destinos = [];
+
+            identificadores.forEach(identificador => {
+                destinos = destinos.concat(jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == identificador));
+            });
+
+            destinos.forEach(destino => {
                 io.to(destino.socketId).emit(acaoSolicitada.acaoItem.acao, acaoSolicitada.acaoItem.data);
                 if (verbose) {
                     console.log("Enviando mensagem de " + acaoSolicitada.acaoItem.acao + " para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
@@ -151,16 +163,22 @@ emitter.on("acoesSolicitadas", (args) => {
 
 emitter.on("resetPropostoResposta", (args) => {
     if ("jogoId" in args && "ladoAdversario" in args && "resposta" in args) {
-        let jogadorIdentificador = "I.A.";
+        let identificadores = [args.jogoId + "-" + args.ladoAdversario.id];
 
         // define parametro q sera usado p buscar socket do adversario
         if (args.ladoAdversario.tipo != null) {
-            if (args.ladoAdversario.tipo.id == 0) {
-                jogadorIdentificador = args.jogoId + "-" + args.ladoAdversario.id;
+            if (args.ladoAdversario.tipo.id != 0) {
+                identificadores.push("I.A.");
             }
         }
 
-        jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador).forEach(destino => {
+        let destinos = [];
+
+        identificadores.forEach(identificador => {
+            destinos = destinos.concat(jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == identificador));
+        });
+
+        destinos.forEach(destino => {
             io.to(destino.socketId).emit("resetPropostoResposta", args.resposta);
             if (verbose) {
                 console.log("Enviando mensagem de resetPropostoResposta para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
@@ -175,16 +193,22 @@ emitter.on("resetPropostoResposta", (args) => {
 
 emitter.on("resetProposto", (args) => {
     if ("jogoId" in args && "ladoAdversario" in args) {
-        let jogadorIdentificador = "I.A.";
+        let identificadores = [args.jogoId + "-" + args.ladoAdversario.id];
 
         // define parametro q sera usado p buscar socket do adversario
         if (args.ladoAdversario.tipo != null) {
-            if (args.ladoAdversario.tipo.id == 0) {
-                jogadorIdentificador = args.jogoId + "-" + args.ladoAdversario.id;
+            if (args.ladoAdversario.tipo.id != 0) {
+                identificadores.push("I.A.");
             }
         }
 
-        jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador).forEach(destino => {
+        let destinos = [];
+
+        identificadores.forEach(identificador => {
+            destinos = destinos.concat(jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == identificador));
+        });
+
+        destinos.forEach(destino => {
             io.to(destino.socketId).emit("resetProposto", {
                 jogoId: args.jogoId,
                 ladoId: args.ladoAdversario.id
@@ -202,16 +226,22 @@ emitter.on("resetProposto", (args) => {
 
 emitter.on("empatePropostoResposta", (args) => {
     if ("jogoId" in args && "ladoAdversario" in args) {
-        let jogadorIdentificador = "I.A.";
+        let identificadores = [args.jogoId + "-" + args.ladoAdversario.id];
 
         // define parametro q sera usado p buscar socket do adversario
         if (args.ladoAdversario.tipo != null) {
-            if (args.ladoAdversario.tipo.id == 0) {
-                jogadorIdentificador = args.jogoId + "-" + args.ladoAdversario.id;
+            if (args.ladoAdversario.tipo.id != 0) {
+                identificadores.push("I.A.");
             }
         }
 
-        jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador).forEach(destino => {
+        let destinos = [];
+
+        identificadores.forEach(identificador => {
+            destinos = destinos.concat(jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == identificador));
+        });
+
+        destinos.forEach(destino => {
             io.to(destino.socketId).emit("empatePropostoResposta");
             if (verbose) {
                 console.log("Enviando mensagem de empatePropostoResposta para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
@@ -226,16 +256,22 @@ emitter.on("empatePropostoResposta", (args) => {
 
 emitter.on("empateProposto", (args) => {
     if ("jogoId" in args && "ladoAdversario" in args) {
-        let jogadorIdentificador = "I.A.";
+        let identificadores = [args.jogoId + "-" + args.ladoAdversario.id];
 
         // define parametro q sera usado p buscar socket do adversario
         if (args.ladoAdversario.tipo != null) {
-            if (args.ladoAdversario.tipo.id == 0) {
-                jogadorIdentificador = args.jogoId + "-" + args.ladoAdversario.id;
+            if (args.ladoAdversario.tipo.id != 0) {
+                identificadores.push("I.A.");
             }
         }
 
-        jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == jogadorIdentificador).forEach(destino => {
+        let destinos = [];
+
+        identificadores.forEach(identificador => {
+            destinos = destinos.concat(jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == identificador));
+        });
+
+        destinos.forEach(destino => {
             io.to(destino.socketId).emit("empateProposto", {
                 jogoId: args.jogoId,
                 ladoId: args.ladoAdversario.id
