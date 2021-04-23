@@ -1076,6 +1076,10 @@ module.exports = class Jogo {
 
         const rei = this.recuperaPecaDaCasa(reiCasa);
 
+        if (ladoId == this.ladoIdAtual && this.chequeLadoAtual) {
+            return habilitado;
+        }
+
         if (rei != null) {
 
             // trata roques

@@ -329,7 +329,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/simples",
+									"raw": "{{API_XADREZ_URL}}/jogos/{{jogoIndex}}/simples?tabuleiroSuperSimplificado=true",
 									"host": [
 										"{{API_XADREZ_URL}}"
 									],
@@ -337,6 +337,12 @@
 										"jogos",
 										"{{jogoIndex}}",
 										"simples"
+									],
+									"query": [
+										{
+											"key": "tabuleiroSuperSimplificado",
+											"value": "true"
+										}
 									]
 								}
 							},

@@ -7,7 +7,7 @@ module.exports = {
         return db.jogos;
     }, encontra(id) {
         return new Jogo().encontra(id);
-    }, encontraSimples(id) {
+    }, encontraSimples(id, tabuleiroSuperSimplificado = false) {
         const jogo = this.encontra(id);
 
         let retorno = {};
@@ -41,7 +41,7 @@ module.exports = {
         });
         retorno.tipoJogo = tipoJogo;
 
-        retorno.tabuleiro = jogo.tabuleiro.recuperaTabuleiroCasasSimplificado();
+        retorno.tabuleiro = jogo.tabuleiro.recuperaTabuleiroCasasSimplificado(tabuleiroSuperSimplificado);
 
         return retorno;
     }, recuperaTurnos(jogoId) {
