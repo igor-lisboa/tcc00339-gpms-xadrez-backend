@@ -1,4 +1,5 @@
 const db = require("../database.json");
+const helper = require("../helper");
 const Jogo = require("../models/Jogo");
 const TipoPecaService = require("./TipoPecaService");
 
@@ -199,7 +200,35 @@ module.exports = {
                     possiveisJogadas = novasPossibilidadesJogadas;
                 }
 
-                // escolhe item no array de possiveisJogadas aleatoriamente
+                const numerosCasaReiAdversario = helper.recuperaNumerosDoNomeDeUmaCasa(this.recuperaPecaReiAdversario(jogoIa.jogo.id, ladoIa.lado.id).casa);
+
+                // insere distancia ate o rei adversario
+                possiveisJogadas.forEach(possivelJogada => {
+                    const numerosCasaPara = helper.recuperaNumerosDoNomeDeUmaCasa(possivelJogada.para);
+                    const diffLetraNumeroCasa = Math.abs(numerosCasaPara.letraNumeroCasa - numerosCasaReiAdversario.letraNumeroCasa);
+                    const diffNumeroCasa = Math.abs(numerosCasaPara.numeroCasa - numerosCasaReiAdversario.numeroCasa);
+                    possivelJogada.custoAteReiAdversarioSimples = diffLetraNumeroCasa + diffNumeroCasa;
+                });
+
+                // ordena pelo custo simples ate o rei adversario
+                possiveisJogadas.sort(function (a, b) {
+                    if (a.custoAteReiAdversarioSimples < b.custoAteReiAdversarioSimples) return -1;
+                    if (a.custoAteReiAdversarioSimples > b.custoAteReiAdversarioSimples) return 1;
+                    return 0;
+                });
+
+                // se tiver possiveis jogadas filtra p pegar tds q levam p mais proximo do rei
+                if (possiveisJogadas.length > 0) {
+                    // pega tds as jogadas q tem o msm menor custo ate o rei adversario
+                    novasPossibilidadesJogadas = possiveisJogadas.filter(possivelJogada =>
+                        possivelJogada.custoAteReiAdversarioSimples == possiveisJogadas[0].custoAteReiAdversarioSimples
+                    );
+                    // se com o filtro as novasPossibilidadesJogadas estiverem diferente de 0 define possiveisJogadas
+                    if (novasPossibilidadesJogadas.length != 0) {
+                        possiveisJogadas = novasPossibilidadesJogadas;
+                    }
+                }
+
                 const jogadaEscolhida = possiveisJogadas[Math.floor(Math.random() * possiveisJogadas.length)];
 
                 // se escolheu alguma jogada... adiciona na lista de jogadas p executar

@@ -24,7 +24,7 @@ module.exports = class Jogo {
 
         /**
         * O tempo de turno em milisegundos é usado pra verificar se o tempo de turno já foi
-        * atingido, o valor padrão é referente a 5 minutos
+        * atingido
         */
         this.tempoDeTurnoEmMilisegundos = tempoDeTurnoEmMilisegundos;
 
