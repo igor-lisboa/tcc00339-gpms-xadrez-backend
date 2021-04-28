@@ -4,6 +4,10 @@ module.exports = {
     lista() {
         return db.tabelaEquivalencia;
     }, listaReverse() {
-        return this.lista().reverse();
+        const tabelaEquivalencia = [];
+        this.lista().forEach(item => {
+            tabelaEquivalencia.push(item);
+        });
+        return tabelaEquivalencia.reverse();
     }
 };
