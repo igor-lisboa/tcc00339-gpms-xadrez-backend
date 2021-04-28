@@ -69,7 +69,7 @@ emitter.on("jogoResetado", (args) => {
 
 emitter.on("jogoFinalizado", (args) => {
     if ("jogoId" in args && "jogoFinalizado" in args) {
-        const identificadores = [args.jogoId + "-0", args.jogoId + "-1"];
+        const identificadores = [args.jogoId + "-0", args.jogoId + "-1", "I.A."];
 
         let destinos = [];
 
