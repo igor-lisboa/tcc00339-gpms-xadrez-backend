@@ -22,6 +22,7 @@ module.exports = {
         retorno.casaPeaoPromocao = jogo.casaPeaoPromocao;
         retorno.empatePropostoPeloLadoId = jogo.empatePropostoPeloLadoId;
         retorno.resetPropostoPeloLadoId = jogo.resetPropostoPeloLadoId;
+        retorno.jogadoresOk = jogo.recuperaLadosDeslogados().length == 0;
 
         let enPassantCasaCaptura = null;
         if (jogo.enPassantCasaCaptura != null) {
@@ -206,29 +207,25 @@ module.exports = {
 
                 // insere distancia ate o rei adversario
                 possiveisJogadas.forEach(possivelJogada => {
+                    // preenche o custo ate o rei adversario do destino da jogada
                     const numerosCasaPara = helper.recuperaNumerosDoNomeDeUmaCasa(possivelJogada.para);
-                    const diffLetraNumeroCasa = Math.abs(numerosCasaPara.letraNumeroCasa - numerosCasaReiAdversario.letraNumeroCasa);
-                    const diffNumeroCasa = Math.abs(numerosCasaPara.numeroCasa - numerosCasaReiAdversario.numeroCasa);
-                    possivelJogada.custoAteReiAdversarioSimples = diffLetraNumeroCasa + diffNumeroCasa;
+                    const diffLetraNumeroCasaPara = Math.abs(numerosCasaPara.letraNumeroCasa - numerosCasaReiAdversario.letraNumeroCasa);
+                    const diffNumeroCasaPara = Math.abs(numerosCasaPara.numeroCasa - numerosCasaReiAdversario.numeroCasa);
+                    possivelJogada.custoAteReiAdversarioSimplesPara = diffLetraNumeroCasaPara + diffNumeroCasaPara;
+                    // preenche o custo ate o rei adversario da origem da peca
+                    const numerosCasaDe = helper.recuperaNumerosDoNomeDeUmaCasa(possivelJogada.de);
+                    const diffLetraNumeroCasaDe = Math.abs(numerosCasaDe.letraNumeroCasa - numerosCasaReiAdversario.letraNumeroCasa);
+                    const diffNumeroCasaDe = Math.abs(numerosCasaDe.numeroCasa - numerosCasaReiAdversario.numeroCasa);
+                    possivelJogada.custoAteReiAdversarioSimplesDe = diffLetraNumeroCasaDe + diffNumeroCasaDe;
                 });
 
-                // ordena pelo custo simples ate o rei adversario
-                possiveisJogadas.sort(function (a, b) {
-                    if (a.custoAteReiAdversarioSimples < b.custoAteReiAdversarioSimples) return -1;
-                    if (a.custoAteReiAdversarioSimples > b.custoAteReiAdversarioSimples) return 1;
-                    return 0;
-                });
-
-                // se tiver possiveis jogadas filtra p pegar tds q levam p mais proximo do rei
-                if (possiveisJogadas.length > 0) {
-                    // pega tds as jogadas q tem o msm menor custo ate o rei adversario
-                    novasPossibilidadesJogadas = possiveisJogadas.filter(possivelJogada =>
-                        possivelJogada.custoAteReiAdversarioSimples == possiveisJogadas[0].custoAteReiAdversarioSimples
-                    );
-                    // se com o filtro as novasPossibilidadesJogadas estiverem diferente de 0 define possiveisJogadas
-                    if (novasPossibilidadesJogadas.length != 0) {
-                        possiveisJogadas = novasPossibilidadesJogadas;
-                    }
+                // pega somente jogadas q se aproximam mais do rei adversario
+                novasPossibilidadesJogadas = possiveisJogadas.filter(possivelJogada =>
+                    possivelJogada.custoAteReiAdversarioSimplesDe <= possivelJogada.custoAteReiAdversarioSimplesPara
+                );
+                // se com o filtro as novasPossibilidadesJogadas estiverem diferente de 0 define possiveisJogadas
+                if (novasPossibilidadesJogadas.length != 0) {
+                    possiveisJogadas = novasPossibilidadesJogadas;
                 }
 
                 const jogadaEscolhida = possiveisJogadas[Math.floor(Math.random() * possiveisJogadas.length)];
@@ -359,14 +356,6 @@ module.exports = {
         }
         return jogo.recuperaLadoAdversarioPeloId(ladoId).pecas.find(peca => peca.peca.tipo == "Rei");
     }, recuperaLadosSemJogador(jogoId) {
-        const jogo = this.encontra(jogoId);
-        let ladosSemJogador = [];
-        if (jogo.ladoBranco.tipo == null) {
-            ladosSemJogador.push(jogo.ladoBranco);
-        }
-        if (jogo.ladoPreto.tipo == null) {
-            ladosSemJogador.push(jogo.ladoPreto);
-        }
-        return ladosSemJogador;
+        return this.encontra(jogoId).recuperaLadosDeslogados();
     }
 };

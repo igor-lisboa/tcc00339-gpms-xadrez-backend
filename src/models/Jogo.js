@@ -221,6 +221,17 @@ module.exports = class Jogo {
         }
     }
 
+    recuperaLadosDeslogados() {
+        let ladosSemJogador = [];
+        if (this.ladoBranco.tipo == null) {
+            ladosSemJogador.push(this.ladoBranco);
+        }
+        if (this.ladoPreto.tipo == null) {
+            ladosSemJogador.push(this.ladoPreto);
+        }
+        return ladosSemJogador;
+    }
+
     realizaJogada(ladoId, casaOrigem, casaDestino) {
         if (this.finalizado != null) {
             throw "Esse jogo está finalizado";
