@@ -60,7 +60,7 @@ module.exports = class Jogo {
             this.resetPropostoPeloLadoId = ladoId;
             const ladoAdversario = this.recuperaLadoAdversarioPeloId(ladoId);
             this.defineNovaAcaoSolicitada("responderPropostaReset", ladoAdversario.id, { ladoId: ladoAdversario.id, jogoId: this.id });
-            this.salva(false);
+            this.salva();
             return ladoAdversario;
         } else {
             throw "Já tem um reset proposto pelo lado " + this.recuperaLadoPeloId(this.resetPropostoPeloLadoId).lado;
@@ -79,7 +79,7 @@ module.exports = class Jogo {
                 // remove acao da lista de solicitadas
                 const indexAcaoSolicitada = this.acoesSolicitadas.indexOf(acaoRespondePropostaReset);
                 this.acoesSolicitadas.splice(indexAcaoSolicitada, 1);
-                this.salva(false);
+                this.salva();
                 return ladoAdversario;
             } else {
                 throw "Não foi possível encontrar uma proposta de reset para responder";
@@ -102,7 +102,7 @@ module.exports = class Jogo {
             this.empatePropostoPeloLadoId = ladoId;
             const ladoAdversario = this.recuperaLadoAdversarioPeloId(ladoId);
             this.defineNovaAcaoSolicitada("responderPropostaEmpate", ladoAdversario.id, { ladoId: ladoAdversario.id, jogoId: this.id });
-            this.salva(false);
+            this.salva();
             return ladoAdversario;
         } else {
             throw "Já tem um empate proposto pelo lado " + this.recuperaLadoPeloId(this.empatePropostoPeloLadoId).lado;
@@ -124,7 +124,7 @@ module.exports = class Jogo {
                 // remove acao da lista de solicitadas
                 const indexAcaoSolicitada = this.acoesSolicitadas.indexOf(acaoRespondePropostaEmpate);
                 this.acoesSolicitadas.splice(indexAcaoSolicitada, 1);
-                this.salva(false);
+                this.salva();
                 return ladoAdversario;
             } else {
                 throw "Não foi possível encontrar uma proposta de empate para responder";
@@ -143,6 +143,7 @@ module.exports = class Jogo {
         if (finalizacao != undefined) {
             this.finalizado = finalizacao;
             this.salva();
+            universalEmitter.emit("jogoFinalizado", { jogoId: this.id, jogoFinalizado: this.finalizado.tipo });
         }
     }
 
@@ -169,7 +170,7 @@ module.exports = class Jogo {
             this.defineFinalizado(7);
         }
 
-        this.salva(false);
+        this.salva();
 
         return lado;
     }
@@ -251,7 +252,7 @@ module.exports = class Jogo {
         this.tabuleiro.fotografaTabuleiro();
         this.verificaTabuleiro();
 
-        this.salva(false);
+        this.salva();
 
         return { jogadaRealizada, ladoAdversario };
     }
@@ -269,12 +270,6 @@ module.exports = class Jogo {
         this.verificaTempoRestanteLados();
 
         return this;
-    }
-
-    verificaFinalizado() {
-        if (this.finalizado != null) {
-            universalEmitter.emit("jogoFinalizado", { jogoId: this.id, jogoFinalizado: this.finalizado.tipo });
-        }
     }
 
     verificaAcoesSolicitadas() {
@@ -301,7 +296,7 @@ module.exports = class Jogo {
         }
     }
 
-    salva(executaVerificacaoFinalizado = true) {
+    salva() {
         if (this.id == null) {
             const tamanhoAntesPush = db.jogos.length;
             const tamanhoDepoisPush = db.jogos.push(this);
@@ -313,9 +308,6 @@ module.exports = class Jogo {
         }
         db.jogos[this.id] = this;
 
-        if (executaVerificacaoFinalizado) {
-            this.verificaFinalizado();
-        }
         this.verificaAcoesSolicitadas();
     }
 
