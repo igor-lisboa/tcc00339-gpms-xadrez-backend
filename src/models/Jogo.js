@@ -221,6 +221,17 @@ module.exports = class Jogo {
         }
     }
 
+    recuperaLadosDeslogados() {
+        let ladosSemJogador = [];
+        if (this.ladoBranco.tipo == null) {
+            ladosSemJogador.push(this.ladoBranco);
+        }
+        if (this.ladoPreto.tipo == null) {
+            ladosSemJogador.push(this.ladoPreto);
+        }
+        return ladosSemJogador;
+    }
+
     realizaJogada(ladoId, casaOrigem, casaDestino) {
         if (this.finalizado != null) {
             throw "Esse jogo está finalizado";
@@ -793,7 +804,9 @@ module.exports = class Jogo {
                                 podeCapturavel: movimentoPossivelDirecao.movimentoPossivel.podeCapturavel,
                                 pecaCaptura: pecaCasaDestino,
                                 captura: movimentoPossivelDirecao.movimentoPossivel.captura,
-                                anda: movimentoPossivelDirecao.movimentoPossivel.anda
+                                anda: movimentoPossivelDirecao.movimentoPossivel.anda,
+                                peca: ladoPeca.peca.tipo,
+                                pecaValor: ladoPeca.peca.valor
                             }
                         );
                         if (pecaCasaDestino != null && direcao != "especial") {
@@ -831,12 +844,12 @@ module.exports = class Jogo {
                         possivelMovimento.casaDestino,
                         possivelMovimento.nomeJogada,
                         possivelMovimento.pecaCaptura,
-                        capturantesAdversarios
+                        capturantesAdversarios,
+                        possivelMovimento.peca,
+                        possivelMovimento.pecaValor
                     )
                 );
             }
-
-
 
         });
 
