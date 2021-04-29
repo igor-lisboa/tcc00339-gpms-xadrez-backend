@@ -139,11 +139,14 @@ module.exports = class Jogo {
     }
 
     defineFinalizado(finalizacaoId) {
-        const finalizacao = db.tiposFinalizacao.find(finalizacao => finalizacao.id == finalizacaoId);
-        if (finalizacao != undefined) {
-            this.finalizado = finalizacao;
-            this.salva();
-            universalEmitter.emit("jogoFinalizado", { jogoId: this.id, jogoFinalizado: this.finalizado.tipo });
+        // so define finlizado se o jogo n tiver sido finalizado ainda
+        if (this.finalizado == null) {
+            const finalizacao = db.tiposFinalizacao.find(finalizacao => finalizacao.id == finalizacaoId);
+            if (finalizacao != undefined) {
+                this.finalizado = finalizacao;
+                this.salva();
+                universalEmitter.emit("jogoFinalizado", { jogoId: this.id, jogoFinalizado: this.finalizado.tipo });
+            }
         }
     }
 
