@@ -221,7 +221,7 @@ module.exports = {
 
                 // pega somente jogadas q se aproximam mais do rei adversario ou sao peoes
                 novasPossibilidadesJogadas = possiveisJogadas.filter(possivelJogada =>
-                    possivelJogada.custoAteReiAdversarioSimplesDe >= possivelJogada.custoAteReiAdversarioSimplesPara || possivelJogada.peca == "Peão"
+                    possivelJogada.custoAteReiAdversarioSimplesDe > possivelJogada.custoAteReiAdversarioSimplesPara || possivelJogada.peca == "Peão"
                 );
                 // se com o filtro as novasPossibilidadesJogadas estiverem diferente de 0 define possiveisJogadas
                 if (novasPossibilidadesJogadas.length != 0) {
