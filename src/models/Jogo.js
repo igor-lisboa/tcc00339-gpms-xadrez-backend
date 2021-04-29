@@ -804,7 +804,9 @@ module.exports = class Jogo {
                                 podeCapturavel: movimentoPossivelDirecao.movimentoPossivel.podeCapturavel,
                                 pecaCaptura: pecaCasaDestino,
                                 captura: movimentoPossivelDirecao.movimentoPossivel.captura,
-                                anda: movimentoPossivelDirecao.movimentoPossivel.anda
+                                anda: movimentoPossivelDirecao.movimentoPossivel.anda,
+                                peca: ladoPeca.peca.tipo,
+                                pecaValor: ladoPeca.peca.valor
                             }
                         );
                         if (pecaCasaDestino != null && direcao != "especial") {
@@ -842,12 +844,12 @@ module.exports = class Jogo {
                         possivelMovimento.casaDestino,
                         possivelMovimento.nomeJogada,
                         possivelMovimento.pecaCaptura,
-                        capturantesAdversarios
+                        capturantesAdversarios,
+                        possivelMovimento.peca,
+                        possivelMovimento.pecaValor
                     )
                 );
             }
-
-
 
         });
 

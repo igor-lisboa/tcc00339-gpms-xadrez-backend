@@ -4,11 +4,15 @@ module.exports = class PossivelJogada {
         casaDestino,
         nome = null,
         pecaCaptura = null,
-        pecasCapturantes = []
+        pecasCapturantes = [],
+        peca = null,
+        pecaValor = 0
     ) {
         this.casaOrigem = casaOrigem;
         this.casaDestino = casaDestino;
         this.nome = nome;
+        this.peca = peca;
+        this.pecaValor = pecaValor;
         this.definePecaCaptura(pecaCaptura);
         this.defineCapturantes(pecasCapturantes);
     }

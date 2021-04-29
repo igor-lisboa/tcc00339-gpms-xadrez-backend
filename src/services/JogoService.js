@@ -219,9 +219,9 @@ module.exports = {
                     possivelJogada.custoAteReiAdversarioSimplesDe = diffLetraNumeroCasaDe + diffNumeroCasaDe;
                 });
 
-                // pega somente jogadas q se aproximam mais do rei adversario
+                // pega somente jogadas q se aproximam mais do rei adversario ou sao peoes
                 novasPossibilidadesJogadas = possiveisJogadas.filter(possivelJogada =>
-                    possivelJogada.custoAteReiAdversarioSimplesDe <= possivelJogada.custoAteReiAdversarioSimplesPara
+                    possivelJogada.custoAteReiAdversarioSimplesDe >= possivelJogada.custoAteReiAdversarioSimplesPara || possivelJogada.peca == "Peão"
                 );
                 // se com o filtro as novasPossibilidadesJogadas estiverem diferente de 0 define possiveisJogadas
                 if (novasPossibilidadesJogadas.length != 0) {
@@ -338,6 +338,7 @@ module.exports = {
             possivelJogadaIa.capturavel = possivelJogada.capturavel;
             possivelJogadaIa.captura = possivelJogada.captura;
             possivelJogadaIa.nome = possivelJogada.nome;
+            possivelJogadaIa.peca = possivelJogada.peca;
 
             possiveisJogadasIa.push(possivelJogadaIa);
         });
