@@ -11,6 +11,11 @@ module.exports = {
     }, encontraSimples(id, tabuleiroSuperSimplificado = false) {
         const jogo = this.encontra(id);
 
+        let idsLadosDeslogados = [];
+        jogo.recuperaLadosDeslogados().forEach(lado => {
+            idsLadosDeslogados.push(lado.id);
+        });
+
         let retorno = {};
         retorno.id = jogo.id;
         retorno.ladoIdAtual = jogo.ladoIdAtual;
@@ -22,7 +27,7 @@ module.exports = {
         retorno.casaPeaoPromocao = jogo.casaPeaoPromocao;
         retorno.empatePropostoPeloLadoId = jogo.empatePropostoPeloLadoId;
         retorno.resetPropostoPeloLadoId = jogo.resetPropostoPeloLadoId;
-        retorno.jogadoresOk = jogo.recuperaLadosDeslogados().length == 0;
+        retorno.ladosIdDeslogados = idsLadosDeslogados;
 
         let enPassantCasaCaptura = null;
         if (jogo.enPassantCasaCaptura != null) {
