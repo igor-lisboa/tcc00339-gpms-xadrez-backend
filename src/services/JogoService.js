@@ -362,6 +362,10 @@ module.exports = {
         }
         return jogo.recuperaLadoAdversarioPeloId(ladoId).pecas.find(peca => peca.peca.tipo == "Rei");
     }, recuperaLadosSemJogador(jogoId) {
-        return this.encontra(jogoId).recuperaLadosDeslogados();
+        const jogo = this.encontra(jogoId);
+        if (jogo.finalizado != null) {
+            throw "Esse jogo já foi finalizado";
+        }
+        return jogo.recuperaLadosDeslogados();
     }
 };
