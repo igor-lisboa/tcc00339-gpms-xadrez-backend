@@ -181,9 +181,9 @@ module.exports = {
 
                 // escolhePossivelJogada
 
-                // capturar pecas (se possivel)
+                // evitar deixar pecas q podem ser capturadas nas casas onde estao
                 novasPossibilidadesJogadas = possiveisJogadas.filter(possivelJogada =>
-                    possivelJogada.captura == true
+                    possivelJogada.pecaAmeacadaNaPosicaoAtual == true
                 );
                 // se com o filtro as novasPossibilidadesJogadas estiverem diferente de 0 define possiveisJogadas
                 if (novasPossibilidadesJogadas.length != 0) {
@@ -199,9 +199,9 @@ module.exports = {
                     possiveisJogadas = novasPossibilidadesJogadas;
                 }
 
-                // evitar deixar pecas q podem ser capturadas nas casas onde estao
+                // capturar pecas (se possivel)
                 novasPossibilidadesJogadas = possiveisJogadas.filter(possivelJogada =>
-                    possivelJogada.pecaAmeacadaNaPosicaoAtual == true
+                    possivelJogada.captura == true
                 );
                 // se com o filtro as novasPossibilidadesJogadas estiverem diferente de 0 define possiveisJogadas
                 if (novasPossibilidadesJogadas.length != 0) {
