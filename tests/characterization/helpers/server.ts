@@ -45,14 +45,14 @@ const waitUntilReady = async (url: string, child: ChildProcess): Promise<void> =
 };
 
 /**
- * Starts the current application (index.js) in its own process with a fresh
+ * Starts the current application (src/main.ts) in its own process with a fresh
  * in-memory database. Used by characterization tests, which talk to it over HTTP.
  */
 export const startServer = async (): Promise<RunningServer> => {
     const port = await findFreePort();
     const url = `http://localhost:${port}`;
 
-    const child = spawn(process.execPath, ["--import", "tsx", "index.js"], {
+    const child = spawn(process.execPath, ["--import", "tsx", "src/main.ts"], {
         cwd: ROOT_DIR,
         env: { ...process.env, PORT: String(port) },
         stdio: "ignore",

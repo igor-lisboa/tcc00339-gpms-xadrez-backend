@@ -27,6 +27,6 @@ The last row is one event per pending action; the event name is the action name.
 - `realtime-events.test.ts`: "tells the other side about a move...", "tells the opponent about a draw offer...", "notifies the AI worker when the game it plays in is created", "asks the AI worker to run when /ia is called"
 
 ## Known deviations
-- On disconnect, the wrong entry is removed: `indexOf` is called with a new object literal, which never matches, so `splice(-1, 1)` removes the last connected player. Covered by a todo until the fix.
+- Fixed in the TypeScript port: a disconnect removes the player that left (test: "keeps the other players connected when one of them disconnects").
 - `resetPropostoResposta` and `empatePropostoResposta` send different payload shapes (a raw value and an object).
-- Events are sent through a global `EventEmitter`. Target: an `EventPublisher` port.
+- Events are published through the `EventPublisher` port and sent by `SocketHub` (see decision 0006).

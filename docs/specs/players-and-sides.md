@@ -18,3 +18,7 @@ Each game has two sides: White (id 0) and Black (id 1). A side is taken by a pla
 
 ## Known deviations
 - Side ids are numbers on the standard board but strings when the value comes from a header or from a custom board string. Comparisons use `==`.
+
+## Changed in the TypeScript port
+- An unknown `tipoId` is refused (see game-lifecycle). Before the port it resigned the side.
+- Side ids are always numbers now. The side id from the `lado` header is converted at the HTTP edge.

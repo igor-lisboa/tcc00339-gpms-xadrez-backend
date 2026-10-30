@@ -25,3 +25,7 @@ An AI plays one or both sides of a game. The move choice lives on the server; `i
 - The "threatened" filter does not check whether the attacked piece is defended.
 - Move generation runs twice per AI side in each call, and each run uses the full board copy.
 - Two worker processes would both act on the same game.
+
+## Changed in the TypeScript port
+- `jogadasErros[].jogadaSolicitada` echoes the request with numeric `jogoId` and `ladoId` (before: the raw values from the body).
+- The move choice is the same filter chain, now a pure function in `src/domain/ai/chooseAiMove.ts`.

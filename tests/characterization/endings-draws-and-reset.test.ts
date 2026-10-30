@@ -110,7 +110,7 @@ describe("characterization: draw offers", () => {
         expect(body.message).toBe("Empate proposto ao lado adversário com sucesso!");
 
         const jogo = await api.get(`/jogos/${jogoId}`);
-        expect(jogo.body.data.empatePropostoPeloLadoId).toBe("0");
+        expect(jogo.body.data.empatePropostoPeloLadoId).toBe(0); // was the string "0" before the TypeScript port
         expect(jogo.body.data.acoesSolicitadas).toEqual([
             { acao: "responderPropostaEmpate", ladoId: 1, data: { ladoId: 1, jogoId } },
         ]);

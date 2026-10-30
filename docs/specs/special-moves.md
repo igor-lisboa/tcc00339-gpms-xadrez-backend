@@ -15,3 +15,9 @@ Castling, en passant and the pawn's double step.
 ## Known deviations
 - Confirmed: castling does not check the squares the king passes through. With a black rook on F8 (attacking F1), White can still castle kingside. Pinned as a characterization test; the target is to refuse it.
 - The en passant check compares square objects by identity. It works only because the lookup table is shared. Fragile.
+
+## Changed in the TypeScript port
+- **Castling needs your own rook.** An enemy rook on the corner no longer allows castling.
+- **Castling is not offered to a side in check.** Before, only the side on turn was checked, using a flag that could be stale.
+- **En passant is taken by pawns only.** A knight landing on the skipped square no longer removes the pawn beside it.
+- **The rook's castling move is recorded on the rook.** A castled rook now shows one performed move; before the port it showed none.

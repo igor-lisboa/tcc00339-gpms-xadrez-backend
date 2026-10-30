@@ -1,3 +1,12 @@
+# Status (updated)
+
+- **Phase 0 and Phase 1: done.** Characterization tests, tooling, config, logger, errors, constants and the names check.
+- **Phases 2 to 5: done in one port.** The domain, application, infrastructure, HTTP and AI were written in TypeScript and the legacy JavaScript was removed. The characterization suite passes against the new code (see the port-change sections in `docs/specs/`).
+- **Decision changed:** the wire format is kept (no English routes, fields or events yet). See `docs/decisions/0005-keep-wire-format.md`. The adapter from the plan is not built.
+- **Still open:** English wire names (a separate step with the frontend), the 50-move rule and the timeout label (known deviations), status codes 400/404/409 (Phase 4 target), dependency upgrades and `npm audit` (Phase 6), and the how-to guides in `docs/guides/`.
+
+---
+
 # Refactor plan: xadrez-backend → TypeScript, SOLID, small files, fully tested
 
 ## Context

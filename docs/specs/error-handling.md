@@ -20,5 +20,9 @@ Every JSON response has `{ message, data, success }`.
 
 ## Known deviations
 - Every failure is 500. Target: 400 for bad input, 404 for an unknown game, 409 for a rule conflict, with the same envelope.
-- Errors are plain strings, not `Error` objects. An `Error` would serialise to `{}` in the envelope.
-- Legacy controllers still log errors with `console.log`. The shared logger (`src/shared/logger.ts`, pino) and the new `errorHandler` middleware (`src/shared/errorHandler.ts`) exist, and are wired into the app when the HTTP layer is migrated (Phase 4).
+- Refused rules are `DomainError`s whose message is the text above. Status codes are still 500 for all of them.
+- Errors are logged through the shared logger (`src/shared/logger.ts`, pino).
+
+## Changed in the TypeScript port
+- An unexpected error (not a refused rule) is answered with the message "Internal server error" and status 500. Before, a non-string error produced an empty object as its message.
+- Refused rules are unchanged: status 500 with the rule's message.

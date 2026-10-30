@@ -6,9 +6,9 @@ description: Add a filter step to the AI move choice (src/ai). Use when the AI s
 # Add an AI filter
 
 1. Read `docs/ai.md` and `docs/specs/ai-opponent.md`.
-2. Write the filter as a small named function `(moves, context) => moves` in `src/domain/ai/filters/<name>.ts`.
-3. Rule: if the filter would leave no move, return the input unchanged. Keep this behaviour and test it.
-4. Add the filter to the pipeline in `src/domain/ai/aiMoveSelector.ts` at the right position, and document the order in `docs/ai.md`.
-5. Tests: one unit test for the filter, one for the "empty result keeps input" rule, and one pipeline test showing the order.
+2. Add the rule as one entry of the `rules` list in `narrowAiOptions` in `src/domain/ai/chooseAiMove.ts`.
+3. The list already skips a rule that would leave no move. Keep that behaviour and test it.
+4. Put the rule at the right position in the list, and document the order in `docs/ai.md`.
+5. Tests: in `tests/unit/domain/board-and-ai.test.ts`, one for the rule, one for the "nothing left keeps the input" case, and one showing the order.
 6. Update `docs/specs/ai-opponent.md`.
 7. Run `npm run typecheck && npm run lint && npm test`.

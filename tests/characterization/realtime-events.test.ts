@@ -92,5 +92,19 @@ describe("characterization: real-time events", () => {
         await recebido;
     });
 
-    it.todo("known deviation: on disconnect the wrong player entry is removed (indexOf on an object literal). See docs/specs/realtime-events.md");
+    it("keeps the other players connected when one of them disconnects", async () => {
+        // fixed in the TypeScript port: the old code removed the last connected player instead of the one that left
+        const jogoId = await createGame(api);
+        const brancas = await track(server.url, `${jogoId}-${WHITE}`);
+        const pretas = await track(server.url, `${jogoId}-${BLACK}`);
+        await seatBothHumans(api, jogoId);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        brancas.disconnect();
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        const recebido = nextEvent(pretas, "jogadaRealizada");
+        await move(api, jogoId, WHITE, "E2", "E4");
+        await recebido;
+    });
 });

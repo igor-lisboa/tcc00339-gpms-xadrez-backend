@@ -19,3 +19,7 @@ Create, read, list, reset and resign games. A game id is its position in the in-
 ## Known deviations
 - `?tabuleiroSuperSimplificado=1` is ignored: `JSON.parse("1")` is the number 1, which is not a boolean, so it falls back to false. Target: accept `1`/`0` and `true`/`false`.
 - A game with a time limit can be finished by a plain GET (see [turn-clock.md](turn-clock.md)).
+
+## Changed in the TypeScript port
+- Seating a player with an unknown `tipoId` is refused with "Tipo de jogador inválido". Before, the side was silently resigned.
+- A `tempoDeTurnoEmMilisegundos` of `null` is treated as no limit (-1), as is a missing value.
