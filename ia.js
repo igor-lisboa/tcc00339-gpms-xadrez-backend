@@ -1,14 +1,15 @@
-require("dotenv").config();
 const axios = require("axios").default;
+const io = require("socket.io-client");
+const { env } = require("./src/config/env");
+const { logger } = require("./src/shared/logger");
 
-const verbose = process.env.APP_VERBOSE || true;
-const apiUrl = process.env.APP_URL || "http://localhost:3333";
-const tempoWait = process.env.APP_WAIT_MS || 3000;
+const verbose = env.APP_VERBOSE;
+const apiUrl = env.APP_URL;
+const tempoWait = env.APP_WAIT_MS;
 
 const api = axios.create({
     baseURL: apiUrl
 });
-const io = require("socket.io-client");
 
 const socket = io(apiUrl, {
     query: { jogador: "I.A." }
@@ -19,54 +20,54 @@ const sleep = async (ms) => {
 }
 
 socket.on("uncaughtException", function (err) {
-    console.log(err);
+    logger.error({ err }, "Uncaught exception in AI worker");
 });
 
 socket.on("promocaoPeao", async function (args) {
     if (verbose) {
-        console.log("Promoção de peão solicitada para o lado " + args.ladoId + " do jogo " + args.jogoId + "...");
+        logger.info("Promoção de peão solicitada para o lado " + args.ladoId + " do jogo " + args.jogoId + "...");
     }
     await promovePeao(args.jogoId, args.ladoId);
 });
 
 socket.on("resetProposto", async function (args) {
     if (verbose) {
-        console.log("Solicitação de responder a um reset proposto do jogo " + args.jogoId + "...");
+        logger.info("Solicitação de responder a um reset proposto do jogo " + args.jogoId + "...");
     }
     await respondeProposta(args.jogoId, args.ladoId, "reset");
 });
 
 socket.on("empateProposto", async function (args) {
     if (verbose) {
-        console.log("Solicitação de responder a um empate proposto do jogo " + args.jogoId + "...");
+        logger.info("Solicitação de responder a um empate proposto do jogo " + args.jogoId + "...");
     }
     await respondeProposta(args.jogoId, args.ladoId, "empate");
 });
 
 socket.on("jogoCriado", async function () {
     if (verbose) {
-        console.log("Novo jogo criado...");
+        logger.info("Novo jogo criado...");
     }
     await ia();
 });
 
 socket.on("adversarioEntrou", async function () {
     if (verbose) {
-        console.log("Adversário entrou...");
+        logger.info("Adversário entrou...");
     }
     await ia();
 });
 
 socket.on("jogadaRealizada", async function () {
     if (verbose) {
-        console.log("Jogada realizada...");
+        logger.info("Jogada realizada...");
     }
     await ia();
 });
 
 socket.on("forcaIa", async function () {
     if (verbose) {
-        console.log("Força I.A. a rodar...");
+        logger.info("Força I.A. a rodar...");
     }
     await ia();
 });
@@ -87,10 +88,10 @@ const respondeProposta = async (jogoId, ladoId, tipo) => {
         }
     ).then((response) => {
         if (verbose) {
-            console.log(response.data);
+            logger.info(response.data);
         }
     }).catch((error) => {
-        console.log(error.response.data.message);
+        logger.error(error.response.data.message);
     });
 }
 
@@ -106,10 +107,10 @@ const promovePeao = async (jogoId, ladoId) => {
         }
     ).then((response) => {
         if (verbose) {
-            console.log(response.data);
+            logger.info(response.data);
         }
     }).catch((e) => {
-        console.log(e);
+        logger.error({ err: e }, "Promotion request failed");
     });
 }
 
@@ -119,15 +120,15 @@ const ia = async () => {
         "/jogos/ia/executa"
     ).then((response) => {
         if (verbose) {
-            console.log(response.data);
+            logger.info(response.data);
         }
     }).catch((e) => {
-        console.log(e);
+        logger.error({ err: e }, "Run request failed");
     });
 }
 
 // executa ia 1 unica vez ao iniciar
 if (verbose) {
-    console.log("Iniciando I.A. ...");
+    logger.info("Iniciando I.A. ...");
 }
 ia();

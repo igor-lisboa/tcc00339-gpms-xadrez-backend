@@ -2,24 +2,17 @@ const db = require("../database.json");
 
 module.exports = {
     lista() {
-        // tratando o array de ids e retornando os objetos
-        let tiposDeJogo = db.tiposJogo;
-        tiposDeJogo.forEach((tipoDeJogo) => {
-            const integranteLadoTipoIds = tipoDeJogo.integranteLadoTipoIds;
-            if (integranteLadoTipoIds != undefined) {
-                integranteLadoTipoIds.forEach((integranteLadoTipoId) => {
-                    let listaLadosDoTipoDeJogo = tipoDeJogo.integranteLadoTipo;
-                    const ladoTipoRecuperado = db.ladoTipos[integranteLadoTipoId];
-                    if (listaLadosDoTipoDeJogo == undefined) {
-                        tipoDeJogo.integranteLadoTipo = [ladoTipoRecuperado];
-                    } else {
-                        tipoDeJogo.integranteLadoTipo.push(ladoTipoRecuperado);
-                    }
-                });
-                delete tipoDeJogo.integranteLadoTipoIds;
+        // builds new objects with the player types resolved; the lookup table itself is not changed
+        return db.tiposJogo.map((tipoDeJogo) => {
+            const { integranteLadoTipoIds, ...dados } = tipoDeJogo;
+            if (integranteLadoTipoIds == undefined) {
+                return { ...dados };
             }
+            return {
+                ...dados,
+                integranteLadoTipo: integranteLadoTipoIds.map((integranteLadoTipoId) => db.ladoTipos[integranteLadoTipoId])
+            };
         });
-        return tiposDeJogo;
     }, encontra(tipoJogoId) {
         const tipoJogoEncontrado = this.lista().find(tipoJogo => tipoJogo.id == tipoJogoId);
         if (tipoJogoEncontrado == undefined) {

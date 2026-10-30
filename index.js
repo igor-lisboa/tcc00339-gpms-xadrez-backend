@@ -1,4 +1,5 @@
-require("dotenv").config();
+const { env } = require("./src/config/env");
+const { logger } = require("./src/shared/logger");
 const express = require("express");
 
 const cors = require("cors");
@@ -10,9 +11,7 @@ const app = express();
 const http = require("http").createServer(app);
 const io = require("socket.io")(http, { cors: true });
 
-const verbose = process.env.APP_VERBOSE || true;
-
-const now = new Date().toUTCString();
+const verbose = env.APP_VERBOSE;
 
 let jogadoresConectados = [];
 
@@ -22,7 +21,7 @@ io.on("connection", (socket) => {
         "identificador": socket.handshake.query.jogador
     });
     if (verbose) {
-        console.log(now + " | O jogador " + socket.handshake.query.jogador + " se conectou...");
+        logger.info("O jogador " + socket.handshake.query.jogador + " se conectou...");
     }
 
     socket.on("disconnect", () => {
@@ -32,7 +31,7 @@ io.on("connection", (socket) => {
         });
         jogadoresConectados.splice(index, 1);
         if (verbose) {
-            console.log(now + " | O jogador " + socket.handshake.query.jogador + " se desconectou...");
+            logger.info("O jogador " + socket.handshake.query.jogador + " se desconectou...");
         }
     });
 });
@@ -42,7 +41,7 @@ const emitter = new events();
 emitter.on("jogoCriado", () => {
     io.emit("jogoCriado");
     if (verbose) {
-        console.log(now + " | Enviando mensagem de jogoCriado para todos os jogadores conectados...");
+        logger.info("Enviando mensagem de jogoCriado para todos os jogadores conectados...");
     }
 });
 
@@ -59,12 +58,12 @@ emitter.on("jogoResetado", (args) => {
         destinos.forEach(destino => {
             io.to(destino.socketId).emit("jogoResetado");
             if (verbose) {
-                console.log(now + " | Enviando mensagem de jogoResetado para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
+                logger.info("Enviando mensagem de jogoResetado para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
             }
         });
     } else {
         if (verbose) {
-            console.log(now + " | O evento jogoResetado não tinha a propriedade jogoId (" + JSON.stringify(args) + ")...");
+            logger.info("O evento jogoResetado não tinha a propriedade jogoId (" + JSON.stringify(args) + ")...");
         }
     }
 });
@@ -82,12 +81,12 @@ emitter.on("jogoFinalizado", (args) => {
         destinos.forEach(destino => {
             io.to(destino.socketId).emit("jogoFinalizado", { jogoFinalizacao: args.jogoFinalizado });
             if (verbose) {
-                console.log(now + " | Enviando mensagem de jogoFinalizado para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
+                logger.info("Enviando mensagem de jogoFinalizado para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
             }
         });
     } else {
         if (verbose) {
-            console.log(now + " | O evento jogoFinalizado não tinha a propriedade jogoId ou a propriedade jogoFinalizado (" + JSON.stringify(args) + ")...");
+            logger.info("O evento jogoFinalizado não tinha a propriedade jogoId ou a propriedade jogoFinalizado (" + JSON.stringify(args) + ")...");
         }
     }
 });
@@ -96,7 +95,7 @@ emitter.on("forcaIa", () => {
     jogadoresConectados.filter(jogadorConectado => jogadorConectado.identificador == "I.A.").forEach(destino => {
         io.to(destino.socketId).emit("forcaIa");
         if (verbose) {
-            console.log(now + " | Enviando mensagem de forcaIa para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
+            logger.info("Enviando mensagem de forcaIa para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
         }
     });
 });
@@ -121,12 +120,12 @@ emitter.on("jogadorEntrou", (args) => {
         destinos.forEach(destino => {
             io.to(destino.socketId).emit("adversarioEntrou");
             if (verbose) {
-                console.log(now + " | Enviando mensagem de adversarioEntrou para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
+                logger.info("Enviando mensagem de adversarioEntrou para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
             }
         });
     } else {
         if (verbose) {
-            console.log(now + " | O evento jogadorEntrou não tinha a propriedade jogoId ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
+            logger.info("O evento jogadorEntrou não tinha a propriedade jogoId ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
         }
     }
 });
@@ -152,13 +151,13 @@ emitter.on("acoesSolicitadas", (args) => {
             destinos.forEach(destino => {
                 io.to(destino.socketId).emit(acaoSolicitada.acaoItem.acao, acaoSolicitada.acaoItem.data);
                 if (verbose) {
-                    console.log(now + " | Enviando mensagem de " + acaoSolicitada.acaoItem.acao + " para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
+                    logger.info("Enviando mensagem de " + acaoSolicitada.acaoItem.acao + " para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
                 }
             });
         });
     } else {
         if (verbose) {
-            console.log(now + " | O evento acoesSolicitadas não tinha a propriedade acoesSolicitadas ou a propriedade jogoId (" + JSON.stringify(args) + ")...");
+            logger.info("O evento acoesSolicitadas não tinha a propriedade acoesSolicitadas ou a propriedade jogoId (" + JSON.stringify(args) + ")...");
         }
     }
 });
@@ -183,12 +182,12 @@ emitter.on("resetPropostoResposta", (args) => {
         destinos.forEach(destino => {
             io.to(destino.socketId).emit("resetPropostoResposta", args.resposta);
             if (verbose) {
-                console.log(now + " | Enviando mensagem de resetPropostoResposta para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
+                logger.info("Enviando mensagem de resetPropostoResposta para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
             }
         });
     } else {
         if (verbose) {
-            console.log(now + " | O evento resetPropostoResposta não tinha a propriedade jogoId ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
+            logger.info("O evento resetPropostoResposta não tinha a propriedade jogoId ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
         }
     }
 });
@@ -216,12 +215,12 @@ emitter.on("resetProposto", (args) => {
                 ladoId: args.ladoAdversario.id
             });
             if (verbose) {
-                console.log(now + " | Enviando mensagem de resetProposto para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
+                logger.info("Enviando mensagem de resetProposto para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
             }
         });
     } else {
         if (verbose) {
-            console.log(now + " | O evento resetProposto não tinha a propriedade jogoId ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
+            logger.info("O evento resetProposto não tinha a propriedade jogoId ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
         }
     }
 });
@@ -246,12 +245,12 @@ emitter.on("empatePropostoResposta", (args) => {
         destinos.forEach(destino => {
             io.to(destino.socketId).emit("empatePropostoResposta");
             if (verbose) {
-                console.log(now + " | Enviando mensagem de empatePropostoResposta para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
+                logger.info("Enviando mensagem de empatePropostoResposta para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
             }
         });
     } else {
         if (verbose) {
-            console.log(now + " | O evento empatePropostoResposta não tinha a propriedade jogoId ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
+            logger.info("O evento empatePropostoResposta não tinha a propriedade jogoId ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
         }
     }
 });
@@ -279,12 +278,12 @@ emitter.on("empateProposto", (args) => {
                 ladoId: args.ladoAdversario.id
             });
             if (verbose) {
-                console.log(now + " | Enviando mensagem de empateProposto para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
+                logger.info("Enviando mensagem de empateProposto para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
             }
         });
     } else {
         if (verbose) {
-            console.log(now + " | O evento empateProposto não tinha a propriedade jogoId ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
+            logger.info("O evento empateProposto não tinha a propriedade jogoId ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
         }
     }
 });
@@ -313,12 +312,12 @@ emitter.on("jogadaRealizada", (args) => {
                 promocaoPara: args.pecaPromovida ? args.pecaPromovida.tipo : args.pecaPromovida
             });
             if (verbose) {
-                console.log(now + " | Enviando mensagem de jogadaRealizada para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
+                logger.info("Enviando mensagem de jogadaRealizada para o jogador " + destino.identificador + "(" + destino.socketId + ")...");
             }
         });
     } else {
         if (verbose) {
-            console.log(now + " | O evento jogadaRealizada não tinha a propriedade jogadaRealizada ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
+            logger.info("O evento jogadaRealizada não tinha a propriedade jogadaRealizada ou a propriedade ladoAdversario (" + JSON.stringify(args) + ")...");
         }
     }
 });
@@ -329,6 +328,6 @@ app.use(cors());
 app.use(express.json());
 app.use(routes);
 
-const port = process.env.PORT || 3333;
+const port = env.PORT;
 
 http.listen(port);
