@@ -15,7 +15,7 @@ Use this when a client needs a new route or a new action on a game. The `add-end
    - Route order matters. Declare `/jogos/ia...` before `/jogos/:jogoId`.
 4. **Presenter.** If the JSON shape is new, add a function to `src/http/presenters/`. Presenters are the only place (together with the routes) that may use the Portuguese wire names.
 5. **Tests.** Add a characterization test under `tests/characterization/` that starts the real server with `startServer` and calls it with `createApiClient`. See [testing.md](testing.md).
-6. **Docs.** Update `docs/api/openapi.yaml` and run `npm run docs:openapi`; update `docs/api/endpoints.md`, the matching spec in `docs/specs/`, and the spec's "Changed in the TypeScript port" section if the behaviour differs from before.
+6. **Docs.** Update `docs/api/openapi.yaml` and run `npm run docs:openapi`; update the matching spec in `docs/specs/`, and the spec's "Changed in the TypeScript port" section if the behaviour differs from before.
 7. **Checks.** Run `npm run typecheck`, `npm run lint`, `npm run check:names` and `npm test`.
 
 ## Wire names

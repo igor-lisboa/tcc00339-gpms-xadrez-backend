@@ -7,7 +7,7 @@ description: Bring docs (specs, API, events, architecture, ADRs, README) back in
 
 1. Look at the diff (`git diff`, read-only).
 2. For each changed behaviour, update the matching `docs/specs/*.md`: rules, tests list, known deviations.
-3. Routes changed: update `docs/api/endpoints.md` and the glossary.
+3. Routes changed: update `docs/api/openapi.yaml` (then `npm run docs:openapi`) and the glossary.
 4. Socket events changed: update `docs/events.md`.
 5. A structural decision: add an ADR in `docs/decisions/` (next number, short: context, decision, consequences).
 6. Names: any new English word goes into `docs/glossary.md`.

@@ -18,7 +18,7 @@ The API needs a process that stays up: socket.io keeps connections open, games l
 The repository has a Vercel setup: `vercel.json` rewrites every path to the function in `api/index.ts`, which is the same Express app as `src/main.ts`. Deploy with the Vercel CLI from the project folder: `npx vercel` for a preview, `npx vercel --prod` for production.
 
 What works on Vercel:
-- every HTTP route in [api/endpoints.md](../api/endpoints.md), with the same envelope and messages.
+- every HTTP route in the Swagger UI at `/docs`, with the same envelope and messages.
 
 What does not:
 - **Real-time events.** socket.io is not served, so no `jogadaRealizada`, `empateProposto` or other socket events are sent (`DiscardingEventPublisher`).

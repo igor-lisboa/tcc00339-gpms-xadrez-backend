@@ -58,7 +58,6 @@ docs/              specs, API, events, rules, AI, guides, decisions
 
 ## API and events
 - Interactive docs (Swagger UI): `GET /docs` on a running API, for example http://localhost:3333/docs. The raw description is at `GET /openapi.json`. "Try it out" calls the host the page came from.
-- Endpoints: [docs/api/endpoints.md](docs/api/endpoints.md)
 - The description is written in [docs/api/openapi.yaml](docs/api/openapi.yaml). After editing it, run `npm run docs:openapi` to regenerate `src/http/docs/openapi.json`, which the API serves. A test fails if the description and the routes disagree.
 - Socket events: [docs/events.md](docs/events.md)
 - What the system does today: [docs/specs/](docs/specs/)
