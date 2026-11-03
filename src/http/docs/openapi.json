@@ -1,0 +1,2947 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "Xadrez API",
+        "version": "1.0.0",
+        "description": "HTTP API of the chess game. Field names and the messages are in Portuguese (the wire names);\nthe domain itself uses English names.\n\n**Envelope.** Every JSON answer has the shape `{ message, data, success }`.\n- Success: HTTP 200, `success` is `true`, `data` holds the result (or `null` when there is nothing to return).\n- Refused rule (for example a move out of turn, an illegal move, a finished game): HTTP 500,\n  `success` is `false`, `data` is `null`, `message` explains the refusal.\n- Unexpected error: HTTP 500, `message` is `\"Internal server error\"`, `data` is `null`, `success` is `false`.\n\n**Outside the envelope (not documented as responses).**\n- A request body that is not valid JSON gets Express's default HTML page with status 400.\n- A route that does not exist gets Express's default HTML page with status 404.\n\n**Side header.** Player actions read the header `lado` (0 for Branco, 1 for Preto). A missing or\nnon-numeric header is not rejected by the routes; it matches no side and the action is refused.\n\n**Game ids.** A game id is its index in the in-memory repository. Games are lost when the process restarts.\n\n**Clock.** Reading a game (`GET /jogos/{jogoId}`) can end it when the clock of the side on turn has run out.\n\n**Known deviation.** Castling does not check the squares the king passes through.\n"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:3333",
+            "description": "Local server (PORT, default 3333)"
+        }
+    ],
+    "tags": [
+        {
+            "name": "Catalogue",
+            "description": "Read-only lookup data and the welcome message."
+        },
+        {
+            "name": "Games",
+            "description": "Creating, reading, resetting and listing games."
+        },
+        {
+            "name": "Players",
+            "description": "Seating a player on a side and resigning a side."
+        },
+        {
+            "name": "Pieces and moves",
+            "description": "Pieces of a side, their legal moves, playing a move and promoting a pawn."
+        },
+        {
+            "name": "Draws and resets",
+            "description": "Offering and answering a draw or a reset."
+        },
+        {
+            "name": "AI",
+            "description": "AI games, AI moves and the endpoint that asks the AI player to run."
+        }
+    ],
+    "paths": {
+        "/": {
+            "get": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "Welcome message, group members and documentation link",
+                "operationId": "getWelcome",
+                "responses": {
+                    "200": {
+                        "description": "Welcome message.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WelcomeEnvelope"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tabela-equivalencia": {
+            "get": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "Equivalence table of the 64 squares (A8 first)",
+                "operationId": "listSquares",
+                "responses": {
+                    "200": {
+                        "description": "The 64 squares.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SquareListEnvelope"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tipos-de-jogo": {
+            "get": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "Game types (0 Human vs Human, 1 Human vs AI, 2 AI vs AI)",
+                "operationId": "listGameTypes",
+                "responses": {
+                    "200": {
+                        "description": "The game types.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GameTypeListEnvelope"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/lados-do-jogo": {
+            "get": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "The two sides of a game (Branco and Preto)",
+                "operationId": "listSides",
+                "responses": {
+                    "200": {
+                        "description": "The sides.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SideInfoListEnvelope"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tipos-de-jogador": {
+            "get": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "Player types (Humano and I.A.)",
+                "operationId": "listPlayerTypes",
+                "responses": {
+                    "200": {
+                        "description": "The player types.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PlayerTypeListEnvelope"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tipos-de-peca": {
+            "get": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "Piece types with their Unicode symbols",
+                "operationId": "listPieceTypes",
+                "responses": {
+                    "200": {
+                        "description": "The piece types.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PieceTypeListEnvelope"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tipos-de-peca/promocao-peao": {
+            "get": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "Pieces a pawn may be promoted to (Rainha, Torre, Bispo, Cavalo)",
+                "operationId": "listPromotionPieces",
+                "responses": {
+                    "200": {
+                        "description": "The pieces allowed for promotion.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PieceTypeListEnvelope"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/jogos": {
+            "get": {
+                "tags": [
+                    "Games"
+                ],
+                "summary": "List all games",
+                "operationId": "listGames",
+                "responses": {
+                    "200": {
+                        "description": "All games, finished ones included.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GameListEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Failure"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Games"
+                ],
+                "summary": "Create a game",
+                "description": "Creates a game and returns it. Every body field is optional; the route fills the defaults\nshown in the schema. `tabuleiroCasas`, when sent, replaces the start position.\n",
+                "operationId": "createGame",
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateGameRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The created game.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GameEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Failure"
+                    }
+                }
+            }
+        },
+        "/jogos/ia": {
+            "get": {
+                "tags": [
+                    "AI"
+                ],
+                "summary": "Unfinished games that have at least one AI side, with the AI legal moves",
+                "description": "Matched before `/jogos/{jogoId}`, which would otherwise capture the segment `ia`.",
+                "operationId": "listAiGames",
+                "responses": {
+                    "200": {
+                        "description": "The AI games and their AI sides.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AiGameListEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Failure"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "AI"
+                ],
+                "summary": "Play the moves requested by the AI player",
+                "description": "Runs each requested move in order. A move that is refused is reported in `jogadasErros`\nand does not stop the others. Missing `jogadas` is treated as an empty list.\n",
+                "operationId": "playRequestedAiMoves",
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AiRunRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Moves executed and moves refused.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AiRunResultEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Failure"
+                    }
+                }
+            }
+        },
+        "/jogos/ia/executa": {
+            "post": {
+                "tags": [
+                    "AI"
+                ],
+                "summary": "Let the AI play one move in every AI game",
+                "operationId": "playAiTurns",
+                "responses": {
+                    "200": {
+                        "description": "Moves executed and moves refused.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AiRunResultEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Failure"
+                    }
+                }
+            }
+        },
+        "/ia": {
+            "get": {
+                "tags": [
+                    "AI"
+                ],
+                "summary": "Trigger the AI (forces the AI to run)",
+                "description": "Calls the application's forceAi and answers with the envelope and no data. The AI player\n(`npm run ia`) reads the AI games from `GET /jogos/ia` and sends its moves back through the API.\n",
+                "operationId": "triggerAi",
+                "responses": {
+                    "200": {
+                        "description": "The trigger was accepted.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EmptyEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Failure"
+                    }
+                }
+            }
+        },
+        "/jogos/{jogoId}": {
+            "get": {
+                "tags": [
+                    "Games"
+                ],
+                "summary": "Full state of a game",
+                "description": "May end the game when the clock of the side on turn has run out, and saves that change.",
+                "operationId": "getGame",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/JogoId"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The game.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GameEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Failure"
+                    }
+                }
+            }
+        },
+        "/jogos/{jogoId}/simples": {
+            "get": {
+                "tags": [
+                    "Games"
+                ],
+                "summary": "Summary of a game (clocks, check, pending actions, board)",
+                "description": "The board is a list of 8 rows of 8 cells. Each cell is `null`, or an object with the piece\ntype, side, number of moves made and value, or, with `tabuleiroSuperSimplificado` true,\nthe string `tipo-ladoId` (for example `Rei-0`).\n\nThe query value counts as true only when it is the literal `true` (any case). Other values\ncount as false. A value that is not valid JSON (for example `abc`) is an unexpected error and gets 500.\n",
+                "operationId": "getGameSummary",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/JogoId"
+                    },
+                    {
+                        "$ref": "#/components/parameters/TabuleiroSuperSimplificado"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The summary.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SummaryEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Failure"
+                    }
+                }
+            }
+        },
+        "/jogos/{jogoId}/turnos": {
+            "get": {
+                "tags": [
+                    "Games"
+                ],
+                "summary": "Turns of a game, in order",
+                "operationId": "listTurns",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/JogoId"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The turns.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TurnListEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Failure"
+                    }
+                }
+            }
+        },
+        "/jogos/{jogoId}/lados": {
+            "get": {
+                "tags": [
+                    "Players"
+                ],
+                "summary": "Both sides of a game (Branco and Preto)",
+                "operationId": "getGameSides",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/JogoId"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The two sides, keyed by name.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SidesEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Failure"
+                    }
+                }
+            }
+        },
+        "/jogos/{jogoId}/reset": {
+            "put": {
+                "tags": [
+                    "Games"
+                ],
+                "summary": "Restart the same game id",
+                "operationId": "resetGame",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/JogoId"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The game, in its start state.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GameEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Failure"
+                    }
+                }
+            }
+        },
+        "/jogos/{jogoId}/reset/propoe": {
+            "put": {
+                "tags": [
+                    "Draws and resets"
+                ],
+                "summary": "Offer a reset to the opponent",
+                "description": "Only for finished games (see the spec game-lifecycle).",
+                "operationId": "proposeReset",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/JogoId"
+                    },
+                    {
+                        "$ref": "#/components/parameters/LadoHeader"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The offer was recorded.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EmptyEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Failure"
+                    }
+                }
+            }
+        },
+        "/jogos/{jogoId}/reset/responde": {
+            "post": {
+                "tags": [
+                    "Draws and resets"
+                ],
+                "summary": "Answer a reset offer",
+                "description": "`resposta` true accepts the reset, false refuses it. The route reads a missing value as false,\nand the response echoes the value that was sent (it is absent when the body omits it).\n",
+                "operationId": "answerReset",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/JogoId"
+                    },
+                    {
+                        "$ref": "#/components/parameters/LadoHeader"
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AnswerRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The answer was recorded.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReplyEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Failure"
+                    }
+                }
+            }
+        },
+        "/jogos/{jogoId}/empate/propoe": {
+            "put": {
+                "tags": [
+                    "Draws and resets"
+                ],
+                "summary": "Offer a draw to the opponent",
+                "operationId": "proposeDraw",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/JogoId"
+                    },
+                    {
+                        "$ref": "#/components/parameters/LadoHeader"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The offer was recorded.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EmptyEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Failure"
+                    }
+                }
+            }
+        },
+        "/jogos/{jogoId}/empate/responde": {
+            "post": {
+                "tags": [
+                    "Draws and resets"
+                ],
+                "summary": "Answer a draw offer",
+                "description": "`resposta` true accepts the draw (the game ends as \"Empate: Comum acordo\"), false refuses it.\nThe route reads a missing value as false, and the response echoes the value that was sent\n(it is absent when the body omits it).\n",
+                "operationId": "answerDraw",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/JogoId"
+                    },
+                    {
+                        "$ref": "#/components/parameters/LadoHeader"
+                    }
+                ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AnswerRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The answer was recorded.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReplyEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Failure"
+                    }
+                }
+            }
+        },
+        "/jogos/{jogoId}/promove-peao/{pecaIdEscolhida}": {
+            "post": {
+                "tags": [
+                    "Pieces and moves"
+                ],
+                "summary": "Promote the pawn of the side with the chosen piece",
+                "operationId": "choosePromotion",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/JogoId"
+                    },
+                    {
+                        "$ref": "#/components/parameters/LadoHeader"
+                    },
+                    {
+                        "$ref": "#/components/parameters/PecaIdEscolhida"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The piece that replaced the pawn.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PieceEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Failure"
+                    }
+                }
+            }
+        },
+        "/jogos/{jogoId}/lado-atual": {
+            "get": {
+                "tags": [
+                    "Players"
+                ],
+                "summary": "Side on turn",
+                "operationId": "getCurrentSide",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/JogoId"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The side on turn.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SideEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Failure"
+                    }
+                }
+            }
+        },
+        "/jogos/{jogoId}/lado-sem-jogador": {
+            "get": {
+                "tags": [
+                    "Players"
+                ],
+                "summary": "Sides that have no player yet",
+                "operationId": "listSidesWithoutPlayer",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/JogoId"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The sides without a player (may be empty).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SideListEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Failure"
+                    }
+                }
+            }
+        },
+        "/jogos/{jogoId}/rei-adversario": {
+            "get": {
+                "tags": [
+                    "Pieces and moves"
+                ],
+                "summary": "King of the opponent of the header side",
+                "description": "The key `data` is absent from the response when the game has no opponent king to return\n(the route passes `undefined`, which JSON omits).\n",
+                "operationId": "getOpponentKing",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/JogoId"
+                    },
+                    {
+                        "$ref": "#/components/parameters/LadoHeader"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The opponent king, when there is one.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/KingEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Failure"
+                    }
+                }
+            }
+        },
+        "/jogos/{jogoId}/pecas": {
+            "get": {
+                "tags": [
+                    "Pieces and moves"
+                ],
+                "summary": "Pieces of the header side, with their candidate moves",
+                "operationId": "listPiecesOfSide",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/JogoId"
+                    },
+                    {
+                        "$ref": "#/components/parameters/LadoHeader"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The pieces of the side.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PieceOnSquareListEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Failure"
+                    }
+                }
+            }
+        },
+        "/jogos/{jogoId}/pecas/{casaNome}/possiveis-jogadas": {
+            "get": {
+                "tags": [
+                    "Pieces and moves"
+                ],
+                "summary": "Legal moves of the piece on a square",
+                "operationId": "listPossibleMovesOfPiece",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/JogoId"
+                    },
+                    {
+                        "$ref": "#/components/parameters/LadoHeader"
+                    },
+                    {
+                        "$ref": "#/components/parameters/CasaNome"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The legal moves (may be empty).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PossibleMoveListEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Failure"
+                    }
+                }
+            }
+        },
+        "/jogos/{jogoId}/pecas/{casaOrigem}/move/{casaDestino}": {
+            "post": {
+                "tags": [
+                    "Pieces and moves"
+                ],
+                "summary": "Play a move from one square to another",
+                "operationId": "makeMove",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/JogoId"
+                    },
+                    {
+                        "$ref": "#/components/parameters/LadoHeader"
+                    },
+                    {
+                        "$ref": "#/components/parameters/CasaOrigem"
+                    },
+                    {
+                        "$ref": "#/components/parameters/CasaDestino"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The move that was played.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MoveRecordEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Failure"
+                    }
+                }
+            }
+        },
+        "/jogos/{jogoId}/jogadores": {
+            "post": {
+                "tags": [
+                    "Players"
+                ],
+                "summary": "Seat a player (human or AI) on a side",
+                "operationId": "joinPlayer",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/JogoId"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/JoinPlayerRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The side with its new player type.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SideEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Failure"
+                    }
+                }
+            }
+        },
+        "/jogos/{jogoId}/jogadores/{ladoId}": {
+            "delete": {
+                "tags": [
+                    "Players"
+                ],
+                "summary": "Resign a side (the game ends as \"Desistência\")",
+                "operationId": "leaveSide",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/JogoId"
+                    },
+                    {
+                        "$ref": "#/components/parameters/LadoIdPath"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The side that resigned.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SideEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Failure"
+                    }
+                }
+            }
+        },
+        "/jogos/{jogoId}/ia/promove-peao": {
+            "post": {
+                "tags": [
+                    "AI"
+                ],
+                "summary": "Let the AI promote its pawn",
+                "operationId": "aiChoosePromotion",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/JogoId"
+                    },
+                    {
+                        "$ref": "#/components/parameters/LadoHeader"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The piece that replaced the pawn.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PieceEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Failure"
+                    }
+                }
+            }
+        },
+        "/jogos/{jogoId}/ias": {
+            "get": {
+                "tags": [
+                    "AI"
+                ],
+                "summary": "AI sides of a game, with their legal moves",
+                "operationId": "listAiSidesOfGame",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/JogoId"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The AI sides (may be empty).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AiSideListEnvelope"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/Failure"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "parameters": {
+            "JogoId": {
+                "name": "jogoId",
+                "in": "path",
+                "required": true,
+                "description": "Game id (its index in the repository).",
+                "schema": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            },
+            "LadoHeader": {
+                "name": "lado",
+                "in": "header",
+                "required": true,
+                "description": "Side that acts, 0 for Branco and 1 for Preto. A missing or non-numeric value matches no side and the action is refused.",
+                "schema": {
+                    "$ref": "#/components/schemas/SideId"
+                }
+            },
+            "LadoIdPath": {
+                "name": "ladoId",
+                "in": "path",
+                "required": true,
+                "description": "Side that resigns, 0 for Branco and 1 for Preto.",
+                "schema": {
+                    "$ref": "#/components/schemas/SideId"
+                }
+            },
+            "PecaIdEscolhida": {
+                "name": "pecaIdEscolhida",
+                "in": "path",
+                "required": true,
+                "description": "Id of the piece chosen for the promotion (see GET /tipos-de-peca/promocao-peao).",
+                "schema": {
+                    "$ref": "#/components/schemas/PromotionPieceId"
+                }
+            },
+            "CasaNome": {
+                "name": "casaNome",
+                "in": "path",
+                "required": true,
+                "description": "Square name, file A to H and rank 1 to 8.",
+                "schema": {
+                    "$ref": "#/components/schemas/SquareName"
+                }
+            },
+            "CasaOrigem": {
+                "name": "casaOrigem",
+                "in": "path",
+                "required": true,
+                "description": "Square the piece leaves.",
+                "schema": {
+                    "$ref": "#/components/schemas/SquareName"
+                }
+            },
+            "CasaDestino": {
+                "name": "casaDestino",
+                "in": "path",
+                "required": true,
+                "description": "Square the piece goes to.",
+                "schema": {
+                    "$ref": "#/components/schemas/SquareName"
+                }
+            },
+            "TabuleiroSuperSimplificado": {
+                "name": "tabuleiroSuperSimplificado",
+                "in": "query",
+                "required": false,
+                "description": "Literal true (any case) gives the string board. See the operation description.",
+                "schema": {
+                    "type": "string",
+                    "example": "true"
+                }
+            }
+        },
+        "responses": {
+            "Failure": {
+                "description": "A refused rule (the message is the refusal text) or an unexpected error (the message is\n\"Internal server error\"). Both use this envelope with HTTP 500.\n",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/FailureEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "schemas": {
+            "FailureEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "data",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "Esse lado já foi escolhido"
+                    },
+                    "data": {
+                        "nullable": true,
+                        "enum": [
+                            null
+                        ]
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            false
+                        ]
+                    }
+                }
+            },
+            "EmptyEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "data",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "nullable": true,
+                        "enum": [
+                            null
+                        ]
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            true
+                        ]
+                    }
+                }
+            },
+            "ReplyEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "data",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/Reply"
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            true
+                        ]
+                    }
+                }
+            },
+            "WelcomeEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "data",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "Olá, esse é nosso XADREZ!"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/Welcome"
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            true
+                        ]
+                    }
+                }
+            },
+            "SquareListEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "data",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Square"
+                        }
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            true
+                        ]
+                    }
+                }
+            },
+            "GameTypeListEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "data",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/GameType"
+                        }
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            true
+                        ]
+                    }
+                }
+            },
+            "SideInfoListEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "data",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SideInfo"
+                        }
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            true
+                        ]
+                    }
+                }
+            },
+            "PlayerTypeListEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "data",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PlayerType"
+                        }
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            true
+                        ]
+                    }
+                }
+            },
+            "PieceTypeListEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "data",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PieceType"
+                        }
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            true
+                        ]
+                    }
+                }
+            },
+            "GameListEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "data",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Game"
+                        }
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            true
+                        ]
+                    }
+                }
+            },
+            "GameEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "data",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/Game"
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            true
+                        ]
+                    }
+                }
+            },
+            "SummaryEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "data",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/GameSummary"
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            true
+                        ]
+                    }
+                }
+            },
+            "TurnListEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "data",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Turn"
+                        }
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            true
+                        ]
+                    }
+                }
+            },
+            "SidesEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "data",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/GameSides"
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            true
+                        ]
+                    }
+                }
+            },
+            "SideEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "data",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/Side"
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            true
+                        ]
+                    }
+                }
+            },
+            "SideListEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "data",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Side"
+                        }
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            true
+                        ]
+                    }
+                }
+            },
+            "KingEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/PieceOnSquare"
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            true
+                        ]
+                    }
+                }
+            },
+            "PieceOnSquareListEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "data",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PieceOnSquare"
+                        }
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            true
+                        ]
+                    }
+                }
+            },
+            "PieceEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "data",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/Piece"
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            true
+                        ]
+                    }
+                }
+            },
+            "MoveRecordEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "data",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/MoveRecord"
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            true
+                        ]
+                    }
+                }
+            },
+            "PossibleMoveListEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "data",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PossibleMove"
+                        }
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            true
+                        ]
+                    }
+                }
+            },
+            "AiSideListEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "data",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AiSide"
+                        }
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            true
+                        ]
+                    }
+                }
+            },
+            "AiGameListEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "data",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AiGame"
+                        }
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            true
+                        ]
+                    }
+                }
+            },
+            "AiRunResultEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "data",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/AiRunResult"
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            true
+                        ]
+                    }
+                }
+            },
+            "SideId": {
+                "type": "integer",
+                "enum": [
+                    0,
+                    1
+                ],
+                "description": "0 is Branco (head down), 1 is Preto."
+            },
+            "PlayerTypeId": {
+                "type": "integer",
+                "enum": [
+                    0,
+                    1
+                ],
+                "description": "0 is Humano, 1 is I.A."
+            },
+            "GameTypeId": {
+                "type": "integer",
+                "enum": [
+                    0,
+                    1,
+                    2
+                ],
+                "description": "0 Humano X Humano, 1 Humano X I.A., 2 I.A. X I.A."
+            },
+            "PromotionPieceId": {
+                "type": "integer",
+                "enum": [
+                    1,
+                    2,
+                    3,
+                    4
+                ],
+                "description": "1 Rainha, 2 Torre, 3 Bispo, 4 Cavalo."
+            },
+            "SquareName": {
+                "type": "string",
+                "pattern": "^[A-H][1-8]$",
+                "example": "E2"
+            },
+            "PieceName": {
+                "type": "string",
+                "enum": [
+                    "Rei",
+                    "Rainha",
+                    "Torre",
+                    "Bispo",
+                    "Cavalo",
+                    "Peão"
+                ]
+            },
+            "MoveName": {
+                "type": "string",
+                "nullable": true,
+                "enum": [
+                    "Roque Menor",
+                    "Roque Maior",
+                    "Primeiro Movimento Peão",
+                    "Promoção do Peão",
+                    "En Passant",
+                    "L",
+                    null
+                ],
+                "description": "Name of the move when it is special (castling, double pawn step, promotion, en passant) or a knight jump (L); null otherwise."
+            },
+            "Direction": {
+                "type": "string",
+                "enum": [
+                    "frente",
+                    "tras",
+                    "esquerda",
+                    "direita",
+                    "frenteEsquerda",
+                    "frenteDireita",
+                    "trasEsquerda",
+                    "trasDireita",
+                    "especial"
+                ],
+                "description": "Direction of a candidate move, seen from the side that owns the piece."
+            },
+            "EndingLabel": {
+                "type": "string",
+                "enum": [
+                    "Vitória: Branco",
+                    "Vitória: Preto",
+                    "Empate: Regra 50 movimentos",
+                    "Empate: Insuficiência material",
+                    "Empate: Rei afogado",
+                    "Empate: Comum acordo",
+                    "Empate: Regra das 3 posições",
+                    "Desistência: Um jogador deixou a partida",
+                    "Tempo esgotado: o tempo de um jogador acabou"
+                ]
+            },
+            "RequestedActionName": {
+                "type": "string",
+                "enum": [
+                    "responderPropostaEmpate",
+                    "responderPropostaReset",
+                    "promocaoPeao"
+                ]
+            },
+            "Welcome": {
+                "type": "object",
+                "required": [
+                    "grupo",
+                    "documentacao"
+                ],
+                "properties": {
+                    "grupo": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Names of the group members, sorted."
+                    },
+                    "documentacao": {
+                        "type": "string",
+                        "format": "uri",
+                        "example": "https://documenter.getpostman.com/view/15046943/TzJrByfx"
+                    }
+                }
+            },
+            "Square": {
+                "type": "object",
+                "required": [
+                    "casa",
+                    "linha",
+                    "coluna"
+                ],
+                "properties": {
+                    "casa": {
+                        "$ref": "#/components/schemas/SquareName"
+                    },
+                    "linha": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 7
+                    },
+                    "coluna": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 7
+                    }
+                }
+            },
+            "SideInfo": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "nome",
+                    "cabecaPraBaixo"
+                ],
+                "properties": {
+                    "id": {
+                        "$ref": "#/components/schemas/SideId"
+                    },
+                    "nome": {
+                        "type": "string",
+                        "enum": [
+                            "Branco",
+                            "Preto"
+                        ]
+                    },
+                    "cabecaPraBaixo": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "PlayerType": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "nome"
+                ],
+                "properties": {
+                    "id": {
+                        "$ref": "#/components/schemas/PlayerTypeId"
+                    },
+                    "nome": {
+                        "type": "string",
+                        "enum": [
+                            "Humano",
+                            "I.A."
+                        ]
+                    }
+                }
+            },
+            "GameType": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "integranteLadoTipo"
+                ],
+                "properties": {
+                    "id": {
+                        "$ref": "#/components/schemas/GameTypeId"
+                    },
+                    "integranteLadoTipo": {
+                        "type": "array",
+                        "description": "Player type of each side, Branco first.",
+                        "minItems": 2,
+                        "maxItems": 2,
+                        "items": {
+                            "$ref": "#/components/schemas/PlayerType"
+                        }
+                    }
+                }
+            },
+            "PieceType": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "nome",
+                    "classe",
+                    "unicodePreto",
+                    "unicodeBranco"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 5
+                    },
+                    "nome": {
+                        "$ref": "#/components/schemas/PieceName"
+                    },
+                    "classe": {
+                        "type": "string",
+                        "description": "Class name in the lookup data (Peao for the pawn, without accent)."
+                    },
+                    "unicodePreto": {
+                        "type": "string",
+                        "example": "♚"
+                    },
+                    "unicodeBranco": {
+                        "type": "string",
+                        "example": "♔"
+                    }
+                }
+            },
+            "Ending": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "tipo"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "enum": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                        ]
+                    },
+                    "tipo": {
+                        "$ref": "#/components/schemas/EndingLabel"
+                    }
+                }
+            },
+            "Piece": {
+                "type": "object",
+                "required": [
+                    "tipo",
+                    "ladoId",
+                    "jogadasRealizadas",
+                    "passosHabilitados",
+                    "valor"
+                ],
+                "properties": {
+                    "tipo": {
+                        "$ref": "#/components/schemas/PieceName"
+                    },
+                    "ladoId": {
+                        "$ref": "#/components/schemas/SideId"
+                    },
+                    "jogadasRealizadas": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MoveRecord"
+                        }
+                    },
+                    "passosHabilitados": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "How many squares the piece may walk in one direction."
+                    },
+                    "valor": {
+                        "type": "integer",
+                        "description": "Value of the piece for the material rules."
+                    }
+                }
+            },
+            "MoveRecord": {
+                "type": "object",
+                "description": "A move that was played, including the castling rook move in `movimentosEspeciaisExecutados`.",
+                "required": [
+                    "identificador",
+                    "casaOrigem",
+                    "casaDestino",
+                    "pecaCapturada",
+                    "nomeJogada",
+                    "movimentosEspeciaisExecutados",
+                    "momento"
+                ],
+                "properties": {
+                    "identificador": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Index of the turn in which the move was played."
+                    },
+                    "casaOrigem": {
+                        "$ref": "#/components/schemas/Square"
+                    },
+                    "casaDestino": {
+                        "$ref": "#/components/schemas/Square"
+                    },
+                    "pecaCapturada": {
+                        "nullable": true,
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Piece"
+                            }
+                        ]
+                    },
+                    "nomeJogada": {
+                        "$ref": "#/components/schemas/MoveName"
+                    },
+                    "movimentosEspeciaisExecutados": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MoveRecord"
+                        }
+                    },
+                    "momento": {
+                        "type": "number",
+                        "description": "Time of the move, in milliseconds (Unix epoch)."
+                    }
+                }
+            },
+            "Turn": {
+                "type": "object",
+                "required": [
+                    "ladoId",
+                    "momentoInicio",
+                    "momentoFim",
+                    "totalMilisegundos"
+                ],
+                "properties": {
+                    "ladoId": {
+                        "$ref": "#/components/schemas/SideId"
+                    },
+                    "momentoInicio": {
+                        "type": "number",
+                        "description": "Start of the turn, in milliseconds (Unix epoch)."
+                    },
+                    "momentoFim": {
+                        "type": "number",
+                        "nullable": true,
+                        "description": "End of the turn; null while the turn is running."
+                    },
+                    "totalMilisegundos": {
+                        "type": "number",
+                        "nullable": true,
+                        "description": "Length of the turn in milliseconds; null while the turn is running."
+                    }
+                }
+            },
+            "CandidateMove": {
+                "type": "object",
+                "description": "A move the piece could make, before the king-safety check. Appears in `movimentosPossiveis` of a piece.",
+                "required": [
+                    "casaDestino",
+                    "nomeJogada",
+                    "direcao",
+                    "anda",
+                    "captura",
+                    "podeCapturavel",
+                    "casas"
+                ],
+                "properties": {
+                    "casaDestino": {
+                        "$ref": "#/components/schemas/Square"
+                    },
+                    "nomeJogada": {
+                        "$ref": "#/components/schemas/MoveName"
+                    },
+                    "direcao": {
+                        "$ref": "#/components/schemas/Direction"
+                    },
+                    "anda": {
+                        "type": "boolean",
+                        "description": "The piece can walk to the square (empty square)."
+                    },
+                    "captura": {
+                        "type": "boolean",
+                        "description": "The piece can capture on the square."
+                    },
+                    "podeCapturavel": {
+                        "type": "boolean",
+                        "description": "Mirrors the domain flag mayEnterAttackedSquare."
+                    },
+                    "casas": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Number of squares walked to reach the destination."
+                    }
+                }
+            },
+            "PieceOnSquare": {
+                "type": "object",
+                "required": [
+                    "casa",
+                    "linha",
+                    "coluna",
+                    "peca",
+                    "movimentosPossiveis"
+                ],
+                "properties": {
+                    "casa": {
+                        "$ref": "#/components/schemas/SquareName"
+                    },
+                    "linha": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 7
+                    },
+                    "coluna": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 7
+                    },
+                    "peca": {
+                        "$ref": "#/components/schemas/Piece"
+                    },
+                    "movimentosPossiveis": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CandidateMove"
+                        }
+                    }
+                }
+            },
+            "Attacker": {
+                "type": "object",
+                "description": "An attacking move that reaches the destination square of a possible move (mirrors the domain's capturantes list).",
+                "required": [
+                    "casaOrigem",
+                    "casaDestino",
+                    "nomeJogada",
+                    "podeCapturavel",
+                    "pecaCaptura",
+                    "captura",
+                    "anda",
+                    "peca",
+                    "pecaValor"
+                ],
+                "properties": {
+                    "casaOrigem": {
+                        "$ref": "#/components/schemas/Square"
+                    },
+                    "casaDestino": {
+                        "$ref": "#/components/schemas/Square"
+                    },
+                    "nomeJogada": {
+                        "$ref": "#/components/schemas/MoveName"
+                    },
+                    "podeCapturavel": {
+                        "type": "boolean"
+                    },
+                    "pecaCaptura": {
+                        "nullable": true,
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Piece"
+                            }
+                        ]
+                    },
+                    "captura": {
+                        "type": "boolean"
+                    },
+                    "anda": {
+                        "type": "boolean"
+                    },
+                    "peca": {
+                        "$ref": "#/components/schemas/PieceName"
+                    },
+                    "pecaValor": {
+                        "type": "integer"
+                    }
+                }
+            },
+            "PossibleMove": {
+                "type": "object",
+                "description": "A legal move of a piece, with the attackers of its destination.",
+                "required": [
+                    "casaOrigem",
+                    "casaDestino",
+                    "nome",
+                    "peca",
+                    "pecaValor",
+                    "pecaCaptura",
+                    "capturantes",
+                    "capturavel",
+                    "captura"
+                ],
+                "properties": {
+                    "casaOrigem": {
+                        "$ref": "#/components/schemas/Square"
+                    },
+                    "casaDestino": {
+                        "$ref": "#/components/schemas/Square"
+                    },
+                    "nome": {
+                        "$ref": "#/components/schemas/MoveName"
+                    },
+                    "peca": {
+                        "$ref": "#/components/schemas/PieceName"
+                    },
+                    "pecaValor": {
+                        "type": "integer"
+                    },
+                    "pecaCaptura": {
+                        "nullable": true,
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Piece"
+                            }
+                        ]
+                    },
+                    "capturantes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Attacker"
+                        }
+                    },
+                    "capturavel": {
+                        "type": "boolean",
+                        "description": "The destination square can be captured by the opponent."
+                    },
+                    "captura": {
+                        "type": "boolean",
+                        "description": "The move captures a piece."
+                    }
+                }
+            },
+            "Side": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "lado",
+                    "cabecaPraBaixo",
+                    "jogadasRealizadas",
+                    "tipo",
+                    "tempoMilisegundosRestante",
+                    "possiveisJogadas",
+                    "pecas"
+                ],
+                "properties": {
+                    "id": {
+                        "$ref": "#/components/schemas/SideId"
+                    },
+                    "lado": {
+                        "type": "string",
+                        "enum": [
+                            "Branco",
+                            "Preto"
+                        ],
+                        "description": "Name of the side."
+                    },
+                    "cabecaPraBaixo": {
+                        "type": "boolean"
+                    },
+                    "jogadasRealizadas": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MoveRecord"
+                        }
+                    },
+                    "tipo": {
+                        "nullable": true,
+                        "description": "Player on the side; null while the side has no player.",
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/PlayerType"
+                            }
+                        ]
+                    },
+                    "tempoMilisegundosRestante": {
+                        "type": "integer",
+                        "nullable": true,
+                        "description": "Clock left for the side, in milliseconds; null when the game has no clock."
+                    },
+                    "possiveisJogadas": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PossibleMove"
+                        }
+                    },
+                    "pecas": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PieceOnSquare"
+                        }
+                    }
+                }
+            },
+            "GameSides": {
+                "type": "object",
+                "required": [
+                    "branco",
+                    "preto"
+                ],
+                "properties": {
+                    "branco": {
+                        "$ref": "#/components/schemas/Side"
+                    },
+                    "preto": {
+                        "$ref": "#/components/schemas/Side"
+                    }
+                }
+            },
+            "RequestedAction": {
+                "type": "object",
+                "required": [
+                    "acao",
+                    "ladoId",
+                    "data"
+                ],
+                "properties": {
+                    "acao": {
+                        "$ref": "#/components/schemas/RequestedActionName"
+                    },
+                    "ladoId": {
+                        "$ref": "#/components/schemas/SideId"
+                    },
+                    "data": {
+                        "type": "object",
+                        "required": [
+                            "ladoId",
+                            "jogoId"
+                        ],
+                        "properties": {
+                            "ladoId": {
+                                "$ref": "#/components/schemas/SideId"
+                            },
+                            "jogoId": {
+                                "type": "integer",
+                                "minimum": 0
+                            }
+                        }
+                    }
+                }
+            },
+            "EnPassant": {
+                "type": "object",
+                "required": [
+                    "casaCaptura",
+                    "casaPeao"
+                ],
+                "properties": {
+                    "casaCaptura": {
+                        "$ref": "#/components/schemas/Square"
+                    },
+                    "casaPeao": {
+                        "$ref": "#/components/schemas/Square"
+                    }
+                }
+            },
+            "PawnPromotion": {
+                "type": "object",
+                "required": [
+                    "casaPeao",
+                    "jogadaPromocao"
+                ],
+                "properties": {
+                    "casaPeao": {
+                        "$ref": "#/components/schemas/Square"
+                    },
+                    "jogadaPromocao": {
+                        "$ref": "#/components/schemas/MoveRecord"
+                    }
+                }
+            },
+            "BoardCell": {
+                "type": "object",
+                "description": "A piece on the board. The summary may show the string form instead (see GameSummary).",
+                "required": [
+                    "tipo",
+                    "ladoId",
+                    "jogadasRealizadas"
+                ],
+                "properties": {
+                    "tipo": {
+                        "$ref": "#/components/schemas/PieceName"
+                    },
+                    "ladoId": {
+                        "$ref": "#/components/schemas/SideId"
+                    },
+                    "jogadasRealizadas": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MoveRecord"
+                        }
+                    }
+                }
+            },
+            "Board": {
+                "type": "object",
+                "required": [
+                    "casas",
+                    "fotografiasTabuleiro",
+                    "qtdTurnosSemCapturaOuMovimentoDePeao"
+                ],
+                "properties": {
+                    "casas": {
+                        "type": "array",
+                        "description": "Eight rows, each with eight cells (null when empty).",
+                        "items": {
+                            "type": "array",
+                            "items": {
+                                "nullable": true,
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Piece"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "fotografiasTabuleiro": {
+                        "type": "array",
+                        "description": "Snapshots of the board. The API always sends an empty list.",
+                        "maxItems": 0,
+                        "items": {
+                            "type": "object"
+                        }
+                    },
+                    "qtdTurnosSemCapturaOuMovimentoDePeao": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Half-moves since the last capture or pawn move (50-move rule counter)."
+                    }
+                }
+            },
+            "Game": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "ladoBranco",
+                    "ladoPreto",
+                    "tabuleiro",
+                    "turnos",
+                    "tempoDeTurnoEmMilisegundos",
+                    "ladoIdAtual",
+                    "enPassantCasaCaptura",
+                    "finalizado",
+                    "acoesSolicitadas",
+                    "casaPeaoPromocao",
+                    "empatePropostoPeloLadoId",
+                    "resetPropostoPeloLadoId",
+                    "chequeLadoAtual",
+                    "tipoJogo"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "ladoBranco": {
+                        "$ref": "#/components/schemas/Side"
+                    },
+                    "ladoPreto": {
+                        "$ref": "#/components/schemas/Side"
+                    },
+                    "tabuleiro": {
+                        "$ref": "#/components/schemas/Board"
+                    },
+                    "turnos": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Turn"
+                        }
+                    },
+                    "tempoDeTurnoEmMilisegundos": {
+                        "type": "integer",
+                        "description": "Time limit of a turn in milliseconds; -1 when the game has no limit."
+                    },
+                    "ladoIdAtual": {
+                        "$ref": "#/components/schemas/SideId"
+                    },
+                    "enPassantCasaCaptura": {
+                        "nullable": true,
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/EnPassant"
+                            }
+                        ]
+                    },
+                    "finalizado": {
+                        "nullable": true,
+                        "description": "How the game ended; null while it is running.",
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Ending"
+                            }
+                        ]
+                    },
+                    "acoesSolicitadas": {
+                        "type": "array",
+                        "description": "Actions one side must answer before the game goes on.",
+                        "items": {
+                            "$ref": "#/components/schemas/RequestedAction"
+                        }
+                    },
+                    "casaPeaoPromocao": {
+                        "nullable": true,
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/PawnPromotion"
+                            }
+                        ]
+                    },
+                    "empatePropostoPeloLadoId": {
+                        "nullable": true,
+                        "description": "Side that offered a draw and waits for the answer; null when there is no offer.",
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/SideId"
+                            }
+                        ]
+                    },
+                    "resetPropostoPeloLadoId": {
+                        "nullable": true,
+                        "description": "Side that offered a reset and waits for the answer; null when there is no offer.",
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/SideId"
+                            }
+                        ]
+                    },
+                    "chequeLadoAtual": {
+                        "type": "boolean",
+                        "description": "The side on turn is in check."
+                    },
+                    "tipoJogo": {
+                        "type": "object",
+                        "required": [
+                            "id",
+                            "integranteLadoTipo"
+                        ],
+                        "properties": {
+                            "id": {
+                                "$ref": "#/components/schemas/GameTypeId"
+                            },
+                            "integranteLadoTipo": {
+                                "type": "array",
+                                "minItems": 2,
+                                "maxItems": 2,
+                                "items": {
+                                    "$ref": "#/components/schemas/PlayerType"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "SummaryCell": {
+                "type": "object",
+                "nullable": true,
+                "description": "Null for an empty square. Otherwise an object, or the string `tipo-ladoId` (for example `Rei-0`) when the board is super simplified.",
+                "oneOf": [
+                    {
+                        "type": "object",
+                        "required": [
+                            "tipo",
+                            "ladoId",
+                            "jogadasRealizadasLength",
+                            "valor"
+                        ],
+                        "properties": {
+                            "tipo": {
+                                "$ref": "#/components/schemas/PieceName"
+                            },
+                            "ladoId": {
+                                "$ref": "#/components/schemas/SideId"
+                            },
+                            "jogadasRealizadasLength": {
+                                "type": "integer",
+                                "minimum": 0
+                            },
+                            "valor": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "pattern": "^(Rei|Rainha|Torre|Bispo|Cavalo|Peão)-[01]$"
+                    }
+                ]
+            },
+            "GameSummary": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "ladoIdAtual",
+                    "ladoBrancoTempoMilisegundosRestante",
+                    "ladoPretoTempoMilisegundosRestante",
+                    "tempoDeTurnoEmMilisegundos",
+                    "chequeLadoAtual",
+                    "acoesSolicitadas",
+                    "casaPeaoPromocao",
+                    "empatePropostoPeloLadoId",
+                    "resetPropostoPeloLadoId",
+                    "ladosIdDeslogados",
+                    "enPassantCasaCaptura",
+                    "finalizado",
+                    "tipoJogo",
+                    "tabuleiro"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "ladoIdAtual": {
+                        "$ref": "#/components/schemas/SideId"
+                    },
+                    "ladoBrancoTempoMilisegundosRestante": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "ladoPretoTempoMilisegundosRestante": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "tempoDeTurnoEmMilisegundos": {
+                        "type": "integer"
+                    },
+                    "chequeLadoAtual": {
+                        "type": "boolean"
+                    },
+                    "acoesSolicitadas": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RequestedAction"
+                        }
+                    },
+                    "casaPeaoPromocao": {
+                        "nullable": true,
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/PawnPromotion"
+                            }
+                        ]
+                    },
+                    "empatePropostoPeloLadoId": {
+                        "nullable": true,
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/SideId"
+                            }
+                        ]
+                    },
+                    "resetPropostoPeloLadoId": {
+                        "nullable": true,
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/SideId"
+                            }
+                        ]
+                    },
+                    "ladosIdDeslogados": {
+                        "type": "array",
+                        "description": "Sides that have no player.",
+                        "items": {
+                            "$ref": "#/components/schemas/SideId"
+                        }
+                    },
+                    "enPassantCasaCaptura": {
+                        "nullable": true,
+                        "description": "Squares of the en passant capture, as names (not Square objects).",
+                        "type": "object",
+                        "required": [
+                            "casaCaptura",
+                            "casaPeao"
+                        ],
+                        "properties": {
+                            "casaCaptura": {
+                                "$ref": "#/components/schemas/SquareName"
+                            },
+                            "casaPeao": {
+                                "$ref": "#/components/schemas/SquareName"
+                            }
+                        }
+                    },
+                    "finalizado": {
+                        "nullable": true,
+                        "description": "Label of the ending; null while the game is running.",
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/EndingLabel"
+                            }
+                        ]
+                    },
+                    "tipoJogo": {
+                        "type": "string",
+                        "description": "Player types of the two sides joined by \" X \", for example \"Humano X I.A.\".",
+                        "example": "Humano X I.A."
+                    },
+                    "tabuleiro": {
+                        "type": "array",
+                        "description": "Eight rows of eight cells.",
+                        "items": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/components/schemas/SummaryCell"
+                            }
+                        }
+                    }
+                }
+            },
+            "AiMove": {
+                "type": "object",
+                "required": [
+                    "de",
+                    "para",
+                    "capturavel",
+                    "captura",
+                    "nome",
+                    "peca",
+                    "pecaAmeacadaNaPosicaoAtual"
+                ],
+                "properties": {
+                    "de": {
+                        "$ref": "#/components/schemas/SquareName"
+                    },
+                    "para": {
+                        "$ref": "#/components/schemas/SquareName"
+                    },
+                    "capturavel": {
+                        "type": "boolean"
+                    },
+                    "captura": {
+                        "type": "boolean"
+                    },
+                    "nome": {
+                        "$ref": "#/components/schemas/MoveName"
+                    },
+                    "peca": {
+                        "$ref": "#/components/schemas/PieceName"
+                    },
+                    "pecaAmeacadaNaPosicaoAtual": {
+                        "type": "boolean",
+                        "description": "The piece on the origin square is attacked by the opponent."
+                    }
+                }
+            },
+            "AiSide": {
+                "type": "object",
+                "required": [
+                    "lado",
+                    "possiveisJogadas"
+                ],
+                "properties": {
+                    "lado": {
+                        "$ref": "#/components/schemas/Side"
+                    },
+                    "possiveisJogadas": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AiMove"
+                        }
+                    }
+                }
+            },
+            "AiGame": {
+                "type": "object",
+                "required": [
+                    "jogo",
+                    "ladosIa"
+                ],
+                "properties": {
+                    "jogo": {
+                        "$ref": "#/components/schemas/Game"
+                    },
+                    "ladosIa": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AiSide"
+                        }
+                    }
+                }
+            },
+            "AiRequest": {
+                "type": "object",
+                "description": "A move asked for by the AI player or a client.",
+                "required": [
+                    "jogoId",
+                    "ladoId",
+                    "casaOrigem",
+                    "casaDestino"
+                ],
+                "properties": {
+                    "jogoId": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "ladoId": {
+                        "$ref": "#/components/schemas/SideId"
+                    },
+                    "casaOrigem": {
+                        "$ref": "#/components/schemas/SquareName"
+                    },
+                    "casaDestino": {
+                        "$ref": "#/components/schemas/SquareName"
+                    }
+                }
+            },
+            "AiRunRequest": {
+                "type": "object",
+                "properties": {
+                    "jogadas": {
+                        "type": "array",
+                        "description": "Moves to play, in order. A missing list is an empty list.",
+                        "items": {
+                            "$ref": "#/components/schemas/AiRequest"
+                        }
+                    }
+                }
+            },
+            "AiRunResult": {
+                "type": "object",
+                "required": [
+                    "jogadasExecutadas",
+                    "jogadasErros"
+                ],
+                "properties": {
+                    "jogadasExecutadas": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "jogoId",
+                                "ladoId",
+                                "jogada"
+                            ],
+                            "properties": {
+                                "jogoId": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                },
+                                "ladoId": {
+                                    "$ref": "#/components/schemas/SideId"
+                                },
+                                "jogada": {
+                                    "$ref": "#/components/schemas/MoveRecord"
+                                }
+                            }
+                        }
+                    },
+                    "jogadasErros": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "jogoId",
+                                "ladoId",
+                                "erro",
+                                "jogadaSolicitada"
+                            ],
+                            "properties": {
+                                "jogoId": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                },
+                                "ladoId": {
+                                    "$ref": "#/components/schemas/SideId"
+                                },
+                                "erro": {
+                                    "type": "string",
+                                    "description": "Refusal text of the move."
+                                },
+                                "jogadaSolicitada": {
+                                    "$ref": "#/components/schemas/AiRequest"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "CreateGameRequest": {
+                "type": "object",
+                "description": "Every field is optional. The defaults are tipoJogo 0, tempoDeTurnoEmMilisegundos -1 (no limit), ladoId 0 and the start position.",
+                "properties": {
+                    "tipoJogo": {
+                        "$ref": "#/components/schemas/GameTypeId"
+                    },
+                    "tempoDeTurnoEmMilisegundos": {
+                        "type": "integer",
+                        "nullable": true,
+                        "description": "Time limit of a turn in milliseconds; -1 or null for no limit."
+                    },
+                    "tabuleiroCasas": {
+                        "type": "array",
+                        "description": "Start position, eight rows of eight cells. A cell is null, a string \"Tipo-ladoId\" (for example \"Torre-0\", side 1 or 0) or a BoardCell object.",
+                        "items": {
+                            "type": "array",
+                            "items": {
+                                "nullable": true,
+                                "oneOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "$ref": "#/components/schemas/BoardCell"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "ladoId": {
+                        "$ref": "#/components/schemas/SideId"
+                    }
+                }
+            },
+            "AnswerRequest": {
+                "type": "object",
+                "properties": {
+                    "resposta": {
+                        "type": "boolean",
+                        "description": "true accepts the offer, false refuses it."
+                    }
+                }
+            },
+            "JoinPlayerRequest": {
+                "type": "object",
+                "required": [
+                    "ladoId",
+                    "tipoId"
+                ],
+                "properties": {
+                    "ladoId": {
+                        "$ref": "#/components/schemas/SideId"
+                    },
+                    "tipoId": {
+                        "$ref": "#/components/schemas/PlayerTypeId"
+                    }
+                }
+            },
+            "Reply": {
+                "type": "object",
+                "description": "Echo of the answer. `resposta` is the value that was sent, so it can be absent when the body omits it.",
+                "properties": {
+                    "resposta": {
+                        "type": "boolean"
+                    }
+                }
+            }
+        }
+    }
+}
