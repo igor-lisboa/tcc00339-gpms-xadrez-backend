@@ -1,4 +1,4 @@
-coverage
-tests
-docs
+/coverage
+/tests
+/docs
 .env
