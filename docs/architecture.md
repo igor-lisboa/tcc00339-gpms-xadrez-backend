@@ -3,7 +3,7 @@
 ## Layers
 
 ```
-            HTTP (Express)                 socket.io                AI worker (ai/worker.ts)
+            HTTP (Express)                 socket.io                AI player (ai/inProcessAi.ts, inside the API process)
             http/routes, presenters         infrastructure/socket    talks to the API over HTTP + socket
                     |                              ^                          |
                     v                              | DomainEvent              |

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { DomainError } from "../../../src/domain/DomainError";
 import { playMove } from "../../../src/domain/game/playMove";
 import { offerDraw, answerDraw } from "../../../src/domain/game/drawOffers";
+import { checkClocks } from "../../../src/domain/game/clock";
 import { GameEnding } from "../../../src/shared/constants";
 import { catalog, gameWith, movesFrom, play } from "./helpers";
 
@@ -56,6 +57,13 @@ describe("draws", () => {
         expect(game.ending?.id).toBe(GameEnding.FiftyMoveRule);
     });
 
+    it("refuses a draw offer once the game has finished", () => {
+        const game = gameWith({ E1: "Rei-0", A8: "Rei-1", H1: "Torre-0" });
+        game.finish(GameEnding.Resignation);
+
+        expect(() => offerDraw(game, 0)).toThrow("Esse jogo já foi finalizado");
+    });
+
     it("clears the offer when it is declined, so a new one can be made", () => {
         const game = gameWith({ E1: "Rei-0", A8: "Rei-1", H1: "Torre-0" });
         offerDraw(game, 0);
@@ -79,7 +87,7 @@ describe("clock", () => {
         const limited = Object.assign(game, { timeLimitMs: 1000 });
         Object.assign(limited.turns[0], { startedAtMs: Date.now() - 5000 });
 
-        limited.checkClocks();
+        checkClocks(limited);
 
         // known deviation: a timeout is reported with the insufficient-material ending (see docs/specs/turn-clock.md)
         expect(limited.ending?.tipo).toBe("Empate: Insuficiência material");

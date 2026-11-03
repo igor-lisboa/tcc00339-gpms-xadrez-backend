@@ -8,6 +8,7 @@ import { buildCatalog } from "./infrastructure/data/catalog";
 import { InMemoryGameRepository } from "./infrastructure/persistence/InMemoryGameRepository";
 import { SocketHub } from "./infrastructure/socket/SocketHub";
 import { logger } from "./shared/logger";
+import { createInProcessAi } from "./ai/inProcessAi";
 
 /**
  * Composition root: builds the parts and connects them. Nothing else creates them.
@@ -26,6 +27,13 @@ const start = (): void => {
 
     const service = new GameService({ repository, events: hub, catalog });
     forward.app = createApp(service, catalog);
+
+    // the AI player runs in this process: it stops when the API stops
+    if (env.AI_ENABLED) {
+        const ai = createInProcessAi(service, env.APP_WAIT_MS);
+        hub.attachAi(ai);
+        ai.start();
+    }
 
     server.listen(env.PORT, () => {
         logger.info({ port: env.PORT }, "API listening");

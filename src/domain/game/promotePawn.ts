@@ -4,6 +4,7 @@ import { PieceNames, type PieceName } from "../pieces/pieceNames";
 import type { MoveRecord } from "../moves/MoveRecord";
 import type { Game } from "./Game";
 import { RequestedActionNames } from "./RequestedAction";
+import { defineCurrentSide } from "./judgement";
 
 export interface PromotedPawn {
     readonly piece: Piece;
@@ -42,7 +43,7 @@ export const promotePawn = (game: Game, sideId: number, pieceTypeId: number): Pr
     game.promotion = null;
 
     const opponent = game.opponentOf(sideId);
-    game.defineCurrentSide(opponent.id);
+    defineCurrentSide(game, opponent.id);
     game.requestedActions = game.requestedActions.filter((action) => action !== pending);
 
     return { piece, move, opponentId: opponent.id };

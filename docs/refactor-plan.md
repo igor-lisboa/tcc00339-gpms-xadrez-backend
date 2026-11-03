@@ -3,7 +3,14 @@
 - **Phase 0 and Phase 1: done.** Characterization tests, tooling, config, logger, errors, constants and the names check.
 - **Phases 2 to 5: done in one port.** The domain, application, infrastructure, HTTP and AI were written in TypeScript and the legacy JavaScript was removed. The characterization suite passes against the new code (see the port-change sections in `docs/specs/`).
 - **Decision changed:** the wire format is kept (no English routes, fields or events yet). See `docs/decisions/0005-keep-wire-format.md`. The adapter from the plan is not built.
-- **Still open:** English wire names (a separate step with the frontend), the 50-move rule and the timeout label (known deviations), status codes 400/404/409 (Phase 4 target), dependency upgrades and `npm audit` (Phase 6), and the how-to guides in `docs/guides/`.
+- **Done in the gap pass:** every `src/` file is under 150 lines (`Game.ts` split into `createGame.ts`, `seating.ts`, `clock.ts`, `judgement.ts`; `candidateMoves.ts` split into `castling.ts` and `stepNames.ts`; `gamePresenter.ts` split with `sidePresenter.ts`); the how-to guides in `docs/guides/` are written; `npm audit --omit=dev` reports 0 vulnerabilities (axios 1.x, socket.io and express patched in range); `tsx` moved to runtime dependencies so the Procfile survives a dev-dependency prune; `engines` set to Node 22; `allowJs` off; the dead `uncaughtException` listener removed from the AI worker; root `readme.md` rewritten in English.
+- **Second pass (client-visible behaviour kept as it was):** the TypeScript side changed, the wire did not. Refusals stay 500 with the same messages; `GET /ia` is the only `/ia` route; the timeout keeps the "Insuficiência material" label; the 50-move rule still applies only on a draw offer. Done: the clock is an explicit step (`loadGameForChange` before a change; reads do not save or announce); a draw offer on a finished game is refused with the existing message "Esse jogo já foi finalizado"; `docs/api/openapi.yaml` written and validated; coverage gate (`npm run test:coverage`, thresholds at the measured level, also run in CI).
+- **Still open:**
+  - domain coverage is about 80% lines against the plan target of 100%; the thresholds are a ratchet;
+  - English wire names (a separate step with the frontend, see ADR 0005);
+  - a GET still shows a timeout that has already happened (kept for compatibility);
+  - the 50-move rule is not automatic (kept as it was; known deviation).
+  - openapi: some field meanings are not confirmed from the code (Piece `valor` and `passosHabilitados`, the attacker entries, the meaning of turn times, `fotografiasTabuleiro`);
 
 ---
 

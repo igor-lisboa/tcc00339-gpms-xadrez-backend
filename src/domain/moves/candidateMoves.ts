@@ -3,6 +3,8 @@ import type { Square, SquareLookup } from "../board/SquareLookup";
 import type { Direction, MoveOption } from "../pieces/movements";
 import { MoveNames, PieceNames } from "../pieces/pieceNames";
 import type { Piece } from "../pieces/Piece";
+import { castleOption } from "./castling";
+import { nameOfStep } from "./stepNames";
 
 /** What the move generator needs to know about the position. */
 export interface MoveRules {
@@ -125,70 +127,3 @@ const isHome = (square: Square, sideId: number, whiteSideId: number): boolean =>
     return square.linha === homeRow && square.coluna === 4;
 };
 
-/** The movement option that marks a castling wing for a given side. */
-export const castleOption = (whiteSideId: number, sideId: number, queenside: boolean): MoveOption => {
-    const side = sideId === whiteSideId ? "white" : "black";
-    return `${side}${queenside ? "Queenside" : "Kingside"}Castle` as MoveOption;
-};
-
-/** Names a step: en passant, the pawn's double step, promotion, castling. Later rules win, as in the legacy code. */
-const nameOfStep = (
-    rules: MoveRules,
-    piece: Piece,
-    to: Square,
-    steps: number,
-    direction: Direction,
-    options: readonly MoveOption[]
-): string | null => {
-    let name: string | null = null;
-
-    if (piece.type === PieceNames.Pawn) {
-        if (rules.enPassant !== null && rules.enPassant.captureSquare.name === to.name) {
-            name = MoveNames.EnPassant;
-        }
-        if (options.includes("firstPawnMove") && steps === 2) {
-            name = MoveNames.PawnFirstMove;
-        }
-        const lastRow = piece.sideId !== rules.whiteSideId ? 7 : 0;
-        if (to.linha === lastRow) {
-            name = MoveNames.PawnPromotion;
-        }
-    }
-
-    if (piece.type === PieceNames.King && steps === 2) {
-        const white = piece.sideId === rules.whiteSideId;
-        const kingsideOpen = options.includes("whiteKingsideCastle") || options.includes("blackKingsideCastle");
-        const queensideOpen = options.includes("whiteQueensideCastle") || options.includes("blackQueensideCastle");
-        if (kingsideOpen && direction === (white ? "right" : "left")) {
-            name = MoveNames.KingsideCastle;
-        }
-        if (queensideOpen && direction === (white ? "left" : "right")) {
-            name = MoveNames.QueensideCastle;
-        }
-    }
-
-    return name;
-};
-
-/** Whether a castle is physically possible for the king on its home square: rook unmoved, path empty, king unmoved. */
-export const castlingPathClear = (board: Board, sideId: number, whiteSideId: number, queenside: boolean): boolean => {
-    const row = sideId === whiteSideId ? 7 : 0;
-    const rookColumn = queenside ? 0 : 7;
-    const pathColumns = queenside ? [1, 2, 3] : [5, 6];
-    const lookup = board.lookup;
-
-    const king = board.pieceAt(lookup.fromPosition(row, 4));
-    const rook = board.pieceAt(lookup.fromPosition(row, rookColumn));
-
-    const pathEmpty = pathColumns.every((column) => board.pieceAt(lookup.fromPosition(row, column)) === null);
-    return (
-        king !== null &&
-        king.type === PieceNames.King &&
-        !king.hasMoved() &&
-        rook !== null &&
-        rook.type === PieceNames.Rook &&
-        rook.sideId === sideId &&
-        !rook.hasMoved() &&
-        pathEmpty
-    );
-};

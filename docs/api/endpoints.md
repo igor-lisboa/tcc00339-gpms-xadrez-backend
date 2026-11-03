@@ -1,6 +1,6 @@
 # HTTP endpoints (today)
 
-All responses use the envelope `{ message, data, success }`. Refusals are HTTP 500 today (see [error-handling](../specs/error-handling.md)). The header `lado` carries the side id for player actions.
+Interactive version: `GET /docs` (Swagger UI) on a running API. The source is [openapi.yaml](openapi.yaml). All responses use the envelope `{ message, data, success }`. Refusals are HTTP 500 today (see [error-handling](../specs/error-handling.md)). The header `lado` carries the side id for player actions.
 
 ## Games
 
@@ -51,7 +51,7 @@ All responses use the envelope `{ message, data, success }`. Refusals are HTTP 5
 | POST | `/jogos/ia/executa` | AI plays one move in every AI game | ai-opponent |
 | GET | `/jogos/:jogoId/ias` | AI sides of a game | players-and-sides |
 | POST | `/jogos/:jogoId/ia/promove-peao` | AI promotes a pawn | pawn-promotion |
-| GET | `/ia` | ask the AI worker to run | ai-opponent |
+| GET | `/ia` | ask the AI player to run | ai-opponent |
 
 ## Catalogues
 

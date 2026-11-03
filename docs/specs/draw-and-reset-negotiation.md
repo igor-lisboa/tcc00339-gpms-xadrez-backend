@@ -18,6 +18,6 @@ One side offers a draw or a reset; the other side accepts or declines.
 - `empatePropostoPeloLadoId` holds the side id as given by the header, so it is the string `"0"`, not the number 0.
 - The 50-move check happens inside the offer (see [draw-conditions.md](draw-conditions.md)): the game is finished and the offer is still sent.
 - Offering a draw after the 50-move limit: the game finishes as a draw first and then the offer is still stored and sent. Test is `it.todo`.
-
 ## Changed in the TypeScript port
 - `empatePropostoPeloLadoId` is the side id as a number (`0`). It used to be the raw header string (`"0"`). This is a change in the JSON type; the frontend should be checked.
+- A draw offer on a finished game is refused with "Esse jogo já foi finalizado" (status 500). Before, it was stored and sent.

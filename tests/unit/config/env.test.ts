@@ -5,9 +5,8 @@ describe("parseEnv", () => {
     it("uses the documented defaults when nothing is set", () => {
         expect(parseEnv({})).toEqual({
             PORT: 3333,
-            APP_URL: "http://localhost:3333",
             APP_WAIT_MS: 3000,
-            APP_VERBOSE: true,
+            AI_ENABLED: true,
             LOG_LEVEL: "info",
         });
     });
@@ -18,9 +17,9 @@ describe("parseEnv", () => {
         expect(settings.APP_WAIT_MS).toBe(250);
     });
 
-    it("turns APP_VERBOSE=false into false (the old code could never turn it off)", () => {
-        expect(parseEnv({ APP_VERBOSE: "false" }).APP_VERBOSE).toBe(false);
-        expect(parseEnv({ APP_VERBOSE: "true" }).APP_VERBOSE).toBe(true);
+    it("turns AI_ENABLED=false into false", () => {
+        expect(parseEnv({ AI_ENABLED: "false" }).AI_ENABLED).toBe(false);
+        expect(parseEnv({ AI_ENABLED: "true" }).AI_ENABLED).toBe(true);
     });
 
     it("refuses a port that is not a positive whole number", () => {
@@ -28,15 +27,11 @@ describe("parseEnv", () => {
         expect(() => parseEnv({ PORT: "0" })).toThrow(/PORT/);
     });
 
-    it("refuses an APP_URL that is not a URL", () => {
-        expect(() => parseEnv({ APP_URL: "not a url" })).toThrow(/APP_URL/);
-    });
-
     it("refuses an unknown log level", () => {
         expect(() => parseEnv({ LOG_LEVEL: "loud" })).toThrow(/LOG_LEVEL/);
     });
 
-    it("refuses APP_VERBOSE values other than true or false", () => {
-        expect(() => parseEnv({ APP_VERBOSE: "yes" })).toThrow(/APP_VERBOSE/);
+    it("refuses AI_ENABLED values other than true or false", () => {
+        expect(() => parseEnv({ AI_ENABLED: "yes" })).toThrow(/AI_ENABLED/);
     });
 });

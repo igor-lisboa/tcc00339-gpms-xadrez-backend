@@ -27,7 +27,7 @@ export interface AiSideView {
     readonly moves: AiMove[];
 }
 
-/** A move asked for by the AI worker or by a client. */
+/** A move asked for by the AI player or by a client. */
 export interface AiRequest {
     readonly gameId: number;
     readonly sideId: number;

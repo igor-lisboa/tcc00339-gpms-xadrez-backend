@@ -1,10 +1,10 @@
 # Real-time events (socket.io)
 
 ## Purpose
-Tell players and the AI worker when something changed, without polling.
+Tell players and the AI player when something changed, without polling.
 
 ## Connecting
-A client connects with the query `jogador`. For a player it is `"<gameId>-<sideId>"`, for example `"0-1"`. The AI worker uses `"I.A."`. The server keeps a list of connected `{socketId, identificador}`.
+A client connects with the query `jogador`. For a player it is `"<gameId>-<sideId>"`, for example `"0-1"`. The AI player uses `"I.A."`. The server keeps a list of connected `{socketId, identificador}`.
 
 ## Events
 | Event | Sent to | Payload |
@@ -13,7 +13,7 @@ A client connects with the query `jogador`. For a player it is `"<gameId>-<sideI
 | `jogoResetado` | both sides of the game and the AI | none |
 | `jogoFinalizado` | both sides and the AI | `{ jogoFinalizacao }` (the finishing text) |
 | `adversarioEntrou` | the opponent of the side that joined (and the AI if it is an AI side) | none |
-| `forcaIa` | the AI worker | none |
+| `forcaIa` | the AI player | none |
 | `jogadaRealizada` | the opponent of the mover (and the AI if it is an AI side) | `{ jogadaRealizada, chequeLadoAtual, promocaoPara }` |
 | `empateProposto` | the opponent | `{ jogoId, ladoId }` |
 | `empatePropostoResposta` | the proposer (when declined) | `{ jogoId, ladoId }` |
@@ -24,7 +24,7 @@ A client connects with the query `jogador`. For a player it is `"<gameId>-<sideI
 The last row is one event per pending action; the event name is the action name.
 
 ## Tests
-- `realtime-events.test.ts`: "tells the other side about a move...", "tells the opponent about a draw offer...", "notifies the AI worker when the game it plays in is created", "asks the AI worker to run when /ia is called"
+- `realtime-events.test.ts`: "tells the other side about a move...", "tells the opponent about a draw offer...", "notifies the AI player when the game it plays in is created", "asks the AI player to run when /ia is called"
 
 ## Known deviations
 - Fixed in the TypeScript port: a disconnect removes the player that left (test: "keeps the other players connected when one of them disconnects").

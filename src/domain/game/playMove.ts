@@ -6,6 +6,7 @@ import { sameSquare } from "../moves/rawMoves";
 import { MoveNames, PieceNames } from "../pieces/pieceNames";
 import type { Game } from "./Game";
 import { RequestedActionNames } from "./RequestedAction";
+import { defineCurrentSide, judgeAfterMove } from "./judgement";
 
 export interface PlayedMove {
     readonly move: MoveRecord;
@@ -21,11 +22,11 @@ export const playMove = (game: Game, sideId: number, fromName: string, toName: s
 
     // the turn only passes when no promotion choice is pending
     if (game.promotion === null) {
-        game.defineCurrentSide(opponent.id);
+        defineCurrentSide(game, opponent.id);
     }
     game.refresh();
     game.board.recordPosition();
-    game.judgeAfterMove();
+    judgeAfterMove(game);
 
     return { move, opponentId: opponent.id };
 };

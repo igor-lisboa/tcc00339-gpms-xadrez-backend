@@ -1,6 +1,6 @@
 # CLAUDE.md — xadrez-backend
 
-Backend of a chess game: Express REST API + socket.io real-time events + an AI worker.
+Backend of a chess game: Express REST API + socket.io real-time events + an AI player that runs inside the API process.
 The code is TypeScript (strict). The refactor plan and its status are in `docs/refactor-plan.md`.
 
 ## Commands
@@ -9,13 +9,13 @@ The code is TypeScript (strict). The refactor plan and its status are in `docs/r
 |---|---|
 | Run the API | `npm start` (`node --import tsx src/main.ts`) |
 | Run the API in watch mode | `npm run dev` |
-| Run the AI worker | `npm run ia` (needs the API running; `APP_URL` in `.env`) |
 | Tests | `npm test` (Vitest) |
 | Tests in watch mode | `npm run test:watch` |
 | Single test file | `npx vitest run tests/unit/domain/rules.test.ts` |
 | Typecheck | `npm run typecheck` |
 | Lint | `npm run lint` |
 | Names check (no Portuguese identifiers in migrated code) | `npm run check:names` |
+| Regenerate the API description (after editing docs/api/openapi.yaml) | `npm run docs:openapi` |
 | Format | `npm run format` |
 
 Copy `.env.example` to `.env` before running. Node 22 or newer. Settings are read and validated once in `src/config/env.ts`; a bad value stops the app at startup. Logs go through `src/shared/logger.ts` (pino, JSON lines, level from `LOG_LEVEL`).
@@ -39,7 +39,7 @@ src/
     ports/                 GameRepository and EventPublisher interfaces
   infrastructure/          in-memory repository, socket.io hub, catalogue loaded from database.json
   http/                    Express app, routes (one file per area), presenters (the API's JSON shapes), error mapping
-  ai/worker.ts             the AI worker process
+  ai/inProcessAi.ts        the AI player, running inside the API process (switch: AI_ENABLED)
 database.json              static lookup data only (sides, piece types, endings, squares)
 tests/unit/                unit tests for domain and shared code
 tests/characterization/    black-box tests of the API and socket events (start the real server)
@@ -69,7 +69,7 @@ docs/                      architecture, specs of implemented behaviour, API, ev
 - The `lado` header arrives as a string and is converted to a number at the HTTP edge; a missing header becomes `NaN`, which matches no side.
 - A GET can end a game when its clock runs out; `loadGame` saves that change.
 - Castling does not check the squares the king passes through (known deviation, see `docs/specs/special-moves.md`).
-- The socket identifiers `"<gameId>-<sideId>"` and `"I.A."` are the contract with the frontend and the AI worker.
+- The socket identifiers `"<gameId>-<sideId>"` and `"I.A."` are the contract with the frontend; the AI player answers to `"I.A."` inside the API process.
 
 ## Pointers
 

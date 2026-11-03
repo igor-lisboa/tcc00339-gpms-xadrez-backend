@@ -87,7 +87,7 @@ describe("characterization: AI endpoints", () => {
         expect(["Rainha", "Torre", "Bispo", "Cavalo"]).toContain(body.data.tipo);
     });
 
-    it("GET /ia asks the AI worker to run (acknowledged even with no AI games)", async () => {
+    it("GET /ia asks the AI player to run (acknowledged even with no AI games)", async () => {
         const { status, body } = await api.get("/ia");
         expect(status).toBe(200);
         expect(body.message).toBe("Tentativa de forçar a I.A. a executar executada com sucesso!");

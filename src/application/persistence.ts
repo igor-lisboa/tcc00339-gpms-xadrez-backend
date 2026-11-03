@@ -1,5 +1,6 @@
 import { DomainError } from "../domain/DomainError";
 import type { Game } from "../domain/game/Game";
+import { refreshForRead } from "../domain/game/judgement";
 import type { EventPublisher } from "./ports/EventPublisher";
 import type { GameRepository } from "./ports/GameRepository";
 import type { Catalog } from "../domain/catalog";
@@ -10,14 +11,22 @@ export interface GameContext {
     readonly catalog: Catalog;
 }
 
-/** Loads a game, brings its derived state up to date, and saves it if the reads ended it (for example on timeout). */
+/** Reads a game. The derived state is brought up to date (the clock included), but nothing is saved or announced here. */
 export const loadGame = (context: GameContext, gameId: number): Game => {
     const game = context.repository.find(gameId);
     if (game === undefined) {
         throw new DomainError("Jogo não encontrado");
     }
-    game.refreshForRead();
-    // a read can end the game (time running out); that change must be saved and announced
+    refreshForRead(game);
+    return game;
+};
+
+/**
+ * Loads a game before a change. This is the explicit clock step: if time ran out, the ending is saved
+ * and announced first, so the change then applies to a game that is already finished.
+ */
+export const loadGameForChange = (context: GameContext, gameId: number): Game => {
+    const game = loadGame(context, gameId);
     if (game.hasPendingFinishedEvents()) {
         saveGame(context, game);
     }

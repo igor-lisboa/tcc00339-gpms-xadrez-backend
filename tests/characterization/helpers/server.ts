@@ -54,7 +54,7 @@ export const startServer = async (): Promise<RunningServer> => {
 
     const child = spawn(process.execPath, ["--import", "tsx", "src/main.ts"], {
         cwd: ROOT_DIR,
-        env: { ...process.env, PORT: String(port) },
+        env: { ...process.env, PORT: String(port), AI_ENABLED: "false" },
         stdio: "ignore",
     });
 

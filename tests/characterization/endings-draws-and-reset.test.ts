@@ -79,6 +79,7 @@ describe("characterization: how a game ends", () => {
         expect(body.data.finalizado).toEqual({ id: 3, tipo: "Empate: Insuficiência material" });
     });
 
+
     it.todo("ends as a draw by the 50-move rule (needs 100 plies without capture or pawn move; covered once the TS rules are in place)");
 
     it("resigning finishes the game with the desistência result", async () => {
@@ -167,6 +168,14 @@ describe("characterization: draw offers", () => {
         const jogoId = await createGameWithHumans(api);
         const { body } = await api.post(`/jogos/${jogoId}/empate/responde`, { resposta: true }, { lado: BLACK });
         expect(body.message).toBe("Nenhum empate foi proposto");
+    });
+
+    it("refuses a draw offer once the game has finished", async () => {
+        const jogoId = await createGameWithHumans(api);
+        await api.delete(`/jogos/${jogoId}/jogadores/${BLACK}`);
+        const { status, body } = await api.put(`/jogos/${jogoId}/empate/propoe`, undefined, { lado: WHITE });
+        expect(status).toBe(500);
+        expect(body.message).toBe("Esse jogo já foi finalizado");
     });
 
     it.todo("known deviation: offering a draw after the 50-move limit finalizes the game and still sends the offer (see docs/specs/draw-and-reset-negotiation.md)");

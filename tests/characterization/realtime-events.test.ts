@@ -78,14 +78,14 @@ describe("characterization: real-time events", () => {
         expect(payload).toEqual({ jogoId, ladoId: 1 });
     });
 
-    it("notifies the AI worker when the game it plays in is created", async () => {
+    it("notifies the AI player when the game it plays in is created", async () => {
         const ia = await track(server.url, "I.A.");
         const recebido = nextEvent(ia, "jogoCriado");
         await createGame(api, { tipoJogo: 2 });
         await recebido;
     });
 
-    it("asks the AI worker to run when /ia is called", async () => {
+    it("asks the AI player to run when /ia is called", async () => {
         const ia = await track(server.url, "I.A.");
         const recebido = nextEvent(ia, "forcaIa");
         await api.get("/ia");

@@ -10,9 +10,8 @@ const booleanFlag = z
 
 export const envSchema = z.object({
     PORT: z.coerce.number().int().positive().default(3333),
-    APP_URL: z.url().default("http://localhost:3333"),
     APP_WAIT_MS: z.coerce.number().int().nonnegative().default(3000),
-    APP_VERBOSE: booleanFlag,
+    AI_ENABLED: booleanFlag,
     LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
 });
 

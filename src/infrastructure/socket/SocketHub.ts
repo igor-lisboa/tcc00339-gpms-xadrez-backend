@@ -2,10 +2,11 @@ import type { Server, Socket } from "socket.io";
 import type { RequestedAction } from "../../domain/game/RequestedAction";
 import type { Side } from "../../domain/game/Side";
 import type { EventPublisher, GameEvent } from "../../application/ports/EventPublisher";
+import type { AiListener } from "../../application/ports/AiListener";
 import { sideMoveWire } from "../../http/presenters/movePresenter";
 import { logger } from "../../shared/logger";
 
-/** Identifier the AI worker uses when it connects. */
+/** Identifier the AI player uses when it connects. */
 const AI_IDENTIFIER = "I.A.";
 
 interface ConnectedPlayer {
@@ -15,13 +16,19 @@ interface ConnectedPlayer {
 
 /**
  * Keeps the list of connected players and turns domain events into socket.io messages.
- * Players are identified by "<gameId>-<sideId>"; the AI worker by "I.A.".
+ * Players are identified by "<gameId>-<sideId>"; the AI player by "I.A.".
  * Event names and payloads are the ones the frontend already listens to.
  */
 export class SocketHub implements EventPublisher {
     private players: ConnectedPlayer[] = [];
+    private ai?: AiListener;
 
     constructor(private readonly io: Server) {}
+
+    /** The AI player inside this process. It receives the events sent to the AI identifier. */
+    attachAi(ai: AiListener): void {
+        this.ai = ai;
+    }
 
     /** Wires a new socket: records who it is, and forgets it when it disconnects. */
     connect(socket: Socket): void {
@@ -39,6 +46,7 @@ export class SocketHub implements EventPublisher {
         switch (event.type) {
             case "gameCreated":
                 this.io.emit("jogoCriado");
+                this.ai?.onEvent("jogoCriado");
                 return;
             case "gameReset":
                 this.sendTo(this.gameIdentifiers(event.gameId), "jogoResetado");
@@ -107,6 +115,9 @@ export class SocketHub implements EventPublisher {
     }
 
     private sendTo(identifiers: string[], eventName: string, payload?: unknown): void {
+        if (identifiers.includes(AI_IDENTIFIER)) {
+            this.ai?.onEvent(eventName, payload);
+        }
         this.players
             .filter((player) => identifiers.includes(player.identifier))
             .forEach((player) => {

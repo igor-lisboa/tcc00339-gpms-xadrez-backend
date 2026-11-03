@@ -1,7 +1,8 @@
 import { Router } from "express";
 import type { GameService } from "../../application/GameService";
 import type { AiRequest, AiRunResult, AiSideView } from "../../application/aiCommands";
-import { gameWire, sideWire } from "../presenters/gamePresenter";
+import { gameWire } from "../presenters/gamePresenter";
+import { sideWire } from "../presenters/sidePresenter";
 import { pieceWire, sideMoveWire } from "../presenters/movePresenter";
 import { aiMoveWire, aiRequestFromWire, aiRequestWire } from "../presenters/aiPresenter";
 import { sideIdFromHeader, success } from "../envelope";

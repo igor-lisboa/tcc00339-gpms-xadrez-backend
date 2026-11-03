@@ -1,7 +1,8 @@
 import { Router, type Request } from "express";
 import type { GameService } from "../../application/GameService";
 import { pieceWire, sideMoveWire } from "../presenters/movePresenter";
-import { gameWire, pieceOnSquareWire, possibleMoveWire, sideWire, summaryWire, turnWire } from "../presenters/gamePresenter";
+import { gameWire, summaryWire } from "../presenters/gamePresenter";
+import { pieceOnSquareWire, possibleMoveWire, sideWire, turnWire } from "../presenters/sidePresenter";
 import { sideIdFromHeader, success } from "../envelope";
 
 const sideOf = (req: Request): number => sideIdFromHeader(req.headers.lado);

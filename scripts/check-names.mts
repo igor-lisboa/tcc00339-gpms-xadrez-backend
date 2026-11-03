@@ -25,8 +25,8 @@ const pattern = new RegExp(`\\b(${FORBIDDEN.join("|")})\\b`, "iu");
 const IGNORE_MARKER = "names-check:ignore";
 const STRING_LITERAL = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`[^`]*`/g;
 
-const listFiles = (dir) =>
-    readdirSync(dir).flatMap((entry) => {
+const listFiles = (dir: string): string[] =>
+    readdirSync(dir).flatMap((entry: string) => {
         const full = path.join(dir, entry);
         if (statSync(full).isDirectory()) {
             return listFiles(full);
@@ -34,9 +34,9 @@ const listFiles = (dir) =>
         return /\.(ts|mjs|js)$/.test(entry) ? [full] : [];
     });
 
-const isWireContract = (file) => WIRE_CONTRACT_DIRS.some((dir) => file.startsWith(path.join(root, dir) + path.sep));
+const isWireContract = (file: string): boolean => WIRE_CONTRACT_DIRS.some((dir) => file.startsWith(path.join(root, dir) + path.sep));
 
-const findings = [];
+const findings: string[] = [];
 for (const folder of MIGRATED) {
     const absolute = path.join(root, folder);
     try {
@@ -50,7 +50,7 @@ for (const folder of MIGRATED) {
         }
         readFileSync(file, "utf8")
             .split(/\r?\n/)
-            .forEach((line, index) => {
+            .forEach((line: string, index: number) => {
                 if (line.includes(IGNORE_MARKER)) {
                     return;
                 }

@@ -6,35 +6,42 @@
   "scripts": {
     "start": "node --import tsx src/main.ts",
     "dev": "node --watch --import tsx src/main.ts",
-    "ia": "node --import tsx src/ai/worker.ts",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "check:names": "node scripts/check-names.mjs"
+    "check:names": "node --import tsx scripts/check-names.mts",
+    "docs:openapi": "node --import tsx scripts/build-openapi.mts"
   },
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
-    "axios": "^0.21.1",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "pino": "^10.4.0",
     "socket.io": "^4.0.0",
     "socket.io-client": "^4.0.0",
+    "tsx": "^4.23.15",
     "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^26.6.6",
     "@types/supertest": "^7.2.1",
+    "@vitest/coverage-v8": "^5.0.5",
     "eslint": "^10.14.0",
+    "jiti": "^2.7.0",
+    "js-yaml": "^4.3.2",
     "prettier": "^3.9.10",
     "supertest": "^7.3.1",
-    "tsx": "^4.23.15",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.72.1",
     "vitest": "^5.0.5"

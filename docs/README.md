@@ -10,8 +10,9 @@ Start with the root `README.md` for setup. Everything else is here.
 | [specs/](specs/) | What the system does today, rule by rule, with the tests that prove it |
 | [domain/rules.md](domain/rules.md) | Chess rules as implemented, with known deviations |
 | [api/endpoints.md](api/endpoints.md) | HTTP endpoints as they are today |
+| [api/openapi.yaml](api/openapi.yaml) | the API description (source); served at /docs (Swagger UI) and /openapi.json |
 | [events.md](events.md) | Socket.io events: name, direction, payload |
-| [ai.md](ai.md) | How the AI picks moves and how the worker runs |
+| [ai.md](ai.md) | How the AI picks moves and how it runs inside the API |
 | [guides/](guides/) | How-to notes for common changes |
 | [decisions/](decisions/) | Architecture decision records (ADRs) |
 

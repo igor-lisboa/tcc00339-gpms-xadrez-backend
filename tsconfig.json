@@ -10,14 +10,13 @@
         "resolveJsonModule": true,
         "skipLibCheck": true,
         "noEmit": true,
-        "allowJs": true,
-        "checkJs": false,
+        "allowJs": false,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
         "forceConsistentCasingInFileNames": true
     },
-    "include": ["src/**/*", "tests/**/*", "vitest.config.ts", "eslint.config.mjs"],
+    "include": ["api/**/*", "src/**/*", "tests/**/*", "vitest.config.ts", "eslint.config.ts", "scripts/**/*"],
     "exclude": ["node_modules", "dist"]
 }

@@ -9,6 +9,9 @@ const FIFTY_MOVE_LIMIT = 100;
 
 /** Only the side on turn can offer a draw. Offering when the fifty-move limit is reached ends the game as a draw. */
 export const offerDraw = (game: Game, sideId: number): Side => {
+    if (game.ending !== null) {
+        throw new DomainError("Esse jogo já foi finalizado");
+    }
     if (game.drawOfferedBy !== null) {
         throw new DomainError(`Já tem um empate proposto pelo lado ${game.sideById(game.drawOfferedBy).name}`);
     }
