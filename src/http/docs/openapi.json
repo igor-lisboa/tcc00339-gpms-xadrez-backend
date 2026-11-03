@@ -1794,7 +1794,8 @@
                     "documentacao": {
                         "type": "string",
                         "format": "uri",
-                        "example": "https://documenter.getpostman.com/view/15046943/TzJrByfx"
+                        "description": "Swagger UI (/docs) on the host that answered the request.",
+                        "example": "https://example.com/docs"
                     }
                 }
             },

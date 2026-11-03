@@ -24,6 +24,11 @@ describe("characterization: catalog endpoints", () => {
         expect(body.data.grupo).toEqual([...body.data.grupo].sort());
     });
 
+    it("GET / points documentacao to Swagger UI (/docs) on the host that answered", async () => {
+        const { body } = await api.get("/");
+        expect(body.data.documentacao).toBe(server.url + "/docs");
+    });
+
     it("GET /tipos-de-jogo lists the three game types with resolved player types", async () => {
         const { body } = await api.get("/tipos-de-jogo");
         expect(body.data.map((tipo: any) => tipo.id)).toEqual([0, 1, 2]);

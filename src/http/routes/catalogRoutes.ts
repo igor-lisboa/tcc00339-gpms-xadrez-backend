@@ -1,9 +1,7 @@
-import { Router } from "express";
+import { Router, type Request } from "express";
 import type { Catalog } from "../../domain/catalog";
 import { PieceNames } from "../../domain/pieces/pieceNames";
 import { success } from "../envelope";
-
-const DOCUMENTATION_URL = "https://documenter.getpostman.com/view/15046943/TzJrByfx";
 
 const GROUP_MEMBERS = [
     "Igor Lisbôa",
@@ -14,12 +12,18 @@ const GROUP_MEMBERS = [
     "Matheus Baldas",
 ];
 
+/** Absolute URL of Swagger UI on the host that answered, honouring the proxy's protocol (Heroku, Vercel). */
+const documentationUrl = (req: Request): string => {
+    const forwarded = req.get("x-forwarded-proto")?.split(",")[0].trim();
+    return `${forwarded || req.protocol}://${req.get("host")}/docs`;
+};
+
 /** Read-only lists and the welcome message. */
 export const catalogRoutes = (catalog: Catalog): Router => {
     const router = Router();
 
-    router.get("/", (_req, res) => {
-        res.json(success("Olá, esse é nosso XADREZ!", { grupo: [...GROUP_MEMBERS].sort(), documentacao: DOCUMENTATION_URL }));
+    router.get("/", (req, res) => {
+        res.json(success("Olá, esse é nosso XADREZ!", { grupo: [...GROUP_MEMBERS].sort(), documentacao: documentationUrl(req) }));
     });
 
     router.get("/tabela-equivalencia", (_req, res) => {
