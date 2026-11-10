@@ -11,6 +11,8 @@ import { defineCurrentSide, judgeAfterMove } from "./judgement";
 export interface PlayedMove {
     readonly move: MoveRecord;
     readonly opponentId: number;
+    /** True when the move declined a draw the opponent had offered (FIDE 9.1.2.3). */
+    readonly declinedDrawOffer?: boolean;
 }
 
 /** Plays a move for the side on turn: checks the turn, the players and pending actions, then the move itself. */
@@ -19,16 +21,27 @@ export const playMove = (game: Game, sideId: number, fromName: string, toName: s
 
     const move = performMove(game, sideId, fromName, toName);
     const opponent = game.opponentOf(sideId);
+    const declinedDrawOffer = declineOfferBy(game, sideId);
 
-    // the turn only passes when no promotion choice is pending
+    // the turn only passes, and the position only counts, once no promotion choice is pending
     if (game.promotion === null) {
         defineCurrentSide(game, opponent.id);
+        judgeAfterMove(game);
+    } else {
+        game.refresh();
     }
-    game.refresh();
-    game.board.recordPosition();
-    judgeAfterMove(game);
 
-    return { move, opponentId: opponent.id };
+    return { move, opponentId: opponent.id, declinedDrawOffer };
+};
+
+/** A side that moves instead of answering the opponent's draw offer declines it. The proposer's own offer stands. */
+const declineOfferBy = (game: Game, sideId: number): boolean => {
+    if (game.drawOfferedBy === null || game.drawOfferedBy === sideId) {
+        return false;
+    }
+    game.drawOfferedBy = null;
+    game.requestedActions = game.requestedActions.filter((action) => action.acao !== RequestedActionNames.DrawOffer);
+    return true;
 };
 
 const assertCanPlay = (game: Game, sideId: number): void => {
@@ -44,7 +57,8 @@ const assertCanPlay = (game: Game, sideId: number): void => {
     if (game.opponentOf(sideId).playerType === null) {
         throw new DomainError("Aguarde outro jogador se logar adequadamente no lado adversário");
     }
-    if (game.hasRequestedActions()) {
+    // a pending promotion must be chosen first; a draw offer does not hold the game up
+    if (game.requestedActions.some((action) => action.acao !== RequestedActionNames.DrawOffer)) {
         throw new DomainError("Tem ações solicitadas a serem executadas");
     }
 };

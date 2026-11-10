@@ -78,6 +78,32 @@ describe("characterization: real-time events", () => {
         expect(payload).toEqual({ jogoId, ladoId: 1 });
     });
 
+    it("tells the proposer the offer was declined when the opponent moves instead of answering", async () => {
+        const jogoId = await createGame(api);
+        const brancas = await track(server.url, `${jogoId}-${WHITE}`);
+        await track(server.url, `${jogoId}-${BLACK}`);
+        await seatBothHumans(api, jogoId);
+        await move(api, jogoId, WHITE, "E2", "E4");
+        await api.put(`/jogos/${jogoId}/empate/propoe`, undefined, { lado: WHITE });
+
+        const recebido = nextEvent(brancas, "empatePropostoResposta");
+        await move(api, jogoId, BLACK, "E7", "E5");
+        // the event has no payload: receiving it means the offer was declined
+        await expect(recebido).resolves.toBeUndefined();
+    });
+
+    it("sends the ending and the winning side when a game finishes", async () => {
+        const jogoId = await createGame(api);
+        const brancas = await track(server.url, `${jogoId}-${WHITE}`);
+        await seatBothHumans(api, jogoId);
+
+        const recebido = nextEvent(brancas, "jogoFinalizado");
+        await api.delete(`/jogos/${jogoId}/jogadores/${BLACK}`, { lado: BLACK });
+        const payload = await recebido;
+
+        expect(payload).toEqual({ jogoFinalizacao: "Desistência: Um jogador deixou a partida", ladoIdVencedor: 0 });
+    });
+
     it("notifies the AI player when the game it plays in is created", async () => {
         const ia = await track(server.url, "I.A.");
         const recebido = nextEvent(ia, "jogoCriado");

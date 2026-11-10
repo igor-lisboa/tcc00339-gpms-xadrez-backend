@@ -52,7 +52,10 @@ export class SocketHub implements EventPublisher {
                 this.sendTo(this.gameIdentifiers(event.gameId), "jogoResetado");
                 return;
             case "gameFinished":
-                this.sendTo(this.gameIdentifiers(event.gameId), "jogoFinalizado", { jogoFinalizacao: event.ending });
+                this.sendTo(this.gameIdentifiers(event.gameId), "jogoFinalizado", {
+                    jogoFinalizacao: event.ending,
+                    ladoIdVencedor: event.winnerSideId,
+                });
                 return;
             case "playerJoined":
                 this.sendTo(this.sideIdentifiers(event.gameId, event.opponent), "adversarioEntrou");

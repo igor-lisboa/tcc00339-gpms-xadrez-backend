@@ -16,12 +16,16 @@ export const applyGameType = (game: Game, gameType: GameTypeInfo): void => {
     }
 };
 
-/** Seats a player on a side. Passing null removes the player and resigns the game. */
+/**
+ * Seats a player on a side. Passing null removes the player and resigns the game:
+ * the opponent wins if a player sits on that side (FIDE 5.1.2), otherwise nobody does.
+ */
 export const seatPlayer = (game: Game, sideId: number, playerType: PlayerTypeInfo | null): Side => {
     const side = game.sideById(sideId);
     if (playerType === null) {
         side.removeType();
-        game.finish(GameEnding.Resignation);
+        const opponent = game.opponentOf(sideId);
+        game.finish(GameEnding.Resignation, opponent.playerType === null ? null : opponent.id);
         return side;
     }
 

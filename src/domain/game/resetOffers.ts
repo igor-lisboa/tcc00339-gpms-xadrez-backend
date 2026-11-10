@@ -11,9 +11,11 @@ export const offerReset = (game: Game, sideId: number): Side => {
     if (game.ending === null) {
         throw new DomainError("Não é possível resetar um jogo que não foi finalizado");
     }
+    // check the side before changing anything, so a bad side id leaves the game as it was
+    game.sideById(sideId);
+    const opponent = game.opponentOf(sideId);
 
     game.resetOfferedBy = sideId;
-    const opponent = game.opponentOf(sideId);
     game.requestedActions.push({
         acao: RequestedActionNames.ResetOffer,
         ladoId: opponent.id,

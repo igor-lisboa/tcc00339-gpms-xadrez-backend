@@ -4,7 +4,7 @@ import { PieceNames, type PieceName } from "../pieces/pieceNames";
 import type { MoveRecord } from "../moves/MoveRecord";
 import type { Game } from "./Game";
 import { RequestedActionNames } from "./RequestedAction";
-import { defineCurrentSide } from "./judgement";
+import { defineCurrentSide, judgeAfterMove } from "./judgement";
 
 export interface PromotedPawn {
     readonly piece: Piece;
@@ -12,7 +12,7 @@ export interface PromotedPawn {
     readonly opponentId: number;
 }
 
-/** Replaces the pawn that reached the last rank with the chosen piece, then passes the turn. */
+/** Replaces the pawn that reached the last rank with the chosen piece, then passes the turn and judges the position. */
 export const promotePawn = (game: Game, sideId: number, pieceTypeId: number): PromotedPawn => {
     if (game.promotion === null) {
         throw new DomainError("Não é possível promover nenhum peão no momento");
@@ -43,8 +43,9 @@ export const promotePawn = (game: Game, sideId: number, pieceTypeId: number): Pr
     game.promotion = null;
 
     const opponent = game.opponentOf(sideId);
-    defineCurrentSide(game, opponent.id);
     game.requestedActions = game.requestedActions.filter((action) => action !== pending);
+    defineCurrentSide(game, opponent.id);
+    judgeAfterMove(game);
 
     return { piece, move, opponentId: opponent.id };
 };

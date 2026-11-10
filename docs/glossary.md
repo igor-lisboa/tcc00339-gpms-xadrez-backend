@@ -96,6 +96,7 @@ These are the response fields the API returns today. The legacy adapter keeps th
 | `ladoIdAtual` | `currentSideId` | game |
 | `enPassantCasaCaptura` | `enPassantSquare` | game |
 | `finalizado` | `ending` | game |
+| `ladoIdVencedor` | `winnerSideId` | game, summary, event payload |
 | `acoesSolicitadas` | `requestedActions` | game |
 | `casaPeaoPromocao` | `promotionSquare` | game |
 | `empatePropostoPeloLadoId` | `drawOfferedBySideId` | game |

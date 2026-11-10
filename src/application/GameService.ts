@@ -78,8 +78,8 @@ export class GameService {
         return commands.joinPlayer(this.context, gameId, sideId, playerTypeId);
     }
 
-    leaveSide(gameId: number, sideId: number): Side {
-        return commands.leaveSide(this.context, gameId, sideId);
+    leaveSide(gameId: number, sideId: number, requesterSideId: number): Side {
+        return commands.leaveSide(this.context, gameId, sideId, requesterSideId);
     }
 
     makeMove(gameId: number, sideId: number, from: string, to: string): MoveRecord {
@@ -90,8 +90,12 @@ export class GameService {
         return commands.choosePromotion(this.context, gameId, sideId, pieceTypeId);
     }
 
-    proposeDraw(gameId: number, sideId: number): void {
-        offers.proposeDraw(this.context, gameId, sideId);
+    proposeDraw(gameId: number, sideId: number, intended?: offers.IntendedMoveInput): offers.DrawProposal {
+        return offers.proposeDraw(this.context, gameId, sideId, intended);
+    }
+
+    isDrawOfferOpenFor(gameId: number, sideId: number): boolean {
+        return queries.isDrawOfferOpenFor(this.context, gameId, sideId);
     }
 
     answerDraw(gameId: number, sideId: number, accepted: boolean): void {

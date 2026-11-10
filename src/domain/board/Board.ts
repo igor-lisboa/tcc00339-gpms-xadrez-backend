@@ -60,19 +60,27 @@ export class Board {
         return copy;
     }
 
-    /** Remembers the current position. Returns how many times it has now appeared. */
-    recordPosition(): number {
-        const key = this.positionKey();
+    /**
+     * Remembers the current position. `context` holds what the grid cannot show and the rules
+     * compare too (side to move, castling rights, en passant). Returns how many times it has now appeared.
+     */
+    recordPosition(context = ""): number {
+        const key = this.repetitionKey(context);
         const count = (this.repetitions.get(key) ?? 0) + 1;
         this.repetitions.set(key, count);
         return count;
     }
 
-    isThreefoldRepetition(): boolean {
-        return [...this.repetitions.values()].some((count) => count >= 3);
+    /** How many times the current position, with this context, has been recorded. */
+    repetitionsOf(context = ""): number {
+        return this.repetitions.get(this.repetitionKey(context)) ?? 0;
     }
 
-    /** Position identity: piece type and side of every square. Move history is not part of it. */
+    private repetitionKey(context: string): string {
+        return `${this.positionKey()}#${context}`;
+    }
+
+    /** Placement identity: piece type and side of every square. Move history is not part of it. */
     positionKey(): string {
         return this.grid
             .map((row) => row.map((piece) => (piece === null ? "." : `${piece.type}-${piece.sideId}`)).join("|"))

@@ -80,8 +80,18 @@ export const gameRoutes = (service: GameService): Router => {
     });
 
     router.put("/jogos/:jogoId/empate/propoe", (req, res) => {
-        service.proposeDraw(gameIdOf(req), sideOf(req));
-        res.json(success("Empate proposto ao lado adversário com sucesso!", null));
+        // optional intended move for a claim (FIDE 9.2.1.1): { origem, destino }
+        const text = (value: unknown) => (typeof value === "string" ? value : undefined);
+        const { claimed, played } = service.proposeDraw(gameIdOf(req), sideOf(req), {
+            from: text(req.body?.origem),
+            to: text(req.body?.destino),
+        });
+        res.json(
+            success(claimed ? "Empate reivindicado com sucesso!" : "Empate proposto ao lado adversário com sucesso!", {
+                reivindicado: claimed,
+                jogadaRealizada: played === null ? null : sideMoveWire(played),
+            })
+        );
     });
 
     router.post("/jogos/:jogoId/empate/responde", (req, res) => {
@@ -131,7 +141,7 @@ export const gameRoutes = (service: GameService): Router => {
     });
 
     router.delete("/jogos/:jogoId/jogadores/:ladoId", (req, res) => {
-        const side = service.leaveSide(gameIdOf(req), Number(req.params.ladoId));
+        const side = service.leaveSide(gameIdOf(req), Number(req.params.ladoId), sideOf(req));
         res.json(success("Desistência do jogador realizada com sucesso!", sideWire(side)));
     });
 

@@ -48,13 +48,27 @@ describe("legal moves", () => {
 });
 
 describe("draws", () => {
-    it("ends the game by the fifty-move rule when a draw is offered after 100 quiet plies", () => {
+    it("ends the game by the fifty-move rule when the side on turn claims it after 100 quiet plies, and sends no offer", () => {
         const game = gameWith({ E1: "Rei-0", A8: "Rei-1", H1: "Torre-0" });
         game.board.halfMoveClock = 100;
 
-        offerDraw(game, 0);
+        const result = offerDraw(game, 0);
 
+        expect(result.claimed).toBe(true);
         expect(game.ending?.id).toBe(GameEnding.FiftyMoveRule);
+        expect(game.drawOfferedBy).toBeNull();
+        expect(game.requestedActions).toEqual([]);
+    });
+
+    it("does not end the game when the side not on turn offers after 100 quiet plies: only the side on turn may claim", () => {
+        const game = gameWith({ E1: "Rei-0", A8: "Rei-1", H1: "Torre-0" });
+        game.board.halfMoveClock = 100;
+
+        const result = offerDraw(game, 1);
+
+        expect(result.claimed).toBe(false);
+        expect(game.ending).toBeNull();
+        expect(game.drawOfferedBy).toBe(1);
     });
 
     it("refuses a draw offer once the game has finished", () => {
@@ -181,14 +195,25 @@ describe("insufficient material", () => {
         expect(game.ending).toBeNull();
     });
 
-    it("king and two knights against a bare king is a draw", () => {
+    it("king and two knights against a bare king is not a draw: a mate is still possible (FIDE 5.2.2)", () => {
         const game = gameWith({ E1: "Rei-0", C3: "Cavalo-0", D3: "Cavalo-0", A8: "Rei-1" });
+        expect(game.ending).toBeNull();
+    });
+
+    it("king and bishop against king and bishop on the same colour is a draw", () => {
+        // C1 and B8 are both dark squares
+        const game = gameWith({ E1: "Rei-0", C1: "Bispo-0", A8: "Rei-1", B8: "Bispo-1" });
         expect(game.ending?.id).toBe(GameEnding.InsufficientMaterial);
     });
 
-    it("king and bishop against king and bishop is a draw", () => {
-        const game = gameWith({ E1: "Rei-0", C1: "Bispo-0", A8: "Rei-1", B8: "Bispo-1" });
-        expect(game.ending?.id).toBe(GameEnding.InsufficientMaterial);
+    it("king and bishop against king and bishop on the other colour is not a draw", () => {
+        const game = gameWith({ E1: "Rei-0", C1: "Bispo-0", A8: "Rei-1", C8: "Bispo-1" });
+        expect(game.ending).toBeNull();
+    });
+
+    it("king and knight against king and bishop, or against king and knight, is not a draw", () => {
+        expect(gameWith({ E1: "Rei-0", C3: "Cavalo-0", A8: "Rei-1", C8: "Bispo-1" }).ending).toBeNull();
+        expect(gameWith({ E1: "Rei-0", C3: "Cavalo-0", A8: "Rei-1", B8: "Cavalo-1" }).ending).toBeNull();
     });
 
     it("king and bishop against king and rook is not a draw", () => {

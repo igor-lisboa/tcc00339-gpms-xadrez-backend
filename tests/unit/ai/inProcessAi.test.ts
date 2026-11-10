@@ -12,6 +12,7 @@ const fakeService = () => {
         answerDraw: vi.fn(),
         answerReset: vi.fn(),
         aiPromote: vi.fn(),
+        isDrawOfferOpenFor: vi.fn(() => true),
     };
     return { service, asService: service as unknown as GameService };
 };
@@ -41,6 +42,16 @@ describe("in-process AI", () => {
         createInProcessAi(asService, 0).onEvent("empateProposto", { jogoId: 4, ladoId: 1 });
 
         await vi.waitFor(() => expect(service.answerDraw).toHaveBeenCalledWith(4, 1, expect.any(Boolean)));
+    });
+
+    it("does not answer a draw offer that is no longer open, for example after its own move declined it", async () => {
+        const { service, asService } = fakeService();
+        service.isDrawOfferOpenFor.mockReturnValue(false);
+
+        createInProcessAi(asService, 0).onEvent("empateProposto", { jogoId: 4, ladoId: 1 });
+
+        await vi.waitFor(() => expect(service.isDrawOfferOpenFor).toHaveBeenCalledWith(4, 1));
+        expect(service.answerDraw).not.toHaveBeenCalled();
     });
 
     it("answers a reset offer for the side it plays", async () => {

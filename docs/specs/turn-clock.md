@@ -9,8 +9,8 @@ Each turn can have a time limit. The game tracks the time each side has left.
 - `GET /jogos/:id/simples` returns `ladoBrancoTempoMilisegundosRestante` and `ladoPretoTempoMilisegundosRestante`.
 - A turn starts when a move passes the turn, or when both sides are seated.
 - If the side on turn runs out of time, the game is judged (FIDE 6.9):
-  - the opponent has mating material (a rook, queen, pawn, two bishops, a bishop and a knight, etc. — see the material rule in [draw-conditions.md](draw-conditions.md)): the opponent wins. Type 0 "Vitória: Branco" when Black ran out, type 1 "Vitória: Preto" when White ran out.
-  - the opponent cannot mate (bare king, king and one minor piece, king and two knights): a draw, type 8 "Empate: Tempo esgotado sem material".
+  - the opponent could checkmate by some series of legal moves: the opponent wins. Type 0 "Vitória: Branco" when Black ran out, type 1 "Vitória: Preto" when White ran out. The pieces of the side that ran out count, because they could block their own king: king and knight wins against king and rook, but not against king and queen. The full "can mate" test is in [draw-conditions.md](draw-conditions.md).
+  - the opponent could never mate (for example a bare king, or a lone bishop against a bare king or king and rook): a draw, type 8 "Empate: Tempo esgotado sem material".
 - When a game ends, for any reason, the turn that is running is closed. Both clocks then stay at their final values: a `GET` after the ending returns the same remaining time as before.
 - The remaining time shown for a side that ran out is 0, never negative.
 - A read (`GET`) shows a timeout that has already happened. The ending is saved and announced by the next change to that game, before the change is applied.
@@ -32,3 +32,7 @@ Each turn can have a time limit. The game tracks the time each side has left.
 ## Changed in the timeout fix
 - Before: a timeout always finished the game as type 3 "Empate: Insuficiência material"; the clocks kept running after any ending and went negative.
 - Now: see the rules above. Type 8 "Empate: Tempo esgotado sem material" is new; the OpenAPI entry "Tempo esgotado: o tempo de um jogador acabou" was removed because no ending used it.
+
+## Changed in the FIDE endings fix
+- Before: a timeout looked only at the opponent's own pieces, so king and knight against a side with a rook was a draw, and king and two knights was always a draw. A side that had offered a draw could not move until the opponent answered, so it could lose on time while waiting.
+- Now: the pieces of the side that ran out count too (FIDE 6.9), and a draw offer never stops a move. Tests: `tests/unit/domain/endings.test.ts` (describes "timeout (FIDE 6.9)" and "draw offers (FIDE 9.1.2)").

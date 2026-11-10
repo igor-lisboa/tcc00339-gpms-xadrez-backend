@@ -2,7 +2,7 @@ import { DomainError } from "../domain/DomainError";
 import type { Game } from "../domain/game/Game";
 import { createGame as buildGame } from "../domain/game/createGame";
 import { seatPlayer } from "../domain/game/seating";
-import { playMove } from "../domain/game/playMove";
+import { playMove, type PlayedMove } from "../domain/game/playMove";
 import { promotePawn } from "../domain/game/promotePawn";
 import type { MoveRecord } from "../domain/moves/MoveRecord";
 import type { Side } from "../domain/game/Side";
@@ -15,7 +15,7 @@ export interface CreateGameInput {
     readonly ladoId?: number;
 }
 
-/** Creates a game, records its first position, and announces it. */
+/** Creates a game and announces it. The game records its first position itself. */
 export const createGame = (context: GameContext, input: CreateGameInput): Game => {
     const game = buildGame({
         catalog: context.catalog,
@@ -24,7 +24,6 @@ export const createGame = (context: GameContext, input: CreateGameInput): Game =
         sideId: input.ladoId ?? 0,
         boardRows: input.tabuleiroCasas ?? [],
     });
-    game.board.recordPosition();
     saveGame(context, game);
     context.events.publish({ type: "gameCreated" });
     return game;
@@ -58,9 +57,12 @@ export const joinPlayer = (context: GameContext, gameId: number, sideId: number,
     return side;
 };
 
-/** Removes the player from a side, which resigns the game. */
-export const leaveSide = (context: GameContext, gameId: number, sideId: number): Side => {
+/** Removes the player from a side, which resigns the game. Only the side itself (the `lado` of the request) may resign. */
+export const leaveSide = (context: GameContext, gameId: number, sideId: number, requesterSideId: number): Side => {
     const game = loadGameForChange(context, gameId);
+    if (requesterSideId !== sideId) {
+        throw new DomainError("Só é possível desistir pelo próprio lado");
+    }
     const side = seatPlayer(game, sideId, null);
     saveGame(context, game);
     return side;
@@ -71,18 +73,22 @@ export const makeMove = (context: GameContext, gameId: number, sideId: number, f
     const game = loadGameForChange(context, gameId);
     const played = playMove(game, sideId, from, to);
     saveGame(context, game);
-
-    if (played.opponentId === game.currentSideId) {
-        context.events.publish({
-            type: "moveMade",
-            gameId,
-            played,
-            game,
-            promotion: null,
-            opponent: game.opponentOf(sideId),
-        });
-    }
+    announceMove(context, game, sideId, played);
     return played.move;
+};
+
+/**
+ * Tells the opponent about a move that has been saved, once the turn has passed to them.
+ * A move that declined the opponent's draw offer tells the opponent the offer was refused.
+ */
+export const announceMove = (context: GameContext, game: Game, sideId: number, played: PlayedMove): void => {
+    const gameId = game.id ?? -1;
+    if (played.declinedDrawOffer === true) {
+        context.events.publish({ type: "drawAnswered", gameId, opponent: game.opponentOf(sideId), accepted: false });
+    }
+    if (played.opponentId === game.currentSideId) {
+        context.events.publish({ type: "moveMade", gameId, played, game, promotion: null, opponent: game.opponentOf(sideId) });
+    }
 };
 
 /** The side on turn picks the piece a promoted pawn becomes. */

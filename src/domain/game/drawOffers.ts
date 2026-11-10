@@ -3,33 +3,67 @@ import { GameEnding } from "../../shared/constants";
 import type { Side } from "./Side";
 import type { Game } from "./Game";
 import { RequestedActionNames } from "./RequestedAction";
+import { claimOnBoard, claimWithMove, type IntendedMove } from "./drawClaims";
+import { playMove, type PlayedMove } from "./playMove";
 
-/** Fifty moves each: 100 moves without a capture or a pawn move. */
-const FIFTY_MOVE_LIMIT = 100;
+export interface DrawOfferResult {
+    readonly opponent: Side;
+    /** True when the offer was a valid claim and ended the game. */
+    readonly claimed: boolean;
+    /** True when an offer now waits for the opponent's answer. */
+    readonly offered: boolean;
+    /** The intended move, when a claim with a move was not valid and the move was played instead (FIDE 9.5.1). */
+    readonly played: PlayedMove | null;
+}
 
-/** Only the side on turn can offer a draw. Offering when the fifty-move limit is reached ends the game as a draw. */
-export const offerDraw = (game: Game, sideId: number): Side => {
+/**
+ * A draw offer (FIDE 9.1.2). Either side may offer while the game runs; the offer stands until the
+ * opponent answers it, declines it by moving, or the game ends.
+ * The side on turn may claim a draw (threefold repetition, FIDE 9.2, or fifty moves, FIDE 9.3) for the
+ * position on the board or, with `intended`, for the position its next move would make. A valid claim
+ * ends the game. A claim that is not valid counts as a draw offer (FIDE 9.1.2.4); with `intended`,
+ * the move is played first (FIDE 9.5.1).
+ */
+export const offerDraw = (game: Game, sideId: number, intended?: IntendedMove): DrawOfferResult => {
     if (game.ending !== null) {
         throw new DomainError("Esse jogo já foi finalizado");
     }
-    if (game.drawOfferedBy !== null) {
+    game.sideById(sideId);
+    const opponent = game.opponentOf(sideId);
+
+    const claim = validClaim(game, sideId, intended);
+    if (claim !== null) {
+        game.finish(claim);
+        return { opponent, claimed: true, offered: false, played: null };
+    }
+    if (game.drawOfferedBy === sideId || (game.drawOfferedBy !== null && intended === undefined)) {
         throw new DomainError(`Já tem um empate proposto pelo lado ${game.sideById(game.drawOfferedBy).name}`);
     }
-    if (game.currentSideId !== sideId) {
-        throw new DomainError("Aguarde sua vez para propor um empate");
-    }
-    if (game.board.halfMoveClock >= FIFTY_MOVE_LIMIT) {
-        game.finish(GameEnding.FiftyMoveRule);
-    }
 
+    // playing the move declines an offer the opponent had made, so the new offer below is the only one
+    const played = intended === undefined ? null : playMove(game, sideId, intended.from, intended.to);
+    if (game.ending !== null) {
+        return { opponent, claimed: false, offered: false, played };
+    }
     game.drawOfferedBy = sideId;
-    const opponent = game.opponentOf(sideId);
     game.requestedActions.push({
         acao: RequestedActionNames.DrawOffer,
         ladoId: opponent.id,
         data: { ladoId: opponent.id, jogoId: game.id },
     });
-    return opponent;
+    return { opponent, claimed: false, offered: true, played };
+};
+
+/** Only the side on turn may claim: first for the position on the board, then for the one its intended move would make. */
+const validClaim = (game: Game, sideId: number, intended: IntendedMove | undefined): GameEnding | null => {
+    if (game.currentSideId !== sideId) {
+        return null;
+    }
+    const onBoard = claimOnBoard(game);
+    if (onBoard !== null || intended === undefined) {
+        return onBoard;
+    }
+    return claimWithMove(game, sideId, intended);
 };
 
 /** Accepting ends the game by agreement. Declining clears the offer. */

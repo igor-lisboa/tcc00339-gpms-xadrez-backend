@@ -47,6 +47,18 @@
         {
             "id": 8,
             "tipo": "Empate: Tempo esgotado sem material"
+        },
+        {
+            "id": 9,
+            "tipo": "Empate: Regra das 5 posições"
+        },
+        {
+            "id": 10,
+            "tipo": "Empate: Regra 75 movimentos"
+        },
+        {
+            "id": 11,
+            "tipo": "Empate: Posição morta"
         }
     ],
     "ladoTipos": [

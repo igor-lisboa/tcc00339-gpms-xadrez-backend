@@ -3,7 +3,7 @@ import { DomainError } from "../../../src/domain/DomainError";
 import { Board, gridFromNotation } from "../../../src/domain/board/Board";
 import { SquareLookup } from "../../../src/domain/board/SquareLookup";
 import { chooseAiMove, narrowAiOptions, squareDistance, type AiOption } from "../../../src/domain/ai/chooseAiMove";
-import { hasMinimumMaterial } from "../../../src/domain/rules/material";
+import { canEverMate } from "../../../src/domain/rules/material";
 import { Piece } from "../../../src/domain/pieces/Piece";
 import { catalog } from "./helpers";
 
@@ -58,34 +58,63 @@ describe("pieces and boards", () => {
         expect(original.pieceAt(lookup.fromName("A8"))).not.toBeNull();
     });
 
-    it("counts repeated positions", () => {
+    it("Given the same position recorded with a context, When counted, Then only the same context adds up", () => {
         const board = new Board(lookup, Board.empty());
-        board.recordPosition();
-        board.recordPosition();
-        expect(board.isThreefoldRepetition()).toBe(false);
-        board.recordPosition();
-        expect(board.isThreefoldRepetition()).toBe(true);
+        board.recordPosition("0|1111|-");
+        board.recordPosition("0|1111|-");
+        board.recordPosition("1|1111|-");
+
+        expect(board.repetitionsOf("0|1111|-")).toBe(2);
+        expect(board.repetitionsOf("1|1111|-")).toBe(1);
+        expect(board.repetitionsOf("0|0000|-")).toBe(0);
+    });
+});
+
+/** Pieces of one side on named squares, e.g. side(0, { E1: "Rei", C1: "Bispo" }). */
+const side = (sideId: number, placements: Record<string, string>) =>
+    Object.entries(placements).map(([name, type]) => ({ square: lookup.fromName(name), piece: new Piece(sideId, type as never) }));
+
+describe("mating material (canEverMate)", () => {
+    const bareBlack = side(1, { A8: "Rei" });
+
+    it("Given a bare king, When judged, Then it can never mate", () => {
+        expect(canEverMate(side(0, { E1: "Rei" }), side(1, { A8: "Rei", D8: "Rainha" }))).toBe(false);
     });
 
-    it("knows when a side has too little material to mate", () => {
-        const king = new Piece(0, "Rei");
-        expect(hasMinimumMaterial([king])).toBe(false);
-        expect(hasMinimumMaterial([king, new Piece(0, "Bispo")])).toBe(false);
-        expect(hasMinimumMaterial([king, new Piece(0, "Torre")])).toBe(true);
-        expect(hasMinimumMaterial([king, new Piece(0, "Bispo"), new Piece(0, "Bispo")])).toBe(true);
+    it("Given a pawn, a rook or a queen, When judged, Then the side can mate", () => {
+        expect(canEverMate(side(0, { E1: "Rei", E2: "Peão" }), bareBlack)).toBe(true);
+        expect(canEverMate(side(0, { E1: "Rei", H1: "Torre" }), bareBlack)).toBe(true);
+        expect(canEverMate(side(0, { E1: "Rei", D1: "Rainha" }), bareBlack)).toBe(true);
     });
 
-    it("counts king and two rooks, queen and knight, rook and bishop as enough to mate", () => {
-        const king = new Piece(0, "Rei");
-        expect(hasMinimumMaterial([king, new Piece(0, "Torre"), new Piece(0, "Torre")])).toBe(true);
-        expect(hasMinimumMaterial([king, new Piece(0, "Rainha"), new Piece(0, "Cavalo")])).toBe(true);
-        expect(hasMinimumMaterial([king, new Piece(0, "Torre"), new Piece(0, "Bispo")])).toBe(true);
-        expect(hasMinimumMaterial([king, new Piece(0, "Peão"), new Piece(0, "Peão")])).toBe(true);
+    it("Given knight and bishop, two knights, or bishops on both colours, When judged, Then the side can mate a bare king", () => {
+        expect(canEverMate(side(0, { E1: "Rei", B1: "Cavalo", C1: "Bispo" }), bareBlack)).toBe(true);
+        expect(canEverMate(side(0, { E1: "Rei", B1: "Cavalo", G1: "Cavalo" }), bareBlack)).toBe(true);
+        expect(canEverMate(side(0, { E1: "Rei", C1: "Bispo", F1: "Bispo" }), bareBlack)).toBe(true);
     });
 
-    it("counts king and two knights as too little material to mate", () => {
-        const king = new Piece(0, "Rei");
-        expect(hasMinimumMaterial([king, new Piece(0, "Cavalo"), new Piece(0, "Cavalo")])).toBe(false);
+    it("Given a lone minor piece against a bare king, When judged, Then it cannot mate", () => {
+        expect(canEverMate(side(0, { E1: "Rei", B1: "Cavalo" }), bareBlack)).toBe(false);
+        expect(canEverMate(side(0, { E1: "Rei", C1: "Bispo" }), bareBlack)).toBe(false);
+    });
+
+    it("Given a lone knight, When the defender has a piece to block with, Then it can mate, except against queens only", () => {
+        const knight = side(0, { E1: "Rei", B1: "Cavalo" });
+        expect(canEverMate(knight, side(1, { A8: "Rei", H8: "Torre" }))).toBe(true);
+        expect(canEverMate(knight, side(1, { A8: "Rei", C8: "Bispo" }))).toBe(true);
+        expect(canEverMate(knight, side(1, { A8: "Rei", A7: "Peão" }))).toBe(true);
+        expect(canEverMate(knight, side(1, { A8: "Rei", D8: "Rainha" }))).toBe(false);
+    });
+
+    it("Given bishops on one colour, When the defender has a pawn, a knight or an other-colour bishop, Then they can mate", () => {
+        // C1 and F4 are both dark squares; C8 is light and F8 is dark
+        const bishops = side(0, { E1: "Rei", C1: "Bispo", F4: "Bispo" });
+        expect(canEverMate(bishops, bareBlack)).toBe(false);
+        expect(canEverMate(bishops, side(1, { A8: "Rei", B8: "Cavalo" }))).toBe(true);
+        expect(canEverMate(bishops, side(1, { A8: "Rei", A7: "Peão" }))).toBe(true);
+        expect(canEverMate(bishops, side(1, { A8: "Rei", C8: "Bispo" }))).toBe(true);
+        expect(canEverMate(bishops, side(1, { A8: "Rei", F8: "Bispo" }))).toBe(false);
+        expect(canEverMate(bishops, side(1, { A8: "Rei", H8: "Torre" }))).toBe(false);
     });
 });
 

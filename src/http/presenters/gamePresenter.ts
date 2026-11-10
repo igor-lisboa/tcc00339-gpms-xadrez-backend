@@ -31,6 +31,7 @@ export const gameWire = (game: Game) => ({
         ? null
         : { casaCaptura: squareWire(game.enPassant.captureSquare), casaPeao: squareWire(game.enPassant.pawnSquare) },
     finalizado: endingWire(game.ending),
+    ladoIdVencedor: game.winnerSideId,
     acoesSolicitadas: game.requestedActions.map(requestedActionWire),
     casaPeaoPromocao: game.promotion === null
         ? null
@@ -60,6 +61,7 @@ export const summaryWire = (game: Game, superSimplified: boolean) => ({
         ? null
         : { casaCaptura: game.enPassant.captureSquare.name, casaPeao: game.enPassant.pawnSquare.name },
     finalizado: game.ending === null ? null : game.ending.tipo,
+    ladoIdVencedor: game.winnerSideId,
     tipoJogo: game.gameType.integranteLadoTipo.map((type) => type.nome).join(" X "),
     tabuleiro: summaryBoardWire(game, superSimplified),
 });

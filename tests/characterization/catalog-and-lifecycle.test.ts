@@ -61,11 +61,11 @@ describe("characterization: catalog endpoints", () => {
         expect(body.data.map((peca: any) => peca.nome)).toEqual(["Rainha", "Torre", "Bispo", "Cavalo"]);
     });
 
-    it("GET /tipos-de-finalizacao lists the nine endings with their category and winning side", async () => {
+    it("GET /tipos-de-finalizacao lists the twelve endings with their category and winning side", async () => {
         const { status, body } = await api.get("/tipos-de-finalizacao");
         expect(status).toBe(200);
         expect(body.message).toBe("Tipos de finalização retornados com sucesso!");
-        expect(body.data).toHaveLength(9);
+        expect(body.data).toHaveLength(12);
         expect(body.data[0]).toEqual({ id: 0, tipo: "Vitória: Branco", categoria: "vitoria", ladoIdVencedor: 0 });
         expect(body.data[1]).toEqual({ id: 1, tipo: "Vitória: Preto", categoria: "vitoria", ladoIdVencedor: 1 });
         expect(body.data[7]).toEqual({
@@ -80,6 +80,9 @@ describe("characterization: catalog endpoints", () => {
             categoria: "empate",
             ladoIdVencedor: null,
         });
+        expect(body.data[9]).toEqual({ id: 9, tipo: "Empate: Regra das 5 posições", categoria: "empate", ladoIdVencedor: null });
+        expect(body.data[10]).toEqual({ id: 10, tipo: "Empate: Regra 75 movimentos", categoria: "empate", ladoIdVencedor: null });
+        expect(body.data[11]).toEqual({ id: 11, tipo: "Empate: Posição morta", categoria: "empate", ladoIdVencedor: null });
     });
 
     it("GET /enumeracoes lists the requested actions, move names and directions the API sends", async () => {
@@ -229,12 +232,27 @@ describe("characterization: game lifecycle", () => {
 
     it("DELETE /jogos/:id/jogadores/:ladoId resigns the side and finishes the game as a desistência", async () => {
         const jogoId = await createGameWithHumans(api);
-        const resign = await api.delete(`/jogos/${jogoId}/jogadores/${WHITE}`);
+        const resign = await api.delete(`/jogos/${jogoId}/jogadores/${WHITE}`, { lado: WHITE });
         expect(resign.status).toBe(200);
         expect(resign.body.data.tipo).toBeNull();
 
         const { body } = await api.get(`/jogos/${jogoId}`);
         expect(body.data.finalizado).toEqual({ id: 7, tipo: "Desistência: Um jogador deixou a partida" });
+        // FIDE 5.1.2: the opponent of the side that resigned wins
+        expect(body.data.ladoIdVencedor).toBe(1);
+    });
+
+    it("DELETE /jogos/:id/jogadores/:ladoId refuses to resign a side other than the one in the lado header", async () => {
+        const jogoId = await createGameWithHumans(api);
+
+        const outroLado = await api.delete(`/jogos/${jogoId}/jogadores/${WHITE}`, { lado: BLACK });
+        const semLado = await api.delete(`/jogos/${jogoId}/jogadores/${WHITE}`);
+
+        expect(outroLado.status).toBe(500);
+        expect(outroLado.body.message).toBe("Só é possível desistir pelo próprio lado");
+        expect(semLado.body.message).toBe("Só é possível desistir pelo próprio lado");
+        const { body } = await api.get(`/jogos/${jogoId}`);
+        expect(body.data.finalizado).toBeNull();
     });
 
     it("GET /jogos/:id with an unknown id returns 500 with the domain message", async () => {

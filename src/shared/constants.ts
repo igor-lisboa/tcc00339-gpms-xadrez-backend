@@ -23,14 +23,24 @@ export enum GameType {
 export enum GameEnding {
     WhiteWins = 0,
     BlackWins = 1,
+    /** Claimed by the side on turn after 50 moves each without a capture or a pawn move (FIDE 9.3). */
     FiftyMoveRule = 2,
+    /** A dead position by material: neither side could ever checkmate (FIDE 5.2.2). */
     InsufficientMaterial = 3,
     Stalemate = 4,
     MutualAgreement = 5,
+    /** Claimed by the side on turn when the position has appeared three times (FIDE 9.2). */
     ThreefoldRepetition = 6,
+    /** A player left; the opponent wins when seated (FIDE 5.1.2). The winner is on the game. */
     Resignation = 7,
-    /** The side on the move ran out of time and the other side has no mating material. */
+    /** The side on the move ran out of time and the other side could never checkmate (FIDE 6.9). */
     TimeoutDraw = 8,
+    /** Automatic: the same position appeared five times (FIDE 9.6.1). */
+    FivefoldRepetition = 9,
+    /** Automatic: 75 moves each without a capture or a pawn move (FIDE 9.6.2). */
+    SeventyFiveMoveRule = 10,
+    /** Automatic: a dead position that is not about material, such as kings behind fully blocked pawns (FIDE 5.2.2). */
+    DeadPosition = 11,
 }
 
 /** Piece ids that a pawn may be promoted to (see tiposPeca in database.json). */

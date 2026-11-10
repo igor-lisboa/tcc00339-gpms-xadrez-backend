@@ -3,7 +3,7 @@
     "info": {
         "title": "Xadrez API",
         "version": "1.0.0",
-        "description": "HTTP API of the chess game. Field names and the messages are in Portuguese (the wire names);\nthe domain itself uses English names.\n\n**Envelope.** Every JSON answer has the shape `{ message, data, success }`.\n- Success: HTTP 200, `success` is `true`, `data` holds the result (or `null` when there is nothing to return).\n- Refused rule (for example a move out of turn, an illegal move, a finished game): HTTP 500,\n  `success` is `false`, `data` is `null`, `message` explains the refusal.\n- Unexpected error: HTTP 500, `message` is `\"Internal server error\"`, `data` is `null`, `success` is `false`.\n\n**Outside the envelope (not documented as responses).**\n- A request body that is not valid JSON gets Express's default HTML page with status 400.\n- A route that does not exist gets Express's default HTML page with status 404.\n\n**Side header.** Player actions read the header `lado` (0 for Branco, 1 for Preto). A missing or\nnon-numeric header is not rejected by the routes; it matches no side and the action is refused.\n\n**Game ids.** A game id is its index in the in-memory repository. Games are lost when the process restarts.\n\n**Clock.** Reading a game (`GET /jogos/{jogoId}`) can end it when the clock of the side on turn has run out.\nThe side that ran out stays in `ladoIdAtual`. The ending is a win for the opponent, or\n\"Empate: Tempo esgotado sem material\" when the opponent cannot checkmate.\n\n**Known deviation.** Castling does not check the squares the king passes through.\n"
+        "description": "HTTP API of the chess game. Field names and the messages are in Portuguese (the wire names);\nthe domain itself uses English names.\n\n**Envelope.** Every JSON answer has the shape `{ message, data, success }`.\n- Success: HTTP 200, `success` is `true`, `data` holds the result (or `null` when there is nothing to return).\n- Refused rule (for example a move out of turn, an illegal move, a finished game): HTTP 500,\n  `success` is `false`, `data` is `null`, `message` explains the refusal.\n- Unexpected error: HTTP 500, `message` is `\"Internal server error\"`, `data` is `null`, `success` is `false`.\n\n**Outside the envelope (not documented as responses).**\n- A request body that is not valid JSON gets Express's default HTML page with status 400.\n- A route that does not exist gets Express's default HTML page with status 404.\n\n**Side header.** Player actions read the header `lado` (0 for Branco, 1 for Preto). A missing or\nnon-numeric header is not rejected by the routes; it matches no side and the action is refused.\n\n**Game ids.** A game id is its index in the in-memory repository. Games are lost when the process restarts.\n\n**Clock.** Reading a game (`GET /jogos/{jogoId}`) can end it when the clock of the side on turn has run out.\nThe side that ran out stays in `ladoIdAtual`. The ending is a win for the opponent, or\n\"Empate: Tempo esgotado sem material\" when the opponent could not checkmate by any series of legal moves (FIDE 6.9).\n\n**Draw rules (FIDE Laws).** Threefold repetition and the 50-move rule are claims: the side on turn claims\nby offering a draw (`PUT /jogos/{jogoId}/empate/propoe`). The game ends by itself at the fifth appearance\nof a position (\"Empate: Regra das 5 posições\"), after 75 moves each without a capture or a pawn move\n(\"Empate: Regra 75 movimentos\"), and in a dead position: by material (\"Empate: Insuficiência material\")\nor with kings behind fully blocked pawns (\"Empate: Posição morta\").\n\n**Known deviation.** Castling does not check the squares the king passes through.\n"
     },
     "servers": [
         {
@@ -191,11 +191,11 @@
                     "Catalogue"
                 ],
                 "summary": "Endings a game can finish with, with their category and the side that wins",
-                "description": "`categoria` is `vitoria` (a side wins), `empate` (a draw) or `desistencia` (a side resigned).\n`ladoIdVencedor` is 0 or 1 for the two winning endings and null otherwise. A resignation does not\nname the winner: the side that did not resign wins.\n",
+                "description": "`categoria` is `vitoria` (a side wins), `empate` (a draw) or `desistencia` (a side resigned).\n`ladoIdVencedor` is 0 or 1 for the two winning endings and null otherwise. The winner of a\nresignation depends on the game: read `ladoIdVencedor` on the game itself.\n",
                 "operationId": "listEndingTypes",
                 "responses": {
                     "200": {
-                        "description": "The nine endings, by id.",
+                        "description": "The twelve endings, by id.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -624,7 +624,8 @@
                 "tags": [
                     "Draws and resets"
                 ],
-                "summary": "Offer a draw to the opponent",
+                "summary": "Offer a draw to the opponent, or claim a draw",
+                "description": "Either side may offer a draw while the game runs (FIDE 9.1.2). The offer stands until the opponent\nanswers it, declines it by playing a move, or the game ends; it does not stop anyone from moving.\nMessage \"Empate proposto ao lado adversário com sucesso!\".\n\nWhen the side on turn offers and a claim is valid, the game ends at once and no offer is sent\n(message \"Empate reivindicado com sucesso!\"): the position on the board has appeared three times\nwith the same side to move, castling rights and en passant right (\"Empate: Regra das 3 posições\"),\nor 50 moves each have passed without a capture or a pawn move (\"Empate: Regra 50 movimentos\").\n\nThe side on turn may also claim for the position its next move would make (FIDE 9.2.1.1, 9.3.1) by\nsending that move as `origem` and `destino`. A valid claim ends the game and the move is not played.\nA claim that is not valid plays the move (FIDE 9.5.1) and then leaves the draw offer\n(`jogadaRealizada` in the answer). Sending only one of the two squares is refused.\n",
                 "operationId": "proposeDraw",
                 "parameters": [
                     {
@@ -634,13 +635,23 @@
                         "$ref": "#/components/parameters/LadoHeader"
                     }
                 ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DrawClaimRequest"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
-                        "description": "The offer was recorded.",
+                        "description": "The offer was recorded, or the claim ended the game.",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/EmptyEnvelope"
+                                    "$ref": "#/components/schemas/DrawProposalEnvelope"
                                 }
                             }
                         }
@@ -970,6 +981,7 @@
                     "Players"
                 ],
                 "summary": "Resign a side (the game ends as \"Desistência\")",
+                "description": "The opponent wins when a player sits on its side (`ladoIdVencedor` on the game); otherwise nobody wins.\nOnly the side itself may resign: the `lado` header must equal `ladoId`, otherwise the request is refused\nwith \"Só é possível desistir pelo próprio lado\".\n",
                 "operationId": "leaveSide",
                 "parameters": [
                     {
@@ -977,6 +989,9 @@
                     },
                     {
                         "$ref": "#/components/parameters/LadoIdPath"
+                    },
+                    {
+                        "$ref": "#/components/parameters/LadoHeader"
                     }
                 ],
                 "responses": {
@@ -1647,6 +1662,51 @@
                     }
                 }
             },
+            "DrawProposalEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "data",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "enum": [
+                            "Empate proposto ao lado adversário com sucesso!",
+                            "Empate reivindicado com sucesso!"
+                        ]
+                    },
+                    "data": {
+                        "type": "object",
+                        "required": [
+                            "reivindicado",
+                            "jogadaRealizada"
+                        ],
+                        "properties": {
+                            "reivindicado": {
+                                "type": "boolean",
+                                "description": "true when the claim was valid and ended the game."
+                            },
+                            "jogadaRealizada": {
+                                "nullable": true,
+                                "description": "The intended move, when the claim was not valid and the move was played.",
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/MoveRecord"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            true
+                        ]
+                    }
+                }
+            },
             "MoveRecordEnvelope": {
                 "type": "object",
                 "required": [
@@ -1876,7 +1936,10 @@
                             5,
                             6,
                             7,
-                            8
+                            8,
+                            9,
+                            10,
+                            11
                         ]
                     },
                     "tipo": {
@@ -1887,7 +1950,7 @@
                     },
                     "ladoIdVencedor": {
                         "nullable": true,
-                        "description": "Side that wins; null for a draw, and for a resignation (the side that did not resign wins).",
+                        "description": "Side that wins; null for a draw and for a resignation (the winner of a resignation is on the game).",
                         "allOf": [
                             {
                                 "$ref": "#/components/schemas/SideId"
@@ -1939,7 +2002,10 @@
                     "Empate: Comum acordo",
                     "Empate: Regra das 3 posições",
                     "Desistência: Um jogador deixou a partida",
-                    "Empate: Tempo esgotado sem material"
+                    "Empate: Tempo esgotado sem material",
+                    "Empate: Regra das 5 posições",
+                    "Empate: Regra 75 movimentos",
+                    "Empate: Posição morta"
                 ]
             },
             "RequestedActionName": {
@@ -2108,7 +2174,10 @@
                             5,
                             6,
                             7,
-                            8
+                            8,
+                            9,
+                            10,
+                            11
                         ]
                     },
                     "tipo": {
@@ -2613,6 +2682,7 @@
                     "ladoIdAtual",
                     "enPassantCasaCaptura",
                     "finalizado",
+                    "ladoIdVencedor",
                     "acoesSolicitadas",
                     "casaPeaoPromocao",
                     "empatePropostoPeloLadoId",
@@ -2664,9 +2734,18 @@
                             }
                         ]
                     },
+                    "ladoIdVencedor": {
+                        "nullable": true,
+                        "description": "Side that won the game; null while it runs, after a draw, and after a resignation with the other seat empty.",
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/SideId"
+                            }
+                        ]
+                    },
                     "acoesSolicitadas": {
                         "type": "array",
-                        "description": "Actions one side must answer before the game goes on.",
+                        "description": "Actions one side must answer. A pending promotion holds the game up; a draw offer does not.",
                         "items": {
                             "$ref": "#/components/schemas/RequestedAction"
                         }
@@ -2681,7 +2760,7 @@
                     },
                     "empatePropostoPeloLadoId": {
                         "nullable": true,
-                        "description": "Side that offered a draw and waits for the answer; null when there is no offer.",
+                        "description": "Side that offered a draw and waits for the answer; null when there is no offer, and once the opponent moves or the game ends.",
                         "allOf": [
                             {
                                 "$ref": "#/components/schemas/SideId"
@@ -2774,6 +2853,7 @@
                     "ladosIdDeslogados",
                     "enPassantCasaCaptura",
                     "finalizado",
+                    "ladoIdVencedor",
                     "tipoJogo",
                     "tabuleiro"
                 ],
@@ -2859,6 +2939,15 @@
                         "allOf": [
                             {
                                 "$ref": "#/components/schemas/EndingLabel"
+                            }
+                        ]
+                    },
+                    "ladoIdVencedor": {
+                        "nullable": true,
+                        "description": "Side that won the game; null while it runs, after a draw, and after a resignation with the other seat empty.",
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/SideId"
                             }
                         ]
                     },
@@ -3080,6 +3169,18 @@
                     },
                     "ladoId": {
                         "$ref": "#/components/schemas/SideId"
+                    }
+                }
+            },
+            "DrawClaimRequest": {
+                "type": "object",
+                "description": "The intended move of a claim (FIDE 9.2.1.1). Send both squares or neither.",
+                "properties": {
+                    "origem": {
+                        "$ref": "#/components/schemas/SquareName"
+                    },
+                    "destino": {
+                        "$ref": "#/components/schemas/SquareName"
                     }
                 }
             },

@@ -1,5 +1,6 @@
 import { DomainError } from "../domain/DomainError";
 import type { Game } from "../domain/game/Game";
+import { RequestedActionNames } from "../domain/game/RequestedAction";
 import type { PieceWithMoves } from "../domain/moves/rawMoves";
 import { legalMovesOf } from "../domain/moves/legality";
 import { sameSquare } from "../domain/moves/rawMoves";
@@ -53,6 +54,12 @@ export const getPossibleMovesOfPiece = (
     const legal = legalMovesOf(game.position(), sideId, side.possibleMoves);
     return legal.filter((move) => sameSquare(move.from, square));
 };
+
+/** Whether a draw offer is waiting for this side's answer. */
+export const isDrawOfferOpenFor = (context: GameContext, gameId: number, sideId: number): boolean =>
+    loadGame(context, gameId).requestedActions.some(
+        (action) => action.acao === RequestedActionNames.DrawOffer && action.ladoId === sideId
+    );
 
 /** The opposing king, asked for by the side on turn. */
 export const getOpponentKing = (context: GameContext, gameId: number, sideId: number) => {

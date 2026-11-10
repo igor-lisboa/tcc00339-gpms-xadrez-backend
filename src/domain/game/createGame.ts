@@ -6,6 +6,7 @@ import { startingBoard } from "../board/startPosition";
 import { Game } from "./Game";
 import { applyGameType } from "./seating";
 import { defineCurrentSide } from "./judgement";
+import { recordPosition } from "./repetition";
 
 export interface GameInput {
     readonly catalog: Catalog;
@@ -30,6 +31,8 @@ export const createGame = (input: GameInput): Game => {
     const gameType = resolveGameType(input.catalog, input.gameTypeId);
     const game = new Game(input.catalog, squares, input.timeLimitMs, board, gameType, input.catalog.sides);
     defineCurrentSide(game, input.sideId);
+    // the starting position counts as the first appearance for the repetition rules
+    recordPosition(game);
     applyGameType(game, gameType);
     return game;
 };

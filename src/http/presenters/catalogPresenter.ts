@@ -21,9 +21,12 @@ const ENDING_CATEGORY: Record<GameEnding, EndingCategory> = {
     [GameEnding.ThreefoldRepetition]: "empate",
     [GameEnding.Resignation]: "desistencia",
     [GameEnding.TimeoutDraw]: "empate",
+    [GameEnding.FivefoldRepetition]: "empate",
+    [GameEnding.SeventyFiveMoveRule]: "empate",
+    [GameEnding.DeadPosition]: "empate",
 };
 
-/** The side that wins, for the endings that name one. A resignation does not say who left, so it has none. */
+/** The side that wins, for the endings that always name one. A resignation's winner is on the game itself (ladoIdVencedor). */
 const WINNING_SIDE: Partial<Record<GameEnding, Side>> = {
     [GameEnding.WhiteWins]: Side.White,
     [GameEnding.BlackWins]: Side.Black,

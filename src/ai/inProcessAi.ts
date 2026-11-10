@@ -41,8 +41,11 @@ export const createInProcessAi = (service: GameService, waitMs: number): InProce
         try {
             if (kind === "reset") {
                 service.answerReset(ref.jogoId, ref.ladoId, accepted);
-            } else {
+            } else if (service.isDrawOfferOpenFor(ref.jogoId, ref.ladoId)) {
                 service.answerDraw(ref.jogoId, ref.ladoId, accepted);
+            } else {
+                // the AI's own move already declined the offer, or the game ended meanwhile
+                logger.info({ jogoId: ref.jogoId, ladoId: ref.ladoId }, "AI draw answer skipped: the offer is no longer open");
             }
         } catch (error) {
             report(`AI answer to ${kind} failed`, error);

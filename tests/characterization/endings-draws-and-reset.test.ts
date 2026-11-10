@@ -25,6 +25,7 @@ describe("characterization: how a game ends", () => {
 
         const { body } = await api.get(`/jogos/${jogoId}`);
         expect(body.data.finalizado).toEqual({ id: 1, tipo: "Vitória: Preto" });
+        expect(body.data.ladoIdVencedor).toBe(1);
         expect(body.data.chequeLadoAtual).toBe(true);
 
         const depois = await api.post(`/jogos/${jogoId}/pecas/A2/move/A3`, undefined, { lado: WHITE });
@@ -44,23 +45,101 @@ describe("characterization: how a game ends", () => {
         expect(body.data.finalizado).toEqual({ id: 4, tipo: "Empate: Rei afogado" });
     });
 
-    it("ends in a draw by threefold repetition", async () => {
-        const jogoId = await createGame(api, {
-            tipoJogo: 0,
-            tabuleiroCasas: boardWith({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1", H8: "Torre-1" }),
-        });
-        await seatBothHumans(api, jogoId);
-
-        // four plies return to the start position; eight plies make it appear for the third time
-        for (let ciclo = 0; ciclo < 2; ciclo++) {
+    /** Four plies that bring both kings back. The first one costs White its castling right, so the start position never returns. */
+    const shuffleKings = async (jogoId: number, cycles: number) => {
+        for (let ciclo = 0; ciclo < cycles; ciclo++) {
             await move(api, jogoId, WHITE, "E1", "E2");
             await move(api, jogoId, BLACK, "A8", "A7");
             await move(api, jogoId, WHITE, "E2", "E1");
             await move(api, jogoId, BLACK, "A7", "A8");
         }
+    };
+
+    it("a threefold repetition is a draw only when the side on turn claims it with a draw offer", async () => {
+        const jogoId = await createGame(api, {
+            tipoJogo: 0,
+            tabuleiroCasas: boardWith({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1", H8: "Torre-1" }),
+        });
+        await seatBothHumans(api, jogoId);
+        await shuffleKings(jogoId, 3);
+
+        const antes = await api.get(`/jogos/${jogoId}`);
+        expect(antes.body.data.finalizado).toBeNull();
+
+        const claim = await api.put(`/jogos/${jogoId}/empate/propoe`, undefined, { lado: WHITE });
+        expect(claim.body.message).toBe("Empate reivindicado com sucesso!");
+        expect(claim.body.data).toEqual({ reivindicado: true, jogadaRealizada: null });
 
         const { body } = await api.get(`/jogos/${jogoId}`);
         expect(body.data.finalizado).toEqual({ id: 6, tipo: "Empate: Regra das 3 posições" });
+        expect(body.data.ladoIdVencedor).toBeNull();
+        expect(body.data.acoesSolicitadas).toEqual([]);
+    });
+
+    it("the side on turn claims a threefold repetition for the position its intended move would make", async () => {
+        const jogoId = await createGame(api, {
+            tipoJogo: 0,
+            tabuleiroCasas: boardWith({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1", H8: "Torre-1" }),
+        });
+        await seatBothHumans(api, jogoId);
+        // after two cycles the board position has appeared twice; White's E1-E2 would make its follower appear a third time
+        await shuffleKings(jogoId, 2);
+
+        const claim = await api.put(`/jogos/${jogoId}/empate/propoe`, { origem: "E1", destino: "E2" }, { lado: WHITE });
+
+        expect(claim.body.message).toBe("Empate reivindicado com sucesso!");
+        expect(claim.body.data).toEqual({ reivindicado: true, jogadaRealizada: null });
+        const { body } = await api.get(`/jogos/${jogoId}`);
+        expect(body.data.finalizado).toEqual({ id: 6, tipo: "Empate: Regra das 3 posições" });
+        // the written move is not played: the white king is still on E1
+        expect(body.data.tabuleiro.casas[7][4]?.tipo).toBe("Rei");
+    });
+
+    it("a claim with an intended move that is not valid plays the move and leaves a draw offer", async () => {
+        const jogoId = await createGameWithHumans(api);
+
+        const claim = await api.put(`/jogos/${jogoId}/empate/propoe`, { origem: "G1", destino: "F3" }, { lado: WHITE });
+
+        expect(claim.body.message).toBe("Empate proposto ao lado adversário com sucesso!");
+        expect(claim.body.data.reivindicado).toBe(false);
+        expect(claim.body.data.jogadaRealizada.casaDestino.casa).toBe("F3");
+        const { body } = await api.get(`/jogos/${jogoId}`);
+        expect(body.data.finalizado).toBeNull();
+        expect(body.data.ladoIdAtual).toBe(1);
+        expect(body.data.empatePropostoPeloLadoId).toBe(0);
+    });
+
+    it("a claim with only one square of the intended move is refused", async () => {
+        const jogoId = await createGameWithHumans(api);
+
+        const { status, body } = await api.put(`/jogos/${jogoId}/empate/propoe`, { origem: "G1" }, { lado: WHITE });
+
+        expect(status).toBe(500);
+        expect(body.message).toBe("Informe a casa de origem e a casa de destino da jogada pretendida");
+    });
+
+    it("kings behind fully blocked pawns end the game as a dead position", async () => {
+        // a zigzag wall of pawns across the board: no pawn can move and neither king can get through
+        const deadId = await createGame(api, {
+            tipoJogo: 0,
+            tabuleiroCasas: boardWith({ A1: "Rei-0", A3: "Peão-0", B4: "Peão-0", C3: "Peão-0", D4: "Peão-0", E3: "Peão-0", F4: "Peão-0", G3: "Peão-0", H4: "Peão-0",
+                A8: "Rei-1", A4: "Peão-1", B5: "Peão-1", C4: "Peão-1", D5: "Peão-1", E4: "Peão-1", F5: "Peão-1", G4: "Peão-1", H5: "Peão-1" }),
+        });
+        const { body } = await api.get(`/jogos/${deadId}`);
+        expect(body.data.finalizado).toEqual({ id: 11, tipo: "Empate: Posição morta" });
+    });
+
+    it("the fifth appearance of a position ends the game without a claim", async () => {
+        const jogoId = await createGame(api, {
+            tipoJogo: 0,
+            tabuleiroCasas: boardWith({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1", H8: "Torre-1" }),
+        });
+        await seatBothHumans(api, jogoId);
+        await shuffleKings(jogoId, 4);
+        await move(api, jogoId, WHITE, "E1", "E2");
+
+        const { body } = await api.get(`/jogos/${jogoId}`);
+        expect(body.data.finalizado).toEqual({ id: 9, tipo: "Empate: Regra das 5 posições" });
     });
 
     it("ends as a draw for insufficient material when the last rook is captured", async () => {
@@ -80,13 +159,39 @@ describe("characterization: how a game ends", () => {
     });
 
 
-    it.todo("ends as a draw by the 50-move rule (needs 100 plies without capture or pawn move; covered once the TS rules are in place)");
+    it("after 50 moves each without a capture or a pawn move, the side on turn claims a draw and no offer is sent", async () => {
+        const jogoId = await createGame(api, {
+            tipoJogo: 0,
+            tabuleiroCasas: boardWith({ C1: "Rei-0", H5: "Torre-0", A8: "Rei-1" }),
+        });
+        await seatBothHumans(api, jogoId);
+
+        // White's king walks a loop of 13 squares while Black's king steps back and forth: no position appears 3 times
+        const loop = ["C1", "D1", "E1", "F1", "G1", "H1", "H2", "G2", "F2", "E2", "D2", "C2", "B1"];
+        for (let lance = 0; lance < 50; lance++) {
+            await move(api, jogoId, WHITE, loop[lance % 13], loop[(lance + 1) % 13]);
+            await move(api, jogoId, BLACK, lance % 2 === 0 ? "A8" : "B8", lance % 2 === 0 ? "B8" : "A8");
+        }
+
+        const antes = await api.get(`/jogos/${jogoId}`);
+        expect(antes.body.data.finalizado).toBeNull();
+        expect(antes.body.data.tabuleiro.qtdTurnosSemCapturaOuMovimentoDePeao).toBe(100);
+
+        const claim = await api.put(`/jogos/${jogoId}/empate/propoe`, undefined, { lado: WHITE });
+        expect(claim.body.message).toBe("Empate reivindicado com sucesso!");
+
+        const { body } = await api.get(`/jogos/${jogoId}`);
+        expect(body.data.finalizado).toEqual({ id: 2, tipo: "Empate: Regra 50 movimentos" });
+        expect(body.data.acoesSolicitadas).toEqual([]);
+        expect(body.data.empatePropostoPeloLadoId).toBeNull();
+    });
 
     it("resigning finishes the game with the desistência result", async () => {
         const jogoId = await createGameWithHumans(api);
-        await api.delete(`/jogos/${jogoId}/jogadores/${BLACK}`);
+        await api.delete(`/jogos/${jogoId}/jogadores/${BLACK}`, { lado: BLACK });
         const { body } = await api.get(`/jogos/${jogoId}`);
         expect(body.data.finalizado.id).toBe(7);
+        expect(body.data.ladoIdVencedor).toBe(0);
     });
 
     it("a time out is a win for the opponent when the opponent has a rook", async () => {
@@ -121,7 +226,7 @@ describe("characterization: how a game ends", () => {
     it("the clocks stop when the game ends: the remaining time does not change afterwards", async () => {
         const jogoId = await createGame(api, { tipoJogo: 0, tempoDeTurnoEmMilisegundos: 60000 });
         await seatBothHumans(api, jogoId);
-        await api.delete(`/jogos/${jogoId}/jogadores/${BLACK}`);
+        await api.delete(`/jogos/${jogoId}/jogadores/${BLACK}`, { lado: BLACK });
 
         const primeiro = await api.get(`/jogos/${jogoId}/simples`);
         await sleep(30);
@@ -174,18 +279,35 @@ describe("characterization: draw offers", () => {
         expect(body.message).toBe("Já tem um empate proposto pelo lado Branco");
     });
 
-    it("the side that is not on turn cannot offer a draw", async () => {
+    it("the side that is not on turn may offer a draw too", async () => {
         const jogoId = await createGameWithHumans(api);
-        const { body } = await api.put(`/jogos/${jogoId}/empate/propoe`, undefined, { lado: BLACK });
-        expect(body.message).toBe("Aguarde sua vez para propor um empate");
+        const { status, body } = await api.put(`/jogos/${jogoId}/empate/propoe`, undefined, { lado: BLACK });
+        expect(status).toBe(200);
+        expect(body.message).toBe("Empate proposto ao lado adversário com sucesso!");
     });
 
-    it("while an offer is pending the side on turn cannot move", async () => {
+    it("an open offer does not stop the proposer from moving, and the offer stands", async () => {
         const jogoId = await createGameWithHumans(api);
         await api.put(`/jogos/${jogoId}/empate/propoe`, undefined, { lado: WHITE });
 
-        const { body } = await api.post(`/jogos/${jogoId}/pecas/E2/move/E4`, undefined, { lado: WHITE });
-        expect(body.message).toBe("Tem ações solicitadas a serem executadas");
+        await move(api, jogoId, WHITE, "E2", "E4");
+
+        const jogo = await api.get(`/jogos/${jogoId}`);
+        expect(jogo.body.data.empatePropostoPeloLadoId).toBe(0);
+    });
+
+    it("the other side declines an offer by moving instead of answering", async () => {
+        const jogoId = await createGameWithHumans(api);
+        await move(api, jogoId, WHITE, "E2", "E4");
+        await api.put(`/jogos/${jogoId}/empate/propoe`, undefined, { lado: WHITE });
+
+        await move(api, jogoId, BLACK, "E7", "E5");
+
+        const jogo = await api.get(`/jogos/${jogoId}`);
+        expect(jogo.body.data.empatePropostoPeloLadoId).toBeNull();
+        expect(jogo.body.data.acoesSolicitadas).toEqual([]);
+        const resposta = await api.post(`/jogos/${jogoId}/empate/responde`, { resposta: true }, { lado: BLACK });
+        expect(resposta.body.message).toBe("Nenhum empate foi proposto");
     });
 
     it("declining clears the offer so a new one can be made", async () => {
@@ -221,13 +343,11 @@ describe("characterization: draw offers", () => {
 
     it("refuses a draw offer once the game has finished", async () => {
         const jogoId = await createGameWithHumans(api);
-        await api.delete(`/jogos/${jogoId}/jogadores/${BLACK}`);
+        await api.delete(`/jogos/${jogoId}/jogadores/${BLACK}`, { lado: BLACK });
         const { status, body } = await api.put(`/jogos/${jogoId}/empate/propoe`, undefined, { lado: WHITE });
         expect(status).toBe(500);
         expect(body.message).toBe("Esse jogo já foi finalizado");
     });
-
-    it.todo("known deviation: offering a draw after the 50-move limit finalizes the game and still sends the offer (see docs/specs/draw-and-reset-negotiation.md)");
 });
 
 describe("characterization: reset", () => {
@@ -266,7 +386,7 @@ describe("characterization: reset", () => {
 
     it("on a finished game, the other side proposes a reset and the reply restarts the game", async () => {
         const jogoId = await createGameWithHumans(api);
-        await api.delete(`/jogos/${jogoId}/jogadores/${WHITE}`);
+        await api.delete(`/jogos/${jogoId}/jogadores/${WHITE}`, { lado: WHITE });
 
         const proposta = await api.put(`/jogos/${jogoId}/reset/propoe`, undefined, { lado: BLACK });
         expect(proposta.body.message).toBe("Reset proposto ao lado adversário com sucesso!");

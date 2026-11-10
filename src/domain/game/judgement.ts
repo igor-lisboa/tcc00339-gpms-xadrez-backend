@@ -1,10 +1,14 @@
 import { GameEnding } from "../../shared/constants";
-import { isInsufficientMaterial } from "../rules/material";
+import { isBlockedPawnDeadPosition } from "../rules/blockedPawns";
+import { isDeadPosition } from "../rules/material";
 import type { Game } from "./Game";
-import type { Side } from "./Side";
 import { checkClocks, startTurn } from "./clock";
+import { SEVENTY_FIVE_MOVE_PLIES, recordPosition } from "./repetition";
 
-/** Sets whose turn it is, starting a new turn if the side changed. Judges the position for the new side. */
+/**
+ * Sets whose turn it is, starting a new turn if the side changed, and judges the position for that side.
+ * Checkmate and stalemate come first: a move that mates wins even if it also leaves little material (FIDE 5.1.1).
+ */
 export const defineCurrentSide = (game: Game, sideId: number): void => {
     game.currentSideId = sideId;
     const last = game.turns.at(-1);
@@ -13,10 +17,13 @@ export const defineCurrentSide = (game: Game, sideId: number): void => {
         startTurn(game);
     }
     game.refresh();
-    if (isInsufficientMaterial(piecesOf(game.white), piecesOf(game.black))) {
+    judgeSide(game, sideId);
+    if (isDeadPosition(game.white.pieces, game.black.pieces)) {
         game.finish(GameEnding.InsufficientMaterial);
     }
-    judgeSide(game, sideId);
+    if (isBlockedPawnDeadPosition(game.position())) {
+        game.finish(GameEnding.DeadPosition);
+    }
 };
 
 /** Recomputes the check flag and the clocks, as a read of the game needs. */
@@ -26,20 +33,24 @@ export const refreshForRead = (game: Game): void => {
     checkClocks(game);
 };
 
-/** Detects threefold repetition and insufficient material after a move. */
+/**
+ * After a move is complete and the turn has passed: records the position and applies the draws
+ * that need no claim (FIDE 9.6). A checkmate found by defineCurrentSide has already ended the game.
+ */
 export const judgeAfterMove = (game: Game): void => {
-    if (game.board.isThreefoldRepetition()) {
-        game.finish(GameEnding.ThreefoldRepetition);
+    const appeared = recordPosition(game);
+    if (appeared >= 5) {
+        game.finish(GameEnding.FivefoldRepetition);
     }
-    if (isInsufficientMaterial(piecesOf(game.white), piecesOf(game.black))) {
-        game.finish(GameEnding.InsufficientMaterial);
+    if (game.board.halfMoveClock >= SEVENTY_FIVE_MOVE_PLIES) {
+        game.finish(GameEnding.SeventyFiveMoveRule);
     }
 };
 
 /** Checkmate or stalemate for the side on the move. */
 const judgeSide = (game: Game, sideId: number): void => {
     game.currentInCheck = game.isKingAttacked(sideId);
-    if (sideId !== game.currentSideId || game.legalMovesOf(sideId).length > 0) {
+    if (game.legalMovesOf(sideId).length > 0) {
         return;
     }
     if (!game.currentInCheck) {
@@ -48,5 +59,3 @@ const judgeSide = (game: Game, sideId: number): void => {
         game.finish(sideId === game.white.id ? GameEnding.BlackWins : GameEnding.WhiteWins);
     }
 };
-
-const piecesOf = (side: Side) => side.pieces.map((entry) => entry.piece);

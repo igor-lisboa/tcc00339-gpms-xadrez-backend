@@ -14,7 +14,7 @@ An AI plays one or both sides of a game. The move choice lives on the server; th
   3. keep captures;
   4. keep moves that reduce the distance to the opponent's king, and all pawn moves.
   Then one move is picked at random.
-- The AI answers draw and reset offers and promotions with random choices.
+- The AI answers draw and reset offers and promotions with random choices. It answers a draw offer only if it is still open for its side: its own move may already have declined it.
 - `GET /ia` asks the AI player to run.
 
 ## Tests
