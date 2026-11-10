@@ -34,6 +34,8 @@ const en: MessageTable = {
     "Tipos de jogador retornados com sucesso!": "Player types returned successfully!",
     "Tipos de peça retornados com sucesso!": "Piece types returned successfully!",
     "Possíveis peças para promover um peão retornadas com sucesso!": "Pieces a pawn can be promoted to returned successfully!",
+    "Tipos de finalização retornados com sucesso!": "Game endings returned successfully!",
+    "Enumerações retornadas com sucesso!": "Enumerations returned successfully!",
     "Rei do adversário não encontrado": "Opposing king not found",
     "Tipo de jogador inválido": "Invalid player type",
     "Esse jogo já foi finalizado": "This game has already ended",

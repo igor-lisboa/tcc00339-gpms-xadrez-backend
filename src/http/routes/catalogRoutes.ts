@@ -2,6 +2,7 @@ import { Router, type Request } from "express";
 import type { Catalog } from "../../domain/catalog";
 import { PieceNames } from "../../domain/pieces/pieceNames";
 import { success } from "../envelope";
+import { endingTypeWire, enumsWire } from "../presenters/catalogPresenter";
 
 const GROUP_MEMBERS = [
     "Igor Lisbôa",
@@ -49,6 +50,14 @@ export const catalogRoutes = (catalog: Catalog): Router => {
     router.get("/tipos-de-peca/promocao-peao", (_req, res) => {
         const choices = catalog.pieceTypes.filter((piece) => piece.nome !== PieceNames.King && piece.nome !== PieceNames.Pawn);
         res.json(success("Possíveis peças para promover um peão retornadas com sucesso!", choices));
+    });
+
+    router.get("/tipos-de-finalizacao", (_req, res) => {
+        res.json(success("Tipos de finalização retornados com sucesso!", catalog.endings.map(endingTypeWire)));
+    });
+
+    router.get("/enumeracoes", (_req, res) => {
+        res.json(success("Enumerações retornadas com sucesso!", enumsWire()));
     });
 
     return router;

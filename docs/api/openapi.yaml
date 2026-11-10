@@ -33,6 +33,8 @@ info:
     **Game ids.** A game id is its index in the in-memory repository. Games are lost when the process restarts.
 
     **Clock.** Reading a game (`GET /jogos/{jogoId}`) can end it when the clock of the side on turn has run out.
+    The side that ran out stays in `ladoIdAtual`. The ending is a win for the opponent, or
+    "Empate: Tempo esgotado sem material" when the opponent cannot checkmate.
 
     **Known deviation.** Castling does not check the squares the king passes through.
 servers:
@@ -145,6 +147,39 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/PieceTypeListEnvelope"
+
+  /tipos-de-finalizacao:
+    get:
+      tags: [Catalogue]
+      summary: Endings a game can finish with, with their category and the side that wins
+      description: |
+        `categoria` is `vitoria` (a side wins), `empate` (a draw) or `desistencia` (a side resigned).
+        `ladoIdVencedor` is 0 or 1 for the two winning endings and null otherwise. A resignation does not
+        name the winner: the side that did not resign wins.
+      operationId: listEndingTypes
+      responses:
+        "200":
+          description: The nine endings, by id.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EndingTypeListEnvelope"
+
+  /enumeracoes:
+    get:
+      tags: [Catalogue]
+      summary: Values the API sends for requested actions, move names and directions
+      description: |
+        The values of the enums that the game data uses, so a client does not have to hard-code them.
+        The ending labels are in GET /tipos-de-finalizacao, the side and player types in their own lists.
+      operationId: listEnums
+      responses:
+        "200":
+          description: The enums.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnumCatalogEnvelope"
 
   /jogos:
     get:
@@ -845,6 +880,32 @@ components:
           type: boolean
           enum: [true]
 
+    EndingTypeListEnvelope:
+      type: object
+      required: [message, data, success]
+      properties:
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/EndingType"
+        success:
+          type: boolean
+          enum: [true]
+
+    EnumCatalogEnvelope:
+      type: object
+      required: [message, data, success]
+      properties:
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/EnumCatalog"
+        success:
+          type: boolean
+          enum: [true]
+
     GameListEnvelope:
       type: object
       required: [message, data, success]
@@ -1081,6 +1142,50 @@ components:
       type: string
       enum: ["frente", "tras", "esquerda", "direita", "frenteEsquerda", "frenteDireita", "trasEsquerda", "trasDireita", "especial"]
       description: Direction of a candidate move, seen from the side that owns the piece.
+
+    EndingCategory:
+      type: string
+      enum: [vitoria, empate, desistencia]
+      description: "vitoria: a side wins. empate: a draw. desistencia: a side resigned."
+
+    EndingType:
+      type: object
+      description: One ending a game can finish with (see GET /tipos-de-finalizacao).
+      required: [id, tipo, categoria, ladoIdVencedor]
+      properties:
+        id:
+          type: integer
+          enum: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+        tipo:
+          $ref: "#/components/schemas/EndingLabel"
+        categoria:
+          $ref: "#/components/schemas/EndingCategory"
+        ladoIdVencedor:
+          nullable: true
+          description: Side that wins; null for a draw, and for a resignation (the side that did not resign wins).
+          allOf:
+            - $ref: "#/components/schemas/SideId"
+
+    EnumCatalog:
+      type: object
+      description: Values of the enums used in the game data (see GET /enumeracoes).
+      required: [acoesSolicitadas, nomesJogada, direcoes]
+      properties:
+        acoesSolicitadas:
+          type: array
+          description: Values of `acao` in the requested actions of a game.
+          items:
+            $ref: "#/components/schemas/RequestedActionName"
+        nomesJogada:
+          type: array
+          description: Move names, with null for a plain move.
+          items:
+            $ref: "#/components/schemas/MoveName"
+        direcoes:
+          type: array
+          description: Values of `direcao` in a candidate move.
+          items:
+            $ref: "#/components/schemas/Direction"
 
     EndingLabel:
       type: string

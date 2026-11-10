@@ -100,6 +100,8 @@ describe("characterization: how a game ends", () => {
 
         const { body } = await api.get(`/jogos/${jogoId}`);
         expect(body.data.finalizado).toEqual({ id: 1, tipo: "Vitória: Preto" });
+        // the side that ran out stays on turn: the frontend reads it as the side that lost on time
+        expect(body.data.ladoIdAtual).toBe(0);
     });
 
     it("a time out is a draw when the opponent holds only a king", async () => {
@@ -113,6 +115,7 @@ describe("characterization: how a game ends", () => {
 
         const { body } = await api.get(`/jogos/${jogoId}`);
         expect(body.data.finalizado).toEqual({ id: 8, tipo: "Empate: Tempo esgotado sem material" });
+        expect(body.data.ladoIdAtual).toBe(0);
     });
 
     it("the clocks stop when the game ends: the remaining time does not change afterwards", async () => {

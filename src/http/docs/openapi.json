@@ -3,7 +3,7 @@
     "info": {
         "title": "Xadrez API",
         "version": "1.0.0",
-        "description": "HTTP API of the chess game. Field names and the messages are in Portuguese (the wire names);\nthe domain itself uses English names.\n\n**Envelope.** Every JSON answer has the shape `{ message, data, success }`.\n- Success: HTTP 200, `success` is `true`, `data` holds the result (or `null` when there is nothing to return).\n- Refused rule (for example a move out of turn, an illegal move, a finished game): HTTP 500,\n  `success` is `false`, `data` is `null`, `message` explains the refusal.\n- Unexpected error: HTTP 500, `message` is `\"Internal server error\"`, `data` is `null`, `success` is `false`.\n\n**Outside the envelope (not documented as responses).**\n- A request body that is not valid JSON gets Express's default HTML page with status 400.\n- A route that does not exist gets Express's default HTML page with status 404.\n\n**Side header.** Player actions read the header `lado` (0 for Branco, 1 for Preto). A missing or\nnon-numeric header is not rejected by the routes; it matches no side and the action is refused.\n\n**Game ids.** A game id is its index in the in-memory repository. Games are lost when the process restarts.\n\n**Clock.** Reading a game (`GET /jogos/{jogoId}`) can end it when the clock of the side on turn has run out.\n\n**Known deviation.** Castling does not check the squares the king passes through.\n"
+        "description": "HTTP API of the chess game. Field names and the messages are in Portuguese (the wire names);\nthe domain itself uses English names.\n\n**Envelope.** Every JSON answer has the shape `{ message, data, success }`.\n- Success: HTTP 200, `success` is `true`, `data` holds the result (or `null` when there is nothing to return).\n- Refused rule (for example a move out of turn, an illegal move, a finished game): HTTP 500,\n  `success` is `false`, `data` is `null`, `message` explains the refusal.\n- Unexpected error: HTTP 500, `message` is `\"Internal server error\"`, `data` is `null`, `success` is `false`.\n\n**Outside the envelope (not documented as responses).**\n- A request body that is not valid JSON gets Express's default HTML page with status 400.\n- A route that does not exist gets Express's default HTML page with status 404.\n\n**Side header.** Player actions read the header `lado` (0 for Branco, 1 for Preto). A missing or\nnon-numeric header is not rejected by the routes; it matches no side and the action is refused.\n\n**Game ids.** A game id is its index in the in-memory repository. Games are lost when the process restarts.\n\n**Clock.** Reading a game (`GET /jogos/{jogoId}`) can end it when the clock of the side on turn has run out.\nThe side that ran out stays in `ladoIdAtual`. The ending is a win for the opponent, or\n\"Empate: Tempo esgotado sem material\" when the opponent cannot checkmate.\n\n**Known deviation.** Castling does not check the squares the king passes through.\n"
     },
     "servers": [
         {
@@ -178,6 +178,50 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/PieceTypeListEnvelope"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tipos-de-finalizacao": {
+            "get": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "Endings a game can finish with, with their category and the side that wins",
+                "description": "`categoria` is `vitoria` (a side wins), `empate` (a draw) or `desistencia` (a side resigned).\n`ladoIdVencedor` is 0 or 1 for the two winning endings and null otherwise. A resignation does not\nname the winner: the side that did not resign wins.\n",
+                "operationId": "listEndingTypes",
+                "responses": {
+                    "200": {
+                        "description": "The nine endings, by id.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EndingTypeListEnvelope"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/enumeracoes": {
+            "get": {
+                "tags": [
+                    "Catalogue"
+                ],
+                "summary": "Values the API sends for requested actions, move names and directions",
+                "description": "The values of the enums that the game data uses, so a client does not have to hard-code them.\nThe ending labels are in GET /tipos-de-finalizacao, the side and player types in their own lists.\n",
+                "operationId": "listEnums",
+                "responses": {
+                    "200": {
+                        "description": "The enums.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EnumCatalogEnvelope"
                                 }
                             }
                         }
@@ -1325,6 +1369,53 @@
                     }
                 }
             },
+            "EndingTypeListEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "data",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EndingType"
+                        }
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            true
+                        ]
+                    }
+                }
+            },
+            "EnumCatalogEnvelope": {
+                "type": "object",
+                "required": [
+                    "message",
+                    "data",
+                    "success"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    },
+                    "data": {
+                        "$ref": "#/components/schemas/EnumCatalog"
+                    },
+                    "success": {
+                        "type": "boolean",
+                        "enum": [
+                            true
+                        ]
+                    }
+                }
+            },
             "GameListEnvelope": {
                 "type": "object",
                 "required": [
@@ -1754,6 +1845,88 @@
                     "especial"
                 ],
                 "description": "Direction of a candidate move, seen from the side that owns the piece."
+            },
+            "EndingCategory": {
+                "type": "string",
+                "enum": [
+                    "vitoria",
+                    "empate",
+                    "desistencia"
+                ],
+                "description": "vitoria: a side wins. empate: a draw. desistencia: a side resigned."
+            },
+            "EndingType": {
+                "type": "object",
+                "description": "One ending a game can finish with (see GET /tipos-de-finalizacao).",
+                "required": [
+                    "id",
+                    "tipo",
+                    "categoria",
+                    "ladoIdVencedor"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "enum": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4,
+                            5,
+                            6,
+                            7,
+                            8
+                        ]
+                    },
+                    "tipo": {
+                        "$ref": "#/components/schemas/EndingLabel"
+                    },
+                    "categoria": {
+                        "$ref": "#/components/schemas/EndingCategory"
+                    },
+                    "ladoIdVencedor": {
+                        "nullable": true,
+                        "description": "Side that wins; null for a draw, and for a resignation (the side that did not resign wins).",
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/SideId"
+                            }
+                        ]
+                    }
+                }
+            },
+            "EnumCatalog": {
+                "type": "object",
+                "description": "Values of the enums used in the game data (see GET /enumeracoes).",
+                "required": [
+                    "acoesSolicitadas",
+                    "nomesJogada",
+                    "direcoes"
+                ],
+                "properties": {
+                    "acoesSolicitadas": {
+                        "type": "array",
+                        "description": "Values of `acao` in the requested actions of a game.",
+                        "items": {
+                            "$ref": "#/components/schemas/RequestedActionName"
+                        }
+                    },
+                    "nomesJogada": {
+                        "type": "array",
+                        "description": "Move names, with null for a plain move.",
+                        "items": {
+                            "$ref": "#/components/schemas/MoveName"
+                        }
+                    },
+                    "direcoes": {
+                        "type": "array",
+                        "description": "Values of `direcao` in a candidate move.",
+                        "items": {
+                            "$ref": "#/components/schemas/Direction"
+                        }
+                    }
+                }
             },
             "EndingLabel": {
                 "type": "string",

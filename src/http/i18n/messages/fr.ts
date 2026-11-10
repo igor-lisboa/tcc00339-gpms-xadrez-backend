@@ -34,6 +34,8 @@ const fr: MessageTable = {
     "Tipos de jogador retornados com sucesso!": "Types de joueur renvoyés avec succès !",
     "Tipos de peça retornados com sucesso!": "Types de pièce renvoyés avec succès !",
     "Possíveis peças para promover um peão retornadas com sucesso!": "Pièces possibles pour promouvoir un pion renvoyées avec succès !",
+    "Tipos de finalização retornados com sucesso!": "Types de fin de partie renvoyés avec succès !",
+    "Enumerações retornadas com sucesso!": "Énumérations renvoyées avec succès !",
     "Rei do adversário não encontrado": "Roi adverse introuvable",
     "Tipo de jogador inválido": "Type de joueur invalide",
     "Esse jogo já foi finalizado": "Cette partie est déjà terminée",

@@ -11,9 +11,11 @@ Create, read, list, reset and resign games. A game id is its position in the in-
   - `tabuleiroSuperSimplificado=true` returns the board as `"Tipo-ladoId"` strings. Any other value (including `1`) returns the verbose board. See known deviations.
 - **Reset:** `PUT /jogos/:id/reset` starts the same id again from the start position with no players and no turns. It does not check whether the game is finished.
 - **Resign:** `DELETE /jogos/:id/jogadores/:ladoId` removes the side's player and finishes the game with type 7 ("Desistência: Um jogador deixou a partida").
+- **Endings list:** `GET /tipos-de-finalizacao` returns the nine endings, each with `id`, `tipo` (the label), `categoria` (`vitoria`, `empate` or `desistencia`) and `ladoIdVencedor` (0 or 1 for the two wins, null otherwise; a resignation does not name the winner).
+- **Enum values:** `GET /enumeracoes` returns the values the API can send for `acoesSolicitadas` (requested action names), `nomesJogada` (move names, with null for a plain move) and `direcoes` (candidate move directions). The lists come from the same constants the domain uses.
 
 ## Tests
-- `catalog-and-lifecycle.test.ts`: "POST /jogos creates a game...", "GET /jogos/:id returns the full game state", "GET /jogos/:id/simples...", "DELETE ... resigns...", "GET /jogos/:id with an unknown id..."
+- `catalog-and-lifecycle.test.ts`: "POST /jogos creates a game...", "GET /jogos/:id returns the full game state", "GET /jogos/:id/simples...", "DELETE ... resigns...", "GET /jogos/:id with an unknown id...", "GET /tipos-de-finalizacao lists the nine endings...", "GET /enumeracoes lists the requested actions..."
 - `endings-draws-and-reset.test.ts`: "PUT /reset restarts the same game id..."
 
 ## Known deviations

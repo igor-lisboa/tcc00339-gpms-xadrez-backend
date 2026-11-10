@@ -34,6 +34,8 @@ const de: MessageTable = {
     "Tipos de jogador retornados com sucesso!": "Spielertypen erfolgreich zurückgegeben!",
     "Tipos de peça retornados com sucesso!": "Figurentypen erfolgreich zurückgegeben!",
     "Possíveis peças para promover um peão retornadas com sucesso!": "Mögliche Figuren zur Bauernumwandlung erfolgreich zurückgegeben!",
+    "Tipos de finalização retornados com sucesso!": "Spielendarten erfolgreich zurückgegeben!",
+    "Enumerações retornadas com sucesso!": "Aufzählungen erfolgreich zurückgegeben!",
     "Rei do adversário não encontrado": "Gegnerischer König nicht gefunden",
     "Tipo de jogador inválido": "Ungültiger Spielertyp",
     "Esse jogo já foi finalizado": "Diese Partie ist bereits beendet",

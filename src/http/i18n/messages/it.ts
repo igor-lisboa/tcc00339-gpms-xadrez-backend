@@ -34,6 +34,8 @@ const it: MessageTable = {
     "Tipos de jogador retornados com sucesso!": "Tipi di giocatore restituiti con successo!",
     "Tipos de peça retornados com sucesso!": "Tipi di pezzo restituiti con successo!",
     "Possíveis peças para promover um peão retornadas com sucesso!": "Pezzi possibili per promuovere un pedone restituiti con successo!",
+    "Tipos de finalização retornados com sucesso!": "Tipi di fine partita restituiti con successo!",
+    "Enumerações retornadas com sucesso!": "Enumerazioni restituite con successo!",
     "Rei do adversário não encontrado": "Re avversario non trovato",
     "Tipo de jogador inválido": "Tipo di giocatore non valido",
     "Esse jogo já foi finalizado": "Questa partita è già terminata",

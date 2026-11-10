@@ -62,7 +62,8 @@ export const pieceOnSquareWire = (entry: PieceWithMoves) => ({
     })),
 });
 
-const DIRECTION_NAMES: Record<string, string> = {
+/** Wire names of the directions of a candidate move (see the Direction schema in the OpenAPI file). */
+export const DIRECTION_NAMES: Record<string, string> = {
     forward: "frente",
     backward: "tras",
     left: "esquerda",

@@ -61,6 +61,53 @@ describe("characterization: catalog endpoints", () => {
         expect(body.data.map((peca: any) => peca.nome)).toEqual(["Rainha", "Torre", "Bispo", "Cavalo"]);
     });
 
+    it("GET /tipos-de-finalizacao lists the nine endings with their category and winning side", async () => {
+        const { status, body } = await api.get("/tipos-de-finalizacao");
+        expect(status).toBe(200);
+        expect(body.message).toBe("Tipos de finalização retornados com sucesso!");
+        expect(body.data).toHaveLength(9);
+        expect(body.data[0]).toEqual({ id: 0, tipo: "Vitória: Branco", categoria: "vitoria", ladoIdVencedor: 0 });
+        expect(body.data[1]).toEqual({ id: 1, tipo: "Vitória: Preto", categoria: "vitoria", ladoIdVencedor: 1 });
+        expect(body.data[7]).toEqual({
+            id: 7,
+            tipo: "Desistência: Um jogador deixou a partida",
+            categoria: "desistencia",
+            ladoIdVencedor: null,
+        });
+        expect(body.data[8]).toEqual({
+            id: 8,
+            tipo: "Empate: Tempo esgotado sem material",
+            categoria: "empate",
+            ladoIdVencedor: null,
+        });
+    });
+
+    it("GET /enumeracoes lists the requested actions, move names and directions the API sends", async () => {
+        const { status, body } = await api.get("/enumeracoes");
+        expect(status).toBe(200);
+        expect(body.data.acoesSolicitadas).toEqual(["responderPropostaEmpate", "responderPropostaReset", "promocaoPeao"]);
+        expect(body.data.nomesJogada).toEqual([
+            "Roque Menor",
+            "Roque Maior",
+            "Primeiro Movimento Peão",
+            "Promoção do Peão",
+            "En Passant",
+            "L",
+            null,
+        ]);
+        expect(body.data.direcoes).toEqual([
+            "frente",
+            "tras",
+            "esquerda",
+            "direita",
+            "frenteEsquerda",
+            "frenteDireita",
+            "trasEsquerda",
+            "trasDireita",
+            "especial",
+        ]);
+    });
+
     it("GET /tabela-equivalencia returns 64 squares in reverse order (A8 first)", async () => {
         const { body } = await api.get("/tabela-equivalencia");
         expect(body.data).toHaveLength(64);

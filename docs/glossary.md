@@ -60,6 +60,8 @@ The routes and JSON fields will be renamed in the refactor. The legacy adapter k
 | `/tipos-de-peca` | `/piece-types` |
 | `/lados-do-jogo` | `/sides` |
 | `/tabela-equivalencia` | `/square-lookup` |
+| `/tipos-de-finalizacao` | `/ending-types` |
+| `/enumeracoes` | `/enums` |
 | `/ia` | `/ai` |
 | header `lado` | header `side` |
 
