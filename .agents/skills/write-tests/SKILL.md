@@ -1,0 +1,15 @@
+---
+name: write-tests
+description: Write unit, integration or characterization tests for this project following its conventions (Vitest, Supertest, board builder, Given/When/Then names). Use when a change needs tests or when coverage is missing.
+---
+
+# Write tests
+
+- **Domain rules:** unit tests in `tests/unit/domain/`, using the board builder `gameWith({ E1: "Rei-0", ... })` from `tests/unit/domain/helpers.ts`. The characterization tests use `boardWith(...)` from `tests/characterization/helpers/game.ts`. Name tests after the spec rule in plain words.
+- **Use-cases:** unit tests with in-memory fakes of the ports (repository, event publisher, clock, random).
+- **HTTP:** Supertest against the Express app factory, not against a running server. Cover success, validation error and domain refusal.
+- **Socket:** `socket.io-client` against a server started on port 0.
+- **Characterization** (`tests/characterization/`): do not change expectations to make them pass. If the behaviour is wrong, record it as a known deviation with `it.todo` and update the spec.
+- Test names read as sentences. Avoid `it("works")`.
+- Coverage: the gate in `vitest.config.ts` counts `src/domain` only, with ratchet thresholds (lines 79, functions 84, branches 74, statements 79). The plan's target is 100% for the domain; raise the thresholds when coverage grows.
+- Run a single file with `npx vitest run <path>`.

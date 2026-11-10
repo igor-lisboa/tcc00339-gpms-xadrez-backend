@@ -9,7 +9,7 @@
 - The log line "AI turn failed" or "AI answer ... failed" carries the refusal message of the game.
 
 ## A game ended without a move
-- A `GET` can end a game when its clock runs out, and the change is saved (see [specs/turn-clock.md](../specs/turn-clock.md)). The ending is reported as insufficient material; that is a known deviation.
+- A `GET` can end a game when its clock runs out, and the change is saved (see [specs/turn-clock.md](../specs/turn-clock.md)). The ending is a win for the opponent if the opponent has mating material, and type 8 "Empate: Tempo esgotado sem material" otherwise.
 
 ## A move is refused with status 500
 - Every refused rule is a 500 today, with the rule's message in the body (see [specs/error-handling.md](../specs/error-handling.md)). An unexpected error is 500, with the message "Internal server error", and it is logged in full.

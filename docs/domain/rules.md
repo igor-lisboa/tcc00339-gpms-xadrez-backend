@@ -11,4 +11,4 @@ Each rule links to its spec, where the tests are listed.
 | Check | `chequeLadoAtual` flag | [check-checkmate-stalemate](../specs/check-checkmate-stalemate.md) |
 | Ending | checkmate, stalemate | [check-checkmate-stalemate](../specs/check-checkmate-stalemate.md) |
 | Draws | threefold repetition, insufficient material, 50-move (known deviation), agreement | [draw-conditions](../specs/draw-conditions.md), [draw-and-reset-negotiation](../specs/draw-and-reset-negotiation.md) |
-| Time | per-side clock; timeout (wrong label today) | [turn-clock](../specs/turn-clock.md) |
+| Time | per-side clock; timeout: a win for the opponent with mating material, otherwise type 8 draw | [turn-clock](../specs/turn-clock.md) |

@@ -1,10 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { DomainError } from "../../../src/domain/DomainError";
 import { playMove } from "../../../src/domain/game/playMove";
 import { offerDraw, answerDraw } from "../../../src/domain/game/drawOffers";
 import { checkClocks } from "../../../src/domain/game/clock";
 import { GameEnding } from "../../../src/shared/constants";
-import { catalog, gameWith, movesFrom, play } from "./helpers";
+import { gameWith, movesFrom, play } from "./helpers";
 
 describe("castling", () => {
     it("is offered only when the rook on the corner belongs to the king's side", () => {
@@ -81,16 +81,118 @@ describe("draws", () => {
     });
 });
 
+/** A game with a 1 second turn limit whose first turn started 5 seconds ago, so White is out of time. */
+const timedOutWhite = (placements: Record<string, string>) => {
+    const game = gameWith(placements);
+    const limited = Object.assign(game, { timeLimitMs: 1000 });
+    Object.assign(limited.turns[0], { startedAtMs: Date.now() - 5000 });
+    return limited;
+};
+
 describe("clock", () => {
-    it("ends the game when the side on turn has used up its time", () => {
+    it("a time out is a loss when the opponent has mating material: a rook wins for Black", () => {
+        const game = timedOutWhite({ E1: "Rei-0", A8: "Rei-1", H1: "Torre-1" });
+
+        checkClocks(game);
+
+        expect(game.ending?.id).toBe(GameEnding.BlackWins);
+        expect(game.ending?.tipo).toBe("Vitória: Preto");
+    });
+
+    it("a time out is a loss for Black when White has mating material", () => {
         const game = gameWith({ E1: "Rei-0", A8: "Rei-1", H1: "Torre-0" });
-        const limited = Object.assign(game, { timeLimitMs: 1000 });
-        Object.assign(limited.turns[0], { startedAtMs: Date.now() - 5000 });
+        const limited = Object.assign(game, { timeLimitMs: 1000, currentSideId: 1 });
+        Object.assign(limited.turns[0], { sideId: 1, startedAtMs: Date.now() - 5000 });
 
         checkClocks(limited);
 
-        // known deviation: a timeout is reported with the insufficient-material ending (see docs/specs/turn-clock.md)
-        expect(limited.ending?.tipo).toBe("Empate: Insuficiência material");
-        expect(catalog.endings.map((ending) => ending.id)).toContain(GameEnding.InsufficientMaterial);
+        expect(limited.ending?.tipo).toBe("Vitória: Branco");
+    });
+
+    it("a time out is a draw when the opponent holds only a king", () => {
+        // White has a rook, so the position is not dead; only the timeout decides it
+        const game = timedOutWhite({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1" });
+
+        checkClocks(game);
+
+        expect(game.ending?.id).toBe(GameEnding.TimeoutDraw);
+        expect(game.ending?.tipo).toBe("Empate: Tempo esgotado sem material");
+    });
+
+    it("a time out is a draw when the opponent holds only king and bishop", () => {
+        const game = timedOutWhite({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1", C1: "Bispo-1" });
+
+        checkClocks(game);
+
+        expect(game.ending?.id).toBe(GameEnding.TimeoutDraw);
+    });
+
+    it("the remaining time of the side that ran out is shown as zero, not negative", () => {
+        const game = timedOutWhite({ E1: "Rei-0", A8: "Rei-1", H1: "Torre-1" });
+
+        checkClocks(game);
+
+        expect(game.white.remainingMs).toBe(0);
+    });
+
+    it("the clocks do not change after the game has ended", () => {
+        vi.useFakeTimers();
+        try {
+            const game = gameWith({ E1: "Rei-0", A8: "Rei-1", H1: "Torre-0" });
+            Object.assign(game, { timeLimitMs: 60_000 });
+            vi.setSystemTime(game.turns[0].startedAtMs + 2_000);
+            game.finish(GameEnding.Resignation);
+            const frozen = game.turns.at(-1)?.totalMs;
+
+            vi.setSystemTime(game.turns[0].startedAtMs + 30_000);
+            checkClocks(game);
+
+            expect(game.turns.at(-1)?.totalMs).toBe(frozen);
+            expect(game.white.remainingMs).toBe(58_000);
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+});
+
+describe("insufficient material", () => {
+    it("a side with king and two rooks against a bare king is not a draw", () => {
+        const game = gameWith({ E1: "Rei-0", H1: "Torre-0", H2: "Torre-0", A8: "Rei-1" });
+        expect(game.ending).toBeNull();
+    });
+
+    it("king and bishop against a bare king is a draw", () => {
+        const game = gameWith({ E1: "Rei-0", C1: "Bispo-0", A8: "Rei-1" });
+        expect(game.ending?.id).toBe(GameEnding.InsufficientMaterial);
+    });
+
+    it("king and knight against a bare king is a draw", () => {
+        const game = gameWith({ E1: "Rei-0", C3: "Cavalo-0", A8: "Rei-1" });
+        expect(game.ending?.id).toBe(GameEnding.InsufficientMaterial);
+    });
+
+    it("king and queen against a bare king is not a draw", () => {
+        const game = gameWith({ E1: "Rei-0", D1: "Rainha-0", A8: "Rei-1" });
+        expect(game.ending).toBeNull();
+    });
+
+    it("king and a pawn against a bare king is not a draw", () => {
+        const game = gameWith({ E1: "Rei-0", E2: "Peão-0", A8: "Rei-1" });
+        expect(game.ending).toBeNull();
+    });
+
+    it("king and two knights against a bare king is a draw", () => {
+        const game = gameWith({ E1: "Rei-0", C3: "Cavalo-0", D3: "Cavalo-0", A8: "Rei-1" });
+        expect(game.ending?.id).toBe(GameEnding.InsufficientMaterial);
+    });
+
+    it("king and bishop against king and bishop is a draw", () => {
+        const game = gameWith({ E1: "Rei-0", C1: "Bispo-0", A8: "Rei-1", B8: "Bispo-1" });
+        expect(game.ending?.id).toBe(GameEnding.InsufficientMaterial);
+    });
+
+    it("king and bishop against king and rook is not a draw", () => {
+        const game = gameWith({ E1: "Rei-0", C1: "Bispo-0", A8: "Rei-1", H8: "Torre-1" });
+        expect(game.ending).toBeNull();
     });
 });

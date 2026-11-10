@@ -123,6 +123,11 @@ export class Game {
             return;
         }
         this.ending = ending;
+        // the clocks stop here: the side on turn keeps the time it had when the game ended
+        const current = this.turns.at(-1);
+        if (current !== undefined && current.totalMs === null) {
+            current.end();
+        }
         this.finishedEvents.push(ending.tipo);
     }
 

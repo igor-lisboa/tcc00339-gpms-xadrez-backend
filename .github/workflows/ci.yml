@@ -18,4 +18,5 @@ jobs:
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run check:names
+      - run: npm run check:agents
       - run: npm run test:coverage

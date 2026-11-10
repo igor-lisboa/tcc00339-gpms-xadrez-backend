@@ -43,6 +43,10 @@
         {
             "id": 7,
             "tipo": "Desistência: Um jogador deixou a partida"
+        },
+        {
+            "id": 8,
+            "tipo": "Empate: Tempo esgotado sem material"
         }
     ],
     "ladoTipos": [

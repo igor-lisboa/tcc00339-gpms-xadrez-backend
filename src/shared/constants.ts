@@ -29,6 +29,8 @@ export enum GameEnding {
     MutualAgreement = 5,
     ThreefoldRepetition = 6,
     Resignation = 7,
+    /** The side on the move ran out of time and the other side has no mating material. */
+    TimeoutDraw = 8,
 }
 
 /** Piece ids that a pawn may be promoted to (see tiposPeca in database.json). */

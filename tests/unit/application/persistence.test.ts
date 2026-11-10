@@ -22,7 +22,8 @@ describe("reading a game", () => {
     it("shows a timeout in the game it returns", () => {
         const { context } = expiredContext();
 
-        expect(loadGame(context, 0).ending?.id).toBe(3);
+        // White has a rook and Black only a king: Black cannot mate, so the timeout is a draw
+        expect(loadGame(context, 0).ending?.id).toBe(8);
     });
 
     it("does not announce the ending while reading", () => {

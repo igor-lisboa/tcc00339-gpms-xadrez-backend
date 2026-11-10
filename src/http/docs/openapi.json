@@ -1766,7 +1766,7 @@
                     "Empate: Comum acordo",
                     "Empate: Regra das 3 posições",
                     "Desistência: Um jogador deixou a partida",
-                    "Tempo esgotado: o tempo de um jogador acabou"
+                    "Empate: Tempo esgotado sem material"
                 ]
             },
             "RequestedActionName": {

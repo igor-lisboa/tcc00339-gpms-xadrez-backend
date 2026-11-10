@@ -74,6 +74,19 @@ describe("pieces and boards", () => {
         expect(hasMinimumMaterial([king, new Piece(0, "Torre")])).toBe(true);
         expect(hasMinimumMaterial([king, new Piece(0, "Bispo"), new Piece(0, "Bispo")])).toBe(true);
     });
+
+    it("counts king and two rooks, queen and knight, rook and bishop as enough to mate", () => {
+        const king = new Piece(0, "Rei");
+        expect(hasMinimumMaterial([king, new Piece(0, "Torre"), new Piece(0, "Torre")])).toBe(true);
+        expect(hasMinimumMaterial([king, new Piece(0, "Rainha"), new Piece(0, "Cavalo")])).toBe(true);
+        expect(hasMinimumMaterial([king, new Piece(0, "Torre"), new Piece(0, "Bispo")])).toBe(true);
+        expect(hasMinimumMaterial([king, new Piece(0, "Peão"), new Piece(0, "Peão")])).toBe(true);
+    });
+
+    it("counts king and two knights as too little material to mate", () => {
+        const king = new Piece(0, "Rei");
+        expect(hasMinimumMaterial([king, new Piece(0, "Cavalo"), new Piece(0, "Cavalo")])).toBe(false);
+    });
 });
 
 describe("AI move choice", () => {

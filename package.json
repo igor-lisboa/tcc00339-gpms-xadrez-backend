@@ -13,7 +13,9 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "check:names": "node --import tsx scripts/check-names.mts",
-    "docs:openapi": "node --import tsx scripts/build-openapi.mts"
+    "docs:openapi": "node --import tsx scripts/build-openapi.mts",
+    "sync:agents": "node --import tsx scripts/sync-agent-config.mts",
+    "check:agents": "node --import tsx scripts/sync-agent-config.mts --check"
   },
   "author": "",
   "license": "ISC",

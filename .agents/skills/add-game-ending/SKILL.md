@@ -1,0 +1,19 @@
+---
+name: add-game-ending
+description: Add a new game ending (a win, a draw or a loss reason) or change the rule that gives one. Touches the lookup data, the GameEnding enum, the domain, the OpenAPI contract, the specs and the tests. Use when a game can finish in a new way or an ending label changes.
+---
+
+# Add or change a game ending
+
+Endings in use: 0 "Vitória: Branco", 1 "Vitória: Preto", 2 "Empate: Regra 50 movimentos", 3 "Empate: Insuficiência material", 4 "Empate: Rei afogado", 5 "Empate: Comum acordo", 6 "Empate: Regra das 3 posições", 7 "Desistência: Um jogador deixou a partida", 8 "Empate: Tempo esgotado sem material". The labels are the API contract: the frontend shows them, so a label change is a behaviour change.
+
+1. Read the spec that owns the rule: `docs/specs/draw-conditions.md`, `docs/specs/turn-clock.md`, `docs/specs/game-lifecycle.md` or `docs/specs/check-checkmate-stalemate.md`.
+2. Prefer an existing ending when the outcome already has one. A loss for a side is `WhiteWins` or `BlackWins`, not a new id.
+3. Add the id and the label to `tiposFinalizacao` in `src/database.json`. Keep the label in Portuguese.
+4. Add the same id to the `GameEnding` enum in `src/shared/constants.ts`, with a comment. `tests/unit/shared/constants.test.ts` fails if the enum and the table differ.
+5. Set the ending only through `game.finish(GameEnding.X)`, from the domain (`judgement.ts` for positions, `clock.ts` for time, `seating.ts` and `drawOffers.ts` for actions). Never assign `game.ending` directly. `finish` also closes the running turn, so the clocks stop.
+6. Update the `EndingLabel` enum in `docs/api/openapi.yaml`, then run `npm run docs:openapi`.
+7. Tests: unit tests in `tests/unit/domain/rules.test.ts` for the rule (both sides of the condition), and one characterization case in `tests/characterization/endings-draws-and-reset.test.ts` for the wire shape `finalizado: { id, tipo }`.
+8. Docs: the spec that owns the rule (rules, tests, and a "Changed in ..." note), `docs/domain/rules.md` if its table changes, `docs/guides/troubleshooting.md` if an operator will see the ending.
+9. Report the list of changed endings and labels, so the frontend can be updated to match.
+10. Run `npm run typecheck && npm run lint && npm run check:names && npx vitest run`.

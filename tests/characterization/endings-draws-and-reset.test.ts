@@ -88,7 +88,53 @@ describe("characterization: how a game ends", () => {
         const { body } = await api.get(`/jogos/${jogoId}`);
         expect(body.data.finalizado.id).toBe(7);
     });
+
+    it("a time out is a win for the opponent when the opponent has a rook", async () => {
+        const jogoId = await createGame(api, {
+            tipoJogo: 0,
+            tempoDeTurnoEmMilisegundos: 1,
+            tabuleiroCasas: boardWith({ E1: "Rei-0", A8: "Rei-1", H8: "Torre-1" }),
+        });
+        await seatBothHumans(api, jogoId);
+        await sleep(20);
+
+        const { body } = await api.get(`/jogos/${jogoId}`);
+        expect(body.data.finalizado).toEqual({ id: 1, tipo: "Vitória: Preto" });
+    });
+
+    it("a time out is a draw when the opponent holds only a king", async () => {
+        const jogoId = await createGame(api, {
+            tipoJogo: 0,
+            tempoDeTurnoEmMilisegundos: 1,
+            tabuleiroCasas: boardWith({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1" }),
+        });
+        await seatBothHumans(api, jogoId);
+        await sleep(20);
+
+        const { body } = await api.get(`/jogos/${jogoId}`);
+        expect(body.data.finalizado).toEqual({ id: 8, tipo: "Empate: Tempo esgotado sem material" });
+    });
+
+    it("the clocks stop when the game ends: the remaining time does not change afterwards", async () => {
+        const jogoId = await createGame(api, { tipoJogo: 0, tempoDeTurnoEmMilisegundos: 60000 });
+        await seatBothHumans(api, jogoId);
+        await api.delete(`/jogos/${jogoId}/jogadores/${BLACK}`);
+
+        const primeiro = await api.get(`/jogos/${jogoId}/simples`);
+        await sleep(30);
+        const segundo = await api.get(`/jogos/${jogoId}/simples`);
+
+        expect(primeiro.body.data.ladoBrancoTempoMilisegundosRestante).toBe(
+            segundo.body.data.ladoBrancoTempoMilisegundosRestante
+        );
+        expect(primeiro.body.data.ladoPretoTempoMilisegundosRestante).toBe(
+            segundo.body.data.ladoPretoTempoMilisegundosRestante
+        );
+        expect(segundo.body.data.ladoBrancoTempoMilisegundosRestante).toBeGreaterThanOrEqual(0);
+    });
 });
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 describe("characterization: draw offers", () => {
     let server: RunningServer;
