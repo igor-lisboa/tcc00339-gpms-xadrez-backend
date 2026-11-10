@@ -2,6 +2,7 @@ import type { Game } from "../../domain/game/Game";
 import type { RequestedAction } from "../../domain/game/RequestedAction";
 import type { Piece } from "../../domain/pieces/Piece";
 import type { EndingInfo } from "../../domain/catalog";
+import { canClaimDraw } from "../../domain/game/drawClaims";
 import { pieceWire, sideMoveWire, squareWire } from "./movePresenter";
 import { sideWire, turnWire } from "./sidePresenter";
 
@@ -37,6 +38,7 @@ export const gameWire = (game: Game) => ({
         ? null
         : { casaPeao: squareWire(game.promotion.pawnSquare), jogadaPromocao: sideMoveWire(game.promotion.move) },
     empatePropostoPeloLadoId: game.drawOfferedBy,
+    empateReivindicavel: canClaimDraw(game),
     resetPropostoPeloLadoId: game.resetOfferedBy,
     chequeLadoAtual: game.currentInCheck,
     tipoJogo: { id: game.gameType.id, integranteLadoTipo: game.gameType.integranteLadoTipo },
@@ -55,6 +57,7 @@ export const summaryWire = (game: Game, superSimplified: boolean) => ({
         ? null
         : { casaPeao: squareWire(game.promotion.pawnSquare), jogadaPromocao: sideMoveWire(game.promotion.move) },
     empatePropostoPeloLadoId: game.drawOfferedBy,
+    empateReivindicavel: canClaimDraw(game),
     resetPropostoPeloLadoId: game.resetOfferedBy,
     ladosIdDeslogados: game.sidesWithoutPlayer().map((side) => side.id),
     enPassantCasaCaptura: game.enPassant === null

@@ -453,6 +453,9 @@ paths:
         sending that move as `origem` and `destino`. A valid claim ends the game and the move is not played.
         A claim that is not valid plays the move (FIDE 9.5.1) and then leaves the draw offer
         (`jogadaRealizada` in the answer). Sending only one of the two squares is refused.
+
+        `empateReivindicavel` on the game (and in the `jogadaRealizada` socket event) says whether a claim
+        for the position on the board would succeed now.
       operationId: proposeDraw
       parameters:
         - $ref: "#/components/parameters/JogoId"
@@ -1661,6 +1664,7 @@ components:
         - acoesSolicitadas
         - casaPeaoPromocao
         - empatePropostoPeloLadoId
+        - empateReivindicavel
         - resetPropostoPeloLadoId
         - chequeLadoAtual
         - tipoJogo
@@ -1711,6 +1715,12 @@ components:
           description: Side that offered a draw and waits for the answer; null when there is no offer, and once the opponent moves or the game ends.
           allOf:
             - $ref: "#/components/schemas/SideId"
+        empateReivindicavel:
+          type: boolean
+          description: |
+            true when the side on turn could claim a draw now, for the position on the board (threefold
+            repetition or 50 moves): calling PUT /jogos/{jogoId}/empate/propoe would end the game.
+            false otherwise, and always false once the game has ended. A claim with an intended move is not covered.
         resetPropostoPeloLadoId:
           nullable: true
           description: Side that offered a reset and waits for the answer; null when there is no offer.
@@ -1764,6 +1774,7 @@ components:
         - acoesSolicitadas
         - casaPeaoPromocao
         - empatePropostoPeloLadoId
+        - empateReivindicavel
         - resetPropostoPeloLadoId
         - ladosIdDeslogados
         - enPassantCasaCaptura
@@ -1799,6 +1810,12 @@ components:
           nullable: true
           allOf:
             - $ref: "#/components/schemas/SideId"
+        empateReivindicavel:
+          type: boolean
+          description: |
+            true when the side on turn could claim a draw now, for the position on the board (threefold
+            repetition or 50 moves): calling PUT /jogos/{jogoId}/empate/propoe would end the game.
+            false otherwise, and always false once the game has ended. A claim with an intended move is not covered.
         resetPropostoPeloLadoId:
           nullable: true
           allOf:

@@ -14,7 +14,7 @@ A client connects with the query `jogador`. For a player it is `"<gameId>-<sideI
 | `jogoFinalizado` | both sides and the AI | `{ jogoFinalizacao, ladoIdVencedor }` (the finishing text, and the side that won or null) |
 | `adversarioEntrou` | the opponent of the side that joined (and the AI if it is an AI side) | none |
 | `forcaIa` | the AI player | none |
-| `jogadaRealizada` | the opponent of the mover (and the AI if it is an AI side) | `{ jogadaRealizada, chequeLadoAtual, promocaoPara }` |
+| `jogadaRealizada` | the opponent of the mover (and the AI if it is an AI side) | `{ jogadaRealizada, chequeLadoAtual, promocaoPara, empateReivindicavel }` (`empateReivindicavel`: the receiver, now on turn, could claim a draw) |
 | `empateProposto` | the opponent | `{ jogoId, ladoId }` |
 | `empatePropostoResposta` | the proposer, when the offer is declined by an answer or by the opponent's move | none |
 | `resetProposto` | the opponent | `{ jogoId, ladoId }` |

@@ -61,10 +61,17 @@ describe("characterization: how a game ends", () => {
             tabuleiroCasas: boardWith({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1", H8: "Torre-1" }),
         });
         await seatBothHumans(api, jogoId);
-        await shuffleKings(jogoId, 3);
+        await shuffleKings(jogoId, 2);
+        const cedo = await api.get(`/jogos/${jogoId}`);
+        expect(cedo.body.data.empateReivindicavel).toBe(false);
+        await shuffleKings(jogoId, 1);
 
         const antes = await api.get(`/jogos/${jogoId}`);
         expect(antes.body.data.finalizado).toBeNull();
+        // the side on turn is told it may claim, in the full game and in the summary
+        expect(antes.body.data.empateReivindicavel).toBe(true);
+        const resumo = await api.get(`/jogos/${jogoId}/simples`);
+        expect(resumo.body.data.empateReivindicavel).toBe(true);
 
         const claim = await api.put(`/jogos/${jogoId}/empate/propoe`, undefined, { lado: WHITE });
         expect(claim.body.message).toBe("Empate reivindicado com sucesso!");
@@ -176,12 +183,14 @@ describe("characterization: how a game ends", () => {
         const antes = await api.get(`/jogos/${jogoId}`);
         expect(antes.body.data.finalizado).toBeNull();
         expect(antes.body.data.tabuleiro.qtdTurnosSemCapturaOuMovimentoDePeao).toBe(100);
+        expect(antes.body.data.empateReivindicavel).toBe(true);
 
         const claim = await api.put(`/jogos/${jogoId}/empate/propoe`, undefined, { lado: WHITE });
         expect(claim.body.message).toBe("Empate reivindicado com sucesso!");
 
         const { body } = await api.get(`/jogos/${jogoId}`);
         expect(body.data.finalizado).toEqual({ id: 2, tipo: "Empate: Regra 50 movimentos" });
+        expect(body.data.empateReivindicavel).toBe(false);
         expect(body.data.acoesSolicitadas).toEqual([]);
         expect(body.data.empatePropostoPeloLadoId).toBeNull();
     });

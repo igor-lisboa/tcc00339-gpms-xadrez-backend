@@ -1,4 +1,5 @@
 import type { Server, Socket } from "socket.io";
+import { canClaimDraw } from "../../domain/game/drawClaims";
 import type { RequestedAction } from "../../domain/game/RequestedAction";
 import type { Side } from "../../domain/game/Side";
 import type { EventPublisher, GameEvent } from "../../application/ports/EventPublisher";
@@ -65,6 +66,8 @@ export class SocketHub implements EventPublisher {
                     jogadaRealizada: sideMoveWire(event.played.move),
                     chequeLadoAtual: event.game.currentInCheck,
                     promocaoPara: event.promotion ? event.promotion.piece.type : null,
+                    // the receiver is the side now on turn: the one that could claim
+                    empateReivindicavel: canClaimDraw(event.game),
                 });
                 return;
             case "drawOffered":

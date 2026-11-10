@@ -625,7 +625,7 @@
                     "Draws and resets"
                 ],
                 "summary": "Offer a draw to the opponent, or claim a draw",
-                "description": "Either side may offer a draw while the game runs (FIDE 9.1.2). The offer stands until the opponent\nanswers it, declines it by playing a move, or the game ends; it does not stop anyone from moving.\nMessage \"Empate proposto ao lado adversário com sucesso!\".\n\nWhen the side on turn offers and a claim is valid, the game ends at once and no offer is sent\n(message \"Empate reivindicado com sucesso!\"): the position on the board has appeared three times\nwith the same side to move, castling rights and en passant right (\"Empate: Regra das 3 posições\"),\nor 50 moves each have passed without a capture or a pawn move (\"Empate: Regra 50 movimentos\").\n\nThe side on turn may also claim for the position its next move would make (FIDE 9.2.1.1, 9.3.1) by\nsending that move as `origem` and `destino`. A valid claim ends the game and the move is not played.\nA claim that is not valid plays the move (FIDE 9.5.1) and then leaves the draw offer\n(`jogadaRealizada` in the answer). Sending only one of the two squares is refused.\n",
+                "description": "Either side may offer a draw while the game runs (FIDE 9.1.2). The offer stands until the opponent\nanswers it, declines it by playing a move, or the game ends; it does not stop anyone from moving.\nMessage \"Empate proposto ao lado adversário com sucesso!\".\n\nWhen the side on turn offers and a claim is valid, the game ends at once and no offer is sent\n(message \"Empate reivindicado com sucesso!\"): the position on the board has appeared three times\nwith the same side to move, castling rights and en passant right (\"Empate: Regra das 3 posições\"),\nor 50 moves each have passed without a capture or a pawn move (\"Empate: Regra 50 movimentos\").\n\nThe side on turn may also claim for the position its next move would make (FIDE 9.2.1.1, 9.3.1) by\nsending that move as `origem` and `destino`. A valid claim ends the game and the move is not played.\nA claim that is not valid plays the move (FIDE 9.5.1) and then leaves the draw offer\n(`jogadaRealizada` in the answer). Sending only one of the two squares is refused.\n\n`empateReivindicavel` on the game (and in the `jogadaRealizada` socket event) says whether a claim\nfor the position on the board would succeed now.\n",
                 "operationId": "proposeDraw",
                 "parameters": [
                     {
@@ -2686,6 +2686,7 @@
                     "acoesSolicitadas",
                     "casaPeaoPromocao",
                     "empatePropostoPeloLadoId",
+                    "empateReivindicavel",
                     "resetPropostoPeloLadoId",
                     "chequeLadoAtual",
                     "tipoJogo"
@@ -2766,6 +2767,10 @@
                                 "$ref": "#/components/schemas/SideId"
                             }
                         ]
+                    },
+                    "empateReivindicavel": {
+                        "type": "boolean",
+                        "description": "true when the side on turn could claim a draw now, for the position on the board (threefold\nrepetition or 50 moves): calling PUT /jogos/{jogoId}/empate/propoe would end the game.\nfalse otherwise, and always false once the game has ended. A claim with an intended move is not covered.\n"
                     },
                     "resetPropostoPeloLadoId": {
                         "nullable": true,
@@ -2849,6 +2854,7 @@
                     "acoesSolicitadas",
                     "casaPeaoPromocao",
                     "empatePropostoPeloLadoId",
+                    "empateReivindicavel",
                     "resetPropostoPeloLadoId",
                     "ladosIdDeslogados",
                     "enPassantCasaCaptura",
@@ -2900,6 +2906,10 @@
                                 "$ref": "#/components/schemas/SideId"
                             }
                         ]
+                    },
+                    "empateReivindicavel": {
+                        "type": "boolean",
+                        "description": "true when the side on turn could claim a draw now, for the position on the board (threefold\nrepetition or 50 moves): calling PUT /jogos/{jogoId}/empate/propoe would end the game.\nfalse otherwise, and always false once the game has ended. A claim with an intended move is not covered.\n"
                     },
                     "resetPropostoPeloLadoId": {
                         "nullable": true,

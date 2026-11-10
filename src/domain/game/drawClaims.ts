@@ -24,6 +24,9 @@ export const claimOnBoard = (game: Game): GameEnding | null => {
     return null;
 };
 
+/** Whether the side on turn could claim a draw right now for the position on the board, so a client can offer the claim. */
+export const canClaimDraw = (game: Game): boolean => game.ending === null && claimOnBoard(game) !== null;
+
 /**
  * The draw the side on turn may claim for the position its intended move would make, if any.
  * The move must be legal. It is tried on a copy of the board; the game does not change.

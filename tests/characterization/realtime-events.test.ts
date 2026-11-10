@@ -62,6 +62,7 @@ describe("characterization: real-time events", () => {
         expect(payload.jogadaRealizada.casaDestino.casa).toBe("E4");
         expect(payload.chequeLadoAtual).toBe(false);
         expect(payload.promocaoPara).toBeNull();
+        expect(payload.empateReivindicavel).toBe(false);
         expect(brancas.connected).toBe(true);
     });
 

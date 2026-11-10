@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { offerDraw } from "../../../src/domain/game/drawOffers";
-import { claimWithMove } from "../../../src/domain/game/drawClaims";
+import { canClaimDraw, claimWithMove } from "../../../src/domain/game/drawClaims";
 import { GameEnding } from "../../../src/shared/constants";
 import { gameWith, play } from "./helpers";
 
@@ -15,6 +15,41 @@ const kingShuffle: Ply[] = [
 ];
 
 const pieceOn = (game: ReturnType<typeof gameWith>, name: string) => game.board.pieceAt(game.squares.fromName(name));
+
+describe("whether the side on turn can claim now (canClaimDraw)", () => {
+    it("Given a new game, When asked, Then no claim is possible", () => {
+        expect(canClaimDraw(gameWith({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1" }))).toBe(false);
+    });
+
+    it("Given the position on the board appeared three times, When asked, Then a claim is possible", () => {
+        const game = gameWith({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1" });
+        play(game, [...kingShuffle, ...kingShuffle]);
+        expect(canClaimDraw(game)).toBe(false);
+
+        play(game, kingShuffle);
+
+        expect(canClaimDraw(game)).toBe(true);
+    });
+
+    it("Given 100 quiet plies, When asked, Then a claim is possible, and none once the claim has ended the game", () => {
+        const game = gameWith({ E1: "Rei-0", H2: "Peão-0", A8: "Rei-1" });
+        game.board.halfMoveClock = 100;
+        expect(canClaimDraw(game)).toBe(true);
+
+        offerDraw(game, 0, { from: "H2", to: "H3" });
+
+        expect(game.ending?.id).toBe(GameEnding.FiftyMoveRule);
+        expect(canClaimDraw(game)).toBe(false);
+    });
+
+    it("Given a game that has ended, When asked, Then no claim is possible", () => {
+        const game = gameWith({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1" });
+        game.board.halfMoveClock = 100;
+        game.finish(GameEnding.MutualAgreement);
+
+        expect(canClaimDraw(game)).toBe(false);
+    });
+});
 
 describe("claims with an intended move (FIDE 9.2.1.1 and 9.3.1)", () => {
     it("Given a move that would make a position appear for the third time, When claimed, Then the game is drawn and the move is not played", () => {
