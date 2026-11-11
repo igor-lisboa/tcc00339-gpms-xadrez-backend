@@ -68,7 +68,7 @@ docs/                      architecture, specs of implemented behaviour, API, ev
 - A game id is its index in the repository.
 - The `lado` header arrives as a string and is converted to a number at the HTTP edge; a missing header becomes `NaN`, which matches no side.
 - A GET can end a game when its clock runs out; `loadGame` saves that change.
-- Castling does not check the squares the king passes through (known deviation, see `docs/specs/special-moves.md`).
+- Types 0 and 1 are used for a checkmate and for a win on time; `motivoFinalizacao` on the game tells them apart.
 - The socket identifiers `"<gameId>-<sideId>"` and `"I.A."` are the contract with the frontend; the AI player answers to `"I.A."` inside the API process.
 
 ## Pointers

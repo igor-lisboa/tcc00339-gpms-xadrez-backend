@@ -9,7 +9,10 @@ export class Side {
     playerType: PlayerTypeInfo | null = null;
     remainingMs: number | null = null;
     pieces: PieceWithMoves[] = [];
+    /** Moves the pieces can physically make, before the king-safety rule. */
     possibleMoves: PossibleMove[] = [];
+    /** The possible moves that do not leave the side's own king attacked: what the side may really play. */
+    legalMoves: PossibleMove[] = [];
     readonly performedMoves: MoveRecord[] = [];
 
     constructor(readonly info: SideInfo) {}

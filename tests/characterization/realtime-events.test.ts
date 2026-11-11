@@ -102,7 +102,11 @@ describe("characterization: real-time events", () => {
         await api.delete(`/jogos/${jogoId}/jogadores/${BLACK}`, { lado: BLACK });
         const payload = await recebido;
 
-        expect(payload).toEqual({ jogoFinalizacao: "Desistência: Um jogador deixou a partida", ladoIdVencedor: 0 });
+        expect(payload).toEqual({
+            jogoFinalizacao: "Desistência: Um jogador deixou a partida",
+            motivoFinalizacao: "desistencia",
+            ladoIdVencedor: 0,
+        });
     });
 
     it("notifies the AI player when the game it plays in is created", async () => {

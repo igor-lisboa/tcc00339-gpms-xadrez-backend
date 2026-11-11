@@ -3,6 +3,7 @@ import type { RequestedAction } from "../../domain/game/RequestedAction";
 import type { Piece } from "../../domain/pieces/Piece";
 import type { EndingInfo } from "../../domain/catalog";
 import { canClaimDraw } from "../../domain/game/drawClaims";
+import { endingReasonWire } from "./catalogPresenter";
 import { pieceWire, sideMoveWire, squareWire } from "./movePresenter";
 import { sideWire, turnWire } from "./sidePresenter";
 
@@ -32,6 +33,7 @@ export const gameWire = (game: Game) => ({
         ? null
         : { casaCaptura: squareWire(game.enPassant.captureSquare), casaPeao: squareWire(game.enPassant.pawnSquare) },
     finalizado: endingWire(game.ending),
+    motivoFinalizacao: endingReasonWire(game.endingReason),
     ladoIdVencedor: game.winnerSideId,
     acoesSolicitadas: game.requestedActions.map(requestedActionWire),
     casaPeaoPromocao: game.promotion === null
@@ -64,6 +66,7 @@ export const summaryWire = (game: Game, superSimplified: boolean) => ({
         ? null
         : { casaCaptura: game.enPassant.captureSquare.name, casaPeao: game.enPassant.pawnSquare.name },
     finalizado: game.ending === null ? null : game.ending.tipo,
+    motivoFinalizacao: endingReasonWire(game.endingReason),
     ladoIdVencedor: game.winnerSideId,
     tipoJogo: game.gameType.integranteLadoTipo.map((type) => type.nome).join(" X "),
     tabuleiro: summaryBoardWire(game, superSimplified),

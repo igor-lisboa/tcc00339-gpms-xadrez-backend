@@ -212,7 +212,7 @@
                 "tags": [
                     "Catalogue"
                 ],
-                "summary": "Values the API sends for requested actions, move names and directions",
+                "summary": "Values the API sends for requested actions, move names, directions and ending reasons",
                 "description": "The values of the enums that the game data uses, so a client does not have to hard-code them.\nThe ending labels are in GET /tipos-de-finalizacao, the side and player types in their own lists.\n",
                 "operationId": "listEnums",
                 "responses": {
@@ -981,7 +981,7 @@
                     "Players"
                 ],
                 "summary": "Resign a side (the game ends as \"Desistência\")",
-                "description": "The opponent wins when a player sits on its side (`ladoIdVencedor` on the game); otherwise nobody wins.\nOnly the side itself may resign: the `lado` header must equal `ladoId`, otherwise the request is refused\nwith \"Só é possível desistir pelo próprio lado\".\n",
+                "description": "The opponent wins when a player sits on its side (`ladoIdVencedor` on the game); otherwise nobody wins.\nWhen the opponent could never checkmate, the game is a draw instead (FIDE 5.1.2): the ending is\n\"Empate: Insuficiência material\" and `motivoFinalizacao` is `desistencia`.\nOnly the side itself may resign: the `lado` header must equal `ladoId`, otherwise the request is refused\nwith \"Só é possível desistir pelo próprio lado\".\n",
                 "operationId": "leaveSide",
                 "parameters": [
                     {
@@ -1965,9 +1965,17 @@
                 "required": [
                     "acoesSolicitadas",
                     "nomesJogada",
-                    "direcoes"
+                    "direcoes",
+                    "motivosFinalizacao"
                 ],
                 "properties": {
+                    "motivosFinalizacao": {
+                        "type": "array",
+                        "description": "Values of `motivoFinalizacao` on a game.",
+                        "items": {
+                            "$ref": "#/components/schemas/EndingReason"
+                        }
+                    },
                     "acoesSolicitadas": {
                         "type": "array",
                         "description": "Values of `acao` in the requested actions of a game.",
@@ -2006,6 +2014,23 @@
                     "Empate: Regra das 5 posições",
                     "Empate: Regra 75 movimentos",
                     "Empate: Posição morta"
+                ]
+            },
+            "EndingReason": {
+                "type": "string",
+                "description": "Why a game ended. The winning endings (ids 0 and 1) are used for a checkmate and for a win on time,\nso read this field to tell them apart:\n- `xequeMate`: checkmate.\n- `tempoEsgotado`: a side ran out of time (a win for the other side, or the draw of id 8).\n- `desistencia`: a side resigned (id 7, or the draw of id 3 when the other side could never mate).\n- `reiAfogado`, `comumAcordo`, `regra50Movimentos`, `regra75Movimentos`, `repeticao3Posicoes`,\n  `repeticao5Posicoes`, `insuficienciaMaterial`, `posicaoMorta`: the draw named by the ending.\n",
+                "enum": [
+                    "xequeMate",
+                    "tempoEsgotado",
+                    "desistencia",
+                    "reiAfogado",
+                    "comumAcordo",
+                    "regra50Movimentos",
+                    "regra75Movimentos",
+                    "repeticao3Posicoes",
+                    "repeticao5Posicoes",
+                    "insuficienciaMaterial",
+                    "posicaoMorta"
                 ]
             },
             "RequestedActionName": {
@@ -2520,6 +2545,7 @@
                     },
                     "possiveisJogadas": {
                         "type": "array",
+                        "description": "The legal moves of the side. A move that would leave its own king attacked is not listed.",
                         "items": {
                             "$ref": "#/components/schemas/PossibleMove"
                         }
@@ -2682,6 +2708,7 @@
                     "ladoIdAtual",
                     "enPassantCasaCaptura",
                     "finalizado",
+                    "motivoFinalizacao",
                     "ladoIdVencedor",
                     "acoesSolicitadas",
                     "casaPeaoPromocao",
@@ -2713,7 +2740,7 @@
                     },
                     "tempoDeTurnoEmMilisegundos": {
                         "type": "integer",
-                        "description": "Time limit of a turn in milliseconds; -1 when the game has no limit."
+                        "description": "Time each side has for the whole game, in milliseconds; -1 when the game has no limit.\nDespite its name it is not a limit per turn: a side that uses it all up loses on time.\n"
                     },
                     "ladoIdAtual": {
                         "$ref": "#/components/schemas/SideId"
@@ -2732,6 +2759,15 @@
                         "allOf": [
                             {
                                 "$ref": "#/components/schemas/Ending"
+                            }
+                        ]
+                    },
+                    "motivoFinalizacao": {
+                        "nullable": true,
+                        "description": "Why the game ended; null while it is running.",
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/EndingReason"
                             }
                         ]
                     },
@@ -2859,6 +2895,7 @@
                     "ladosIdDeslogados",
                     "enPassantCasaCaptura",
                     "finalizado",
+                    "motivoFinalizacao",
                     "ladoIdVencedor",
                     "tipoJogo",
                     "tabuleiro"
@@ -2949,6 +2986,15 @@
                         "allOf": [
                             {
                                 "$ref": "#/components/schemas/EndingLabel"
+                            }
+                        ]
+                    },
+                    "motivoFinalizacao": {
+                        "nullable": true,
+                        "description": "Why the game ended; null while it is running.",
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/EndingReason"
                             }
                         ]
                     },

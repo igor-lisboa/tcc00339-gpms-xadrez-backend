@@ -108,7 +108,7 @@ These are the response fields the API returns today. The legacy adapter keeps th
 | `jogadasRealizadas` | `performedMoves` | side, piece |
 | `tipo` (player type on a side) | `playerType` | side |
 | `tempoMilisegundosRestante` | `remainingMs` | side |
-| `possiveisJogadas` | `possibleMoves` | side |
+| `possiveisJogadas` | `legalMoves` | side |
 | `pecas` | `pieces` | side |
 | `casaOrigem` / `casaDestino` | `fromSquare` / `toSquare` | move |
 | `nome` (move name, e.g. "Roque Menor") | `moveName` | move |
@@ -122,5 +122,6 @@ These are the response fields the API returns today. The legacy adapter keeps th
 | `chequeLadoAtual` | `currentSideInCheck` | event payload |
 | `promocaoPara` | `promotedTo` | event payload |
 | `jogoFinalizacao` | `endingText` | event payload |
+| `motivoFinalizacao` | `endingReason` | game, summary, event payload |
 
 Lookup values (data in `database.json`) still use the Portuguese strings for now: piece names (`Rei`, `Rainha`, …), side names (`Branco`, `Preto`), player types (`Humano`, `I.A.`), finishing texts. They are translated with the data in Phase 3. Until then, `npm run check:names` allows these lines with the marker `names-check:ignore`.

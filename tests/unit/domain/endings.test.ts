@@ -6,7 +6,7 @@ import { offerReset } from "../../../src/domain/game/resetOffers";
 import { seatPlayer } from "../../../src/domain/game/seating";
 import { checkClocks } from "../../../src/domain/game/clock";
 import { repetitionContext, timesPositionAppeared } from "../../../src/domain/game/repetition";
-import { GameEnding, PromotionPiece } from "../../../src/shared/constants";
+import { DEFAULT_ENDING_REASON, EndingReason, GameEnding, PromotionPiece } from "../../../src/shared/constants";
 import { gameWith, play } from "./helpers";
 
 type Ply = [number, string, string];
@@ -206,6 +206,7 @@ describe("timeout (FIDE 6.9)", () => {
         checkClocks(game);
 
         expect(game.ending?.id).toBe(GameEnding.BlackWins);
+        expect(game.endingReason).toBe(EndingReason.Timeout);
         expect(game.winnerSideId).toBe(1);
     });
 
@@ -215,7 +216,89 @@ describe("timeout (FIDE 6.9)", () => {
         checkClocks(game);
 
         expect(game.ending?.id).toBe(GameEnding.TimeoutDraw);
+        expect(game.endingReason).toBe(EndingReason.Timeout);
         expect(game.winnerSideId).toBeNull();
+    });
+});
+
+describe("ending reason", () => {
+    it("Given a running game, When read, Then it has no reason", () => {
+        expect(gameWith({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1" }).endingReason).toBeNull();
+    });
+
+    it("Given a mating move, When played, Then the reason is checkmate", () => {
+        const game = gameWith({ B6: "Rei-0", H1: "Torre-0", A8: "Rei-1" });
+
+        playMove(game, 0, "H1", "H8");
+
+        expect(game.ending?.id).toBe(GameEnding.WhiteWins);
+        expect(game.endingReason).toBe(EndingReason.Checkmate);
+    });
+
+    it("Given every ending, When finished without a named reason, Then a default reason exists", () => {
+        Object.values(GameEnding)
+            .filter((value): value is GameEnding => typeof value === "number")
+            .forEach((ending) => {
+                const game = gameWith({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1" });
+                game.finish(ending);
+                expect(game.endingReason).toBe(DEFAULT_ENDING_REASON[ending]);
+            });
+    });
+
+    it("Given a finished game, When finished again, Then the first ending and its reason stay", () => {
+        const game = gameWith({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1" });
+        game.finish(GameEnding.MutualAgreement);
+
+        seatPlayer(game, 1, null);
+
+        expect(game.endingReason).toBe(EndingReason.MutualAgreement);
+    });
+});
+
+/**
+ * The last moves of two real AI against AI games, taken from the games list. Both ended in stalemate, and in the first
+ * the stalemated king stood next to a protected pawn that the old move list still offered as a capture.
+ */
+describe("recorded games", () => {
+    it("Given Black's king on G7 hemmed in by king, bishop, pawn and rook, When the rook goes to E8, Then it is stalemate", () => {
+        const game = gameWith({ G5: "Rei-0", F5: "Bispo-0", G6: "Peão-0", D7: "Torre-0", G8: "Rei-1" });
+        play(game, [[0, "D7", "D8"], [1, "G8", "G7"]]);
+        // the pawn on G6 is protected, so taking it is not a move
+        playMove(game, 0, "D8", "E8");
+
+        expect(game.ending?.id).toBe(GameEnding.Stalemate);
+        expect(game.endingReason).toBe(EndingReason.Stalemate);
+        expect(game.black.legalMoves).toEqual([]);
+        expect(game.currentInCheck).toBe(false);
+    });
+
+    it("Given White's bare king on D3, When the queen goes to C1, Then it is stalemate", () => {
+        const game = gameWith({ E3: "Rei-0", D5: "Rei-1", G1: "Rainha-1", G2: "Bispo-1", B2: "Torre-1" });
+        play(game, [[0, "E3", "D3"], [1, "G1", "C1"]]);
+
+        expect(game.ending?.id).toBe(GameEnding.Stalemate);
+        expect(game.white.legalMoves).toEqual([]);
+    });
+});
+
+describe("castling across an attacked square (FIDE 3.8.2.2.2)", () => {
+    it("Given a rook attacking F1, When White's moves are listed, Then kingside castling is not offered", () => {
+        const game = gameWith({ E1: "Rei-0", H1: "Torre-0", F8: "Torre-1", A8: "Rei-1" });
+
+        expect(game.white.legalMoves.some((move) => move.from.name === "E1" && move.to.name === "G1")).toBe(false);
+        expect(() => playMove(game, 0, "E1", "G1")).toThrow();
+    });
+
+    it("Given a rook attacking D1, When White's moves are listed, Then queenside castling is not offered", () => {
+        const game = gameWith({ E1: "Rei-0", A1: "Torre-0", D8: "Torre-1", H8: "Rei-1" });
+
+        expect(game.white.legalMoves.some((move) => move.to.name === "C1" && move.from.name === "E1")).toBe(false);
+    });
+
+    it("Given a rook attacking only B1, When White's moves are listed, Then queenside castling is offered: the king does not cross B1", () => {
+        const game = gameWith({ E1: "Rei-0", A1: "Torre-0", B8: "Torre-1", H8: "Rei-1" });
+
+        expect(game.white.legalMoves.some((move) => move.to.name === "C1" && move.from.name === "E1")).toBe(true);
     });
 });
 
@@ -226,7 +309,27 @@ describe("resignation (FIDE 5.1.2)", () => {
         seatPlayer(game, 1, null);
 
         expect(game.ending?.id).toBe(GameEnding.Resignation);
+        expect(game.endingReason).toBe(EndingReason.Resignation);
         expect(game.winnerSideId).toBe(0);
+    });
+
+    it("Given the opponent has only king and knight against a queen, When the queen's side resigns, Then it is a draw", () => {
+        const game = gameWith({ E1: "Rei-0", D1: "Rainha-0", A8: "Rei-1", C6: "Cavalo-1" });
+
+        seatPlayer(game, 0, null);
+
+        expect(game.ending?.id).toBe(GameEnding.InsufficientMaterial);
+        expect(game.endingReason).toBe(EndingReason.Resignation);
+        expect(game.winnerSideId).toBeNull();
+    });
+
+    it("Given the opponent has king and knight against a rook, When the rook's side resigns, Then the opponent wins: a mate was possible", () => {
+        const game = gameWith({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1", C6: "Cavalo-1" });
+
+        seatPlayer(game, 0, null);
+
+        expect(game.ending?.id).toBe(GameEnding.Resignation);
+        expect(game.winnerSideId).toBe(1);
     });
 
     it("Given the opponent's seat is empty, When a side leaves, Then nobody wins", () => {

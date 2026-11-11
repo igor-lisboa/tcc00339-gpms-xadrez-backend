@@ -1,7 +1,7 @@
 import type { EndingInfo } from "../../domain/catalog";
 import { RequestedActionNames } from "../../domain/game/RequestedAction";
 import { MoveNames } from "../../domain/pieces/pieceNames";
-import { GameEnding, Side } from "../../shared/constants";
+import { EndingReason, GameEnding, Side } from "../../shared/constants";
 import { DIRECTION_NAMES } from "./sidePresenter";
 
 /**
@@ -39,9 +39,27 @@ export const endingTypeWire = (ending: EndingInfo) => ({
     ladoIdVencedor: WINNING_SIDE[ending.id as GameEnding] ?? null,
 });
 
+/** Wire names of the reasons a game ends (`motivoFinalizacao` on a game and on the jogoFinalizado event). */
+export const ENDING_REASON_NAMES: Record<EndingReason, string> = {
+    [EndingReason.Checkmate]: "xequeMate",
+    [EndingReason.Timeout]: "tempoEsgotado",
+    [EndingReason.Resignation]: "desistencia",
+    [EndingReason.Stalemate]: "reiAfogado",
+    [EndingReason.MutualAgreement]: "comumAcordo",
+    [EndingReason.FiftyMoveRule]: "regra50Movimentos",
+    [EndingReason.SeventyFiveMoveRule]: "regra75Movimentos",
+    [EndingReason.ThreefoldRepetition]: "repeticao3Posicoes",
+    [EndingReason.FivefoldRepetition]: "repeticao5Posicoes",
+    [EndingReason.InsufficientMaterial]: "insuficienciaMaterial",
+    [EndingReason.DeadPosition]: "posicaoMorta",
+};
+
+export const endingReasonWire = (reason: EndingReason | null): string | null => (reason === null ? null : ENDING_REASON_NAMES[reason]);
+
 /** The names used on the wire. Move names may be null (a plain move), as in the MoveRecord of a move. */
 export const enumsWire = () => ({
     acoesSolicitadas: Object.values(RequestedActionNames),
     nomesJogada: [...Object.values(MoveNames), null],
     direcoes: Object.values(DIRECTION_NAMES),
+    motivosFinalizacao: Object.values(ENDING_REASON_NAMES),
 });

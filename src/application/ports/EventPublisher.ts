@@ -3,12 +3,13 @@ import type { PlayedMove } from "../../domain/game/playMove";
 import type { PromotedPawn } from "../../domain/game/promotePawn";
 import type { RequestedAction } from "../../domain/game/RequestedAction";
 import type { Side } from "../../domain/game/Side";
+import type { EndingReason } from "../../shared/constants";
 
 /** Something that happened, described without any transport detail. The socket adapter decides who hears it. */
 export type GameEvent =
     | { readonly type: "gameCreated" }
     | { readonly type: "gameReset"; readonly gameId: number }
-    | { readonly type: "gameFinished"; readonly gameId: number; readonly ending: string; readonly winnerSideId: number | null; readonly sides: Side[] }
+    | { readonly type: "gameFinished"; readonly gameId: number; readonly ending: string; readonly reason: EndingReason | null; readonly winnerSideId: number | null; readonly sides: Side[] }
     | { readonly type: "playerJoined"; readonly gameId: number; readonly opponent: Side }
     | { readonly type: "moveMade"; readonly gameId: number; readonly played: PlayedMove; readonly game: Game; readonly promotion: PromotedPawn | null; readonly opponent: Side }
     | { readonly type: "drawOffered"; readonly gameId: number; readonly opponent: Side }

@@ -20,7 +20,8 @@ export const sideWire = (side: Side) => ({
     jogadasRealizadas: side.performedMoves.map(sideMoveWire),
     tipo: side.playerType === null ? null : { id: side.playerType.id, nome: side.playerType.nome },
     tempoMilisegundosRestante: side.remainingMs,
-    possiveisJogadas: side.possibleMoves.map(possibleMoveWire),
+    // only legal moves: a move that would leave the side's own king attacked is not listed
+    possiveisJogadas: side.legalMoves.map(possibleMoveWire),
     pecas: side.pieces.map(pieceOnSquareWire),
 });
 

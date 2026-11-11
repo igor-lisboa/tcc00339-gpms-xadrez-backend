@@ -36,3 +36,8 @@ Each turn can have a time limit. The game tracks the time each side has left.
 ## Changed in the FIDE endings fix
 - Before: a timeout looked only at the opponent's own pieces, so king and knight against a side with a rook was a draw, and king and two knights was always a draw. A side that had offered a draw could not move until the opponent answered, so it could lose on time while waiting.
 - Now: the pieces of the side that ran out count too (FIDE 6.9), and a draw offer never stops a move. Tests: `tests/unit/domain/endings.test.ts` (describes "timeout (FIDE 6.9)" and "draw offers (FIDE 9.1.2)").
+
+## Changed in the ending reasons fix
+- Before: a win on time looked the same as a checkmate (type 0 or 1), so a client could not say why a side won.
+- Now: the game carries `motivoFinalizacao`; a timeout sets it to `tempoEsgotado`, for the win and for the draw of type 8. See [game-lifecycle.md](game-lifecycle.md).
+- `tempoDeTurnoEmMilisegundos` is the time each side has for the whole game, not a limit per turn. The name is kept for the frontend.

@@ -3,18 +3,17 @@ import type { Catalog, EndingInfo, GameTypeInfo, SideInfo } from "../catalog";
 import type { Board } from "../board/Board";
 import type { SquareLookup, Square } from "../board/SquareLookup";
 import type { EnPassantTarget } from "../moves/candidateMoves";
-import { legalMovesOf as filterLegalMoves, isKingAttacked as isAttacked } from "../moves/legality";
+import { legalMovesOf as filterLegalMoves, isKingAttacked as isAttacked, mayCastle } from "../moves/legality";
 import type { PossibleMove } from "../moves/possibleMoves";
 import type { MoveRecord } from "../moves/MoveRecord";
 import { piecesOfSide, type PieceWithMoves } from "../moves/rawMoves";
 import { possibleMovesOfSide } from "../moves/possibleMoves";
-import { castlingPathClear } from "../moves/castling";
 import { movesRulesFor, type Geometry, type Position } from "../position";
 import { RequestedActionNames, type RequestedAction } from "./RequestedAction";
 import { Side } from "./Side";
 import type { Turn } from "./Turn";
 import { PieceNames } from "../pieces/pieceNames";
-import { GameEnding } from "../../shared/constants";
+import { DEFAULT_ENDING_REASON, GameEnding, type EndingReason } from "../../shared/constants";
 
 /**
  * A chess game: both sides, the board, the turns and the state of offers and promotion. Each action
@@ -30,6 +29,7 @@ export class Game {
     currentSideId = 0;
     enPassant: EnPassantTarget | null = null;
     ending: EndingInfo | null = null;
+    endingReason: EndingReason | null = null;
     winnerSideId: number | null = null;
     requestedActions: RequestedAction[] = [];
     promotion: { readonly pawnSquare: Square; readonly move: MoveRecord } | null = null;
@@ -98,27 +98,26 @@ export class Game {
         return isAttacked(this.position(), sideId);
     }
 
-    /** Recomputes the pieces and the possible moves of both sides. Castling needs its right, a clear path, and no check. */
+    /** Recomputes the pieces and the moves of both sides. Castling needs its right, a clear and safe path, and no check. */
     refresh(): void {
-        const rules = movesRulesFor(
-            this.position(),
-            (sideId, queenside) => castlingPathClear(this.board, sideId, this.white.id, queenside) && !this.isKingAttacked(sideId)
-        );
+        const rules = movesRulesFor(this.position(), (sideId, queenside) => mayCastle(this.position(), sideId, queenside));
         for (const side of this.sides()) {
             side.pieces = piecesOfSide(this.board, side.id, rules);
         }
         for (const side of this.sides()) {
             side.possibleMoves = possibleMovesOfSide(side.pieces, this.opponentOf(side.id).pieces, this.board, this.enPassant);
+            side.legalMoves = this.legalMovesOf(side.id);
         }
     }
 
     /** Ends the game once; later calls do nothing. A win names its side; a resignation passes the winner, if any. */
-    finish(endingId: number, winnerSideId: number | null = null): void {
+    finish(endingId: GameEnding, winnerSideId: number | null = null, reason = DEFAULT_ENDING_REASON[endingId]): void {
         const ending = this.catalog.endings.find((item) => item.id === endingId);
         if (this.ending !== null || ending === undefined) {
             return;
         }
         this.ending = ending;
+        this.endingReason = reason;
         const wins: Record<number, number> = { [GameEnding.WhiteWins]: this.white.id, [GameEnding.BlackWins]: this.black.id };
         this.winnerSideId = wins[endingId] ?? winnerSideId;
         // the clocks stop here: the side on turn keeps the time it had when the game ended

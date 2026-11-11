@@ -4,6 +4,7 @@ import type { RequestedAction } from "../../domain/game/RequestedAction";
 import type { Side } from "../../domain/game/Side";
 import type { EventPublisher, GameEvent } from "../../application/ports/EventPublisher";
 import type { AiListener } from "../../application/ports/AiListener";
+import { endingReasonWire } from "../../http/presenters/catalogPresenter";
 import { sideMoveWire } from "../../http/presenters/movePresenter";
 import { logger } from "../../shared/logger";
 
@@ -55,6 +56,7 @@ export class SocketHub implements EventPublisher {
             case "gameFinished":
                 this.sendTo(this.gameIdentifiers(event.gameId), "jogoFinalizado", {
                     jogoFinalizacao: event.ending,
+                    motivoFinalizacao: endingReasonWire(event.reason),
                     ladoIdVencedor: event.winnerSideId,
                 });
                 return;

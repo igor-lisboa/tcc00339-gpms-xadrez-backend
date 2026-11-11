@@ -25,6 +25,7 @@ describe("characterization: how a game ends", () => {
 
         const { body } = await api.get(`/jogos/${jogoId}`);
         expect(body.data.finalizado).toEqual({ id: 1, tipo: "Vitória: Preto" });
+        expect(body.data.motivoFinalizacao).toBe("xequeMate");
         expect(body.data.ladoIdVencedor).toBe(1);
         expect(body.data.chequeLadoAtual).toBe(true);
 
@@ -43,6 +44,17 @@ describe("characterization: how a game ends", () => {
 
         const { body } = await api.get(`/jogos/${jogoId}`);
         expect(body.data.finalizado).toEqual({ id: 4, tipo: "Empate: Rei afogado" });
+        expect(body.data.motivoFinalizacao).toBe("reiAfogado");
+        // a stalemated side has no move to show
+        expect(body.data.ladoPreto.possiveisJogadas).toEqual([]);
+    });
+
+    it("a running game has no ending reason", async () => {
+        const jogoId = await createGameWithHumans(api);
+        const { body } = await api.get(`/jogos/${jogoId}`);
+        expect(body.data.motivoFinalizacao).toBeNull();
+        const simples = await api.get(`/jogos/${jogoId}/simples`);
+        expect(simples.body.data.motivoFinalizacao).toBeNull();
     });
 
     /** Four plies that bring both kings back. The first one costs White its castling right, so the start position never returns. */
@@ -200,7 +212,23 @@ describe("characterization: how a game ends", () => {
         await api.delete(`/jogos/${jogoId}/jogadores/${BLACK}`, { lado: BLACK });
         const { body } = await api.get(`/jogos/${jogoId}`);
         expect(body.data.finalizado.id).toBe(7);
+        expect(body.data.motivoFinalizacao).toBe("desistencia");
         expect(body.data.ladoIdVencedor).toBe(0);
+    });
+
+    it("resigning against a side that could never mate is a draw (FIDE 5.1.2)", async () => {
+        const jogoId = await createGame(api, {
+            tipoJogo: 0,
+            tabuleiroCasas: boardWith({ E1: "Rei-0", D1: "Rainha-0", A8: "Rei-1", C6: "Cavalo-1" }),
+        });
+        await seatBothHumans(api, jogoId);
+
+        await api.delete(`/jogos/${jogoId}/jogadores/${WHITE}`, { lado: WHITE });
+
+        const { body } = await api.get(`/jogos/${jogoId}`);
+        expect(body.data.finalizado).toEqual({ id: 3, tipo: "Empate: Insuficiência material" });
+        expect(body.data.motivoFinalizacao).toBe("desistencia");
+        expect(body.data.ladoIdVencedor).toBeNull();
     });
 
     it("a time out is a win for the opponent when the opponent has a rook", async () => {
@@ -214,6 +242,11 @@ describe("characterization: how a game ends", () => {
 
         const { body } = await api.get(`/jogos/${jogoId}`);
         expect(body.data.finalizado).toEqual({ id: 1, tipo: "Vitória: Preto" });
+        // same ending as a checkmate: the reason tells them apart
+        expect(body.data.motivoFinalizacao).toBe("tempoEsgotado");
+        expect(body.data.ladoIdVencedor).toBe(1);
+        const simples = await api.get(`/jogos/${jogoId}/simples`);
+        expect(simples.body.data.motivoFinalizacao).toBe("tempoEsgotado");
         // the side that ran out stays on turn: the frontend reads it as the side that lost on time
         expect(body.data.ladoIdAtual).toBe(0);
     });
@@ -229,6 +262,7 @@ describe("characterization: how a game ends", () => {
 
         const { body } = await api.get(`/jogos/${jogoId}`);
         expect(body.data.finalizado).toEqual({ id: 8, tipo: "Empate: Tempo esgotado sem material" });
+        expect(body.data.motivoFinalizacao).toBe("tempoEsgotado");
         expect(body.data.ladoIdAtual).toBe(0);
     });
 

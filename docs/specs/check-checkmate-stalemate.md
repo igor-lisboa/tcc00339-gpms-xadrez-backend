@@ -25,3 +25,8 @@ Tell the player on turn whether the king is in check, and end the game when the 
 ## Changed in the FIDE endings fix
 - Before: insufficient material was checked before checkmate, so a capture that mated and left little material (for example king and knight against king and bishop) was scored as type 3 "Empate: Insuficiência material".
 - Now: checkmate and stalemate are judged first.
+
+## Changed in the ending reasons fix
+- A checkmate sets `motivoFinalizacao` to `xequeMate`; a stalemate sets it to `reiAfogado`.
+- Before: `possiveisJogadas` of a side listed moves before the king-safety rule, so a stalemated side could still show a move (for example a king taking a protected pawn), and a pinned piece showed its moves.
+- Now: `possiveisJogadas` lists legal moves only. A side with no legal move shows an empty list. Tests: `endings-draws-and-reset.test.ts` ("ends in a stalemate draw..."), `moves-and-special-moves.test.ts` ("lists only legal moves in possiveisJogadas: a pinned piece has none"), `tests/unit/domain/endings.test.ts` (describe "recorded games").

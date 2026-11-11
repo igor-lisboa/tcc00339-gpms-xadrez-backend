@@ -1,4 +1,4 @@
-import { GameEnding } from "../../shared/constants";
+import { EndingReason, GameEnding } from "../../shared/constants";
 import { canEverMate } from "../rules/material";
 import type { Game } from "./Game";
 import { Turn } from "./Turn";
@@ -37,7 +37,7 @@ const judgeTimeout = (game: Game, sideId: number): void => {
     game.refresh();
     const opponent = game.opponentOf(sideId);
     if (canEverMate(opponent.pieces, game.sideById(sideId).pieces)) {
-        game.finish(sideId === game.white.id ? GameEnding.BlackWins : GameEnding.WhiteWins);
+        game.finish(sideId === game.white.id ? GameEnding.BlackWins : GameEnding.WhiteWins, null, EndingReason.Timeout);
     } else {
         game.finish(GameEnding.TimeoutDraw);
     }

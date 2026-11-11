@@ -31,7 +31,7 @@ export enum GameEnding {
     MutualAgreement = 5,
     /** Claimed by the side on turn when the position has appeared three times (FIDE 9.2). */
     ThreefoldRepetition = 6,
-    /** A player left; the opponent wins when seated (FIDE 5.1.2). The winner is on the game. */
+    /** A player left; the opponent wins when seated and able to mate (FIDE 5.1.2). The winner is on the game. */
     Resignation = 7,
     /** The side on the move ran out of time and the other side could never checkmate (FIDE 6.9). */
     TimeoutDraw = 8,
@@ -42,6 +42,40 @@ export enum GameEnding {
     /** Automatic: a dead position that is not about material, such as kings behind fully blocked pawns (FIDE 5.2.2). */
     DeadPosition = 11,
 }
+
+/**
+ * Why a game ended. The two winning endings do not say how the side won, and a draw can also come
+ * from a clock or a resignation, so the game carries the reason next to its ending.
+ */
+export enum EndingReason {
+    Checkmate = "checkmate",
+    Timeout = "timeout",
+    Resignation = "resignation",
+    Stalemate = "stalemate",
+    MutualAgreement = "mutualAgreement",
+    FiftyMoveRule = "fiftyMoveRule",
+    SeventyFiveMoveRule = "seventyFiveMoveRule",
+    ThreefoldRepetition = "threefoldRepetition",
+    FivefoldRepetition = "fivefoldRepetition",
+    InsufficientMaterial = "insufficientMaterial",
+    DeadPosition = "deadPosition",
+}
+
+/** The reason an ending has when the caller of `finish` names none. A win is a checkmate unless said otherwise. */
+export const DEFAULT_ENDING_REASON: Record<GameEnding, EndingReason> = {
+    [GameEnding.WhiteWins]: EndingReason.Checkmate,
+    [GameEnding.BlackWins]: EndingReason.Checkmate,
+    [GameEnding.FiftyMoveRule]: EndingReason.FiftyMoveRule,
+    [GameEnding.InsufficientMaterial]: EndingReason.InsufficientMaterial,
+    [GameEnding.Stalemate]: EndingReason.Stalemate,
+    [GameEnding.MutualAgreement]: EndingReason.MutualAgreement,
+    [GameEnding.ThreefoldRepetition]: EndingReason.ThreefoldRepetition,
+    [GameEnding.Resignation]: EndingReason.Resignation,
+    [GameEnding.TimeoutDraw]: EndingReason.Timeout,
+    [GameEnding.FivefoldRepetition]: EndingReason.FivefoldRepetition,
+    [GameEnding.SeventyFiveMoveRule]: EndingReason.SeventyFiveMoveRule,
+    [GameEnding.DeadPosition]: EndingReason.DeadPosition,
+};
 
 /** Piece ids that a pawn may be promoted to (see tiposPeca in database.json). */
 export enum PromotionPiece {

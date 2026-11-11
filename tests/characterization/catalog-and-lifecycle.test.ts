@@ -109,6 +109,19 @@ describe("characterization: catalog endpoints", () => {
             "trasDireita",
             "especial",
         ]);
+        expect(body.data.motivosFinalizacao).toEqual([
+            "xequeMate",
+            "tempoEsgotado",
+            "desistencia",
+            "reiAfogado",
+            "comumAcordo",
+            "regra50Movimentos",
+            "regra75Movimentos",
+            "repeticao3Posicoes",
+            "repeticao5Posicoes",
+            "insuficienciaMaterial",
+            "posicaoMorta",
+        ]);
     });
 
     it("GET /tabela-equivalencia returns 64 squares in reverse order (A8 first)", async () => {

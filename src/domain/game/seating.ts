@@ -1,5 +1,6 @@
 import type { GameTypeInfo, PlayerTypeInfo } from "../catalog";
-import { GameEnding } from "../../shared/constants";
+import { EndingReason, GameEnding } from "../../shared/constants";
+import { canEverMate } from "../rules/material";
 import type { Game } from "./Game";
 import type { Side } from "./Side";
 import { startTurn } from "./clock";
@@ -17,15 +18,29 @@ export const applyGameType = (game: Game, gameType: GameTypeInfo): void => {
 };
 
 /**
- * Seats a player on a side. Passing null removes the player and resigns the game:
- * the opponent wins if a player sits on that side (FIDE 5.1.2), otherwise nobody does.
+ * FIDE 5.1.2: the side that resigns loses, unless the opponent could not checkmate by any series of legal
+ * moves; then the game is a draw. With the other seat empty there is nobody to win.
  */
+const resign = (game: Game, side: Side): void => {
+    const opponent = game.opponentOf(side.id);
+    if (opponent.playerType === null) {
+        game.finish(GameEnding.Resignation);
+        return;
+    }
+    game.refresh();
+    if (canEverMate(opponent.pieces, side.pieces)) {
+        game.finish(GameEnding.Resignation, opponent.id);
+    } else {
+        game.finish(GameEnding.InsufficientMaterial, null, EndingReason.Resignation);
+    }
+};
+
+/** Seats a player on a side. Passing null removes the player and resigns the game. */
 export const seatPlayer = (game: Game, sideId: number, playerType: PlayerTypeInfo | null): Side => {
     const side = game.sideById(sideId);
     if (playerType === null) {
         side.removeType();
-        const opponent = game.opponentOf(sideId);
-        game.finish(GameEnding.Resignation, opponent.playerType === null ? null : opponent.id);
+        resign(game, side);
         return side;
     }
 

@@ -174,7 +174,7 @@ paths:
   /enumeracoes:
     get:
       tags: [Catalogue]
-      summary: Values the API sends for requested actions, move names and directions
+      summary: Values the API sends for requested actions, move names, directions and ending reasons
       description: |
         The values of the enums that the game data uses, so a client does not have to hard-code them.
         The ending labels are in GET /tipos-de-finalizacao, the side and player types in their own lists.
@@ -664,6 +664,8 @@ paths:
       summary: Resign a side (the game ends as "Desistência")
       description: |
         The opponent wins when a player sits on its side (`ladoIdVencedor` on the game); otherwise nobody wins.
+        When the opponent could never checkmate, the game is a draw instead (FIDE 5.1.2): the ending is
+        "Empate: Insuficiência material" and `motivoFinalizacao` is `desistencia`.
         Only the side itself may resign: the `lado` header must equal `ladoId`, otherwise the request is refused
         with "Só é possível desistir pelo próprio lado".
       operationId: leaveSide
@@ -1226,8 +1228,13 @@ components:
     EnumCatalog:
       type: object
       description: Values of the enums used in the game data (see GET /enumeracoes).
-      required: [acoesSolicitadas, nomesJogada, direcoes]
+      required: [acoesSolicitadas, nomesJogada, direcoes, motivosFinalizacao]
       properties:
+        motivosFinalizacao:
+          type: array
+          description: Values of `motivoFinalizacao` on a game.
+          items:
+            $ref: "#/components/schemas/EndingReason"
         acoesSolicitadas:
           type: array
           description: Values of `acao` in the requested actions of a game.
@@ -1259,6 +1266,29 @@ components:
         - "Empate: Regra das 5 posições"
         - "Empate: Regra 75 movimentos"
         - "Empate: Posição morta"
+
+    EndingReason:
+      type: string
+      description: |
+        Why a game ended. The winning endings (ids 0 and 1) are used for a checkmate and for a win on time,
+        so read this field to tell them apart:
+        - `xequeMate`: checkmate.
+        - `tempoEsgotado`: a side ran out of time (a win for the other side, or the draw of id 8).
+        - `desistencia`: a side resigned (id 7, or the draw of id 3 when the other side could never mate).
+        - `reiAfogado`, `comumAcordo`, `regra50Movimentos`, `regra75Movimentos`, `repeticao3Posicoes`,
+          `repeticao5Posicoes`, `insuficienciaMaterial`, `posicaoMorta`: the draw named by the ending.
+      enum:
+        - xequeMate
+        - tempoEsgotado
+        - desistencia
+        - reiAfogado
+        - comumAcordo
+        - regra50Movimentos
+        - regra75Movimentos
+        - repeticao3Posicoes
+        - repeticao5Posicoes
+        - insuficienciaMaterial
+        - posicaoMorta
 
     RequestedActionName:
       type: string
@@ -1558,6 +1588,7 @@ components:
           description: Clock left for the side, in milliseconds; null when the game has no clock.
         possiveisJogadas:
           type: array
+          description: The legal moves of the side. A move that would leave its own king attacked is not listed.
           items:
             $ref: "#/components/schemas/PossibleMove"
         pecas:
@@ -1660,6 +1691,7 @@ components:
         - ladoIdAtual
         - enPassantCasaCaptura
         - finalizado
+        - motivoFinalizacao
         - ladoIdVencedor
         - acoesSolicitadas
         - casaPeaoPromocao
@@ -1684,7 +1716,9 @@ components:
             $ref: "#/components/schemas/Turn"
         tempoDeTurnoEmMilisegundos:
           type: integer
-          description: Time limit of a turn in milliseconds; -1 when the game has no limit.
+          description: |
+            Time each side has for the whole game, in milliseconds; -1 when the game has no limit.
+            Despite its name it is not a limit per turn: a side that uses it all up loses on time.
         ladoIdAtual:
           $ref: "#/components/schemas/SideId"
         enPassantCasaCaptura:
@@ -1696,6 +1730,11 @@ components:
           description: How the game ended; null while it is running.
           allOf:
             - $ref: "#/components/schemas/Ending"
+        motivoFinalizacao:
+          nullable: true
+          description: Why the game ended; null while it is running.
+          allOf:
+            - $ref: "#/components/schemas/EndingReason"
         ladoIdVencedor:
           nullable: true
           description: Side that won the game; null while it runs, after a draw, and after a resignation with the other seat empty.
@@ -1779,6 +1818,7 @@ components:
         - ladosIdDeslogados
         - enPassantCasaCaptura
         - finalizado
+        - motivoFinalizacao
         - ladoIdVencedor
         - tipoJogo
         - tabuleiro
@@ -1840,6 +1880,11 @@ components:
           description: Label of the ending; null while the game is running.
           allOf:
             - $ref: "#/components/schemas/EndingLabel"
+        motivoFinalizacao:
+          nullable: true
+          description: Why the game ended; null while it is running.
+          allOf:
+            - $ref: "#/components/schemas/EndingReason"
         ladoIdVencedor:
           nullable: true
           description: Side that won the game; null while it runs, after a draw, and after a resignation with the other seat empty.

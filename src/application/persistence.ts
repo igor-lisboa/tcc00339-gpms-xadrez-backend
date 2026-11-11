@@ -51,6 +51,7 @@ export const saveGame = (context: GameContext, game: Game): void => {
             type: "gameFinished",
             gameId: game.id ?? -1,
             ending,
+            reason: game.endingReason,
             winnerSideId: game.winnerSideId,
             sides: game.sides(),
         });

@@ -166,7 +166,7 @@ describe("characterization: special moves", () => {
         expect(tabuleiro.body.data.tabuleiro[7][7]).toBeNull();
     });
 
-    it("known deviation: castling is offered even when the king's path is attacked (see docs/specs/special-moves.md)", async () => {
+    it("does not offer castling when the square the king crosses is attacked, and refuses the move (FIDE 3.8.2.2.2)", async () => {
         const jogoId = await createGame(api, {
             tipoJogo: 0,
             tabuleiroCasas: boardWith({ E1: "Rei-0", H1: "Torre-0", F8: "Torre-1", A8: "Rei-1" }),
@@ -174,7 +174,23 @@ describe("characterization: special moves", () => {
         await seatBothHumans(api, jogoId);
 
         const { body } = await api.get(`/jogos/${jogoId}/pecas/E1/possiveis-jogadas`, { lado: WHITE });
-        expect(body.data.find((jogada: any) => jogada.casaDestino.casa === "G1").nome).toBe("Roque Menor");
+        expect(body.data.find((jogada: any) => jogada.casaDestino.casa === "G1")).toBeUndefined();
+
+        const response = await api.post(`/jogos/${jogoId}/pecas/E1/move/G1`, undefined, { lado: WHITE });
+        expect(response.body.success).toBe(false);
+    });
+
+    it("lists only legal moves in possiveisJogadas: a pinned piece has none", async () => {
+        const jogoId = await createGame(api, {
+            tipoJogo: 0,
+            tabuleiroCasas: boardWith({ E1: "Rei-0", E2: "Bispo-0", E8: "Torre-1", A8: "Rei-1" }),
+        });
+        await seatBothHumans(api, jogoId);
+
+        const { body } = await api.get(`/jogos/${jogoId}`);
+        const origens = body.data.ladoBranco.possiveisJogadas.map((jogada: any) => jogada.casaOrigem.casa);
+        expect(origens).not.toContain("E2");
+        expect(origens).toContain("E1");
     });
 
     it("does not offer castling once the rook has moved (no castling option in the list)", async () => {
