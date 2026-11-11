@@ -273,3 +273,101 @@ describe("characterization: special moves", () => {
         expect(body.message).toBe("Não é possível promover nenhum peão no momento");
     });
 });
+
+describe("characterization: legal moves of one piece (GET /pecas/:casa/possiveis-jogadas)", () => {
+    let server: RunningServer;
+    let api: ApiClient;
+
+    beforeAll(async () => {
+        server = await startServer();
+        api = createApiClient(server.url);
+    });
+
+    afterAll(async () => {
+        await server.stop();
+    });
+
+    it("a pinned knight has no possible moves: every jump leaves its king on the file of the rook", async () => {
+        const jogoId = await createGame(api, {
+            tipoJogo: 0,
+            tabuleiroCasas: boardWith({ E1: "Rei-0", E2: "Cavalo-0", E8: "Torre-1", A8: "Rei-1" }),
+        });
+        await seatBothHumans(api, jogoId);
+
+        const { status, body } = await api.get(`/jogos/${jogoId}/pecas/E2/possiveis-jogadas`, { lado: WHITE });
+
+        expect(status).toBe(200);
+        expect(body.data).toEqual([]);
+    });
+
+    it("a pinned rook moves only along the pin: its legal squares stay on the file of its king", async () => {
+        const jogoId = await createGame(api, {
+            tipoJogo: 0,
+            tabuleiroCasas: boardWith({ E1: "Rei-0", E2: "Torre-0", E8: "Torre-1", A8: "Rei-1" }),
+        });
+        await seatBothHumans(api, jogoId);
+
+        const { body } = await api.get(`/jogos/${jogoId}/pecas/E2/possiveis-jogadas`, { lado: WHITE });
+
+        const destinos = body.data.map((jogada: any) => jogada.casaDestino.casa);
+        expect(destinos).toContain("E8");
+        expect(destinos.every((casa: string) => casa.startsWith("E"))).toBe(true);
+    });
+
+    it("a stalemated side gets an empty list, not an error", async () => {
+        const jogoId = await createGame(api, {
+            tipoJogo: 0,
+            tabuleiroCasas: boardWith({ A8: "Rei-1", B6: "Rei-0", C1: "Rainha-0" }),
+        });
+        await seatBothHumans(api, jogoId);
+        await move(api, jogoId, WHITE, "C1", "C7");
+
+        const { status, body } = await api.get(`/jogos/${jogoId}/pecas/A8/possiveis-jogadas`, { lado: BLACK });
+
+        expect(status).toBe(200);
+        expect(body.success).toBe(true);
+        expect(body.data).toEqual([]);
+    });
+
+    it("a checkmated side gets an empty list for its king, not an error", async () => {
+        const jogoId = await createGameWithHumans(api);
+        await move(api, jogoId, WHITE, "F2", "F3");
+        await move(api, jogoId, BLACK, "E7", "E5");
+        await move(api, jogoId, WHITE, "G2", "G4");
+        await move(api, jogoId, BLACK, "D8", "H4");
+
+        const { status, body } = await api.get(`/jogos/${jogoId}/pecas/E1/possiveis-jogadas`, { lado: WHITE });
+
+        expect(status).toBe(200);
+        expect(body.success).toBe(true);
+        expect(body.data).toEqual([]);
+    });
+
+    it("the king does not get kingside castling when it would land on an attacked G1", async () => {
+        const jogoId = await createGame(api, {
+            tipoJogo: 0,
+            tabuleiroCasas: boardWith({ E1: "Rei-0", H1: "Torre-0", G8: "Torre-1", A8: "Rei-1" }),
+        });
+        await seatBothHumans(api, jogoId);
+
+        const { body } = await api.get(`/jogos/${jogoId}/pecas/E1/possiveis-jogadas`, { lado: WHITE });
+        expect(body.data.find((jogada: any) => jogada.casaDestino.casa === "G1")).toBeUndefined();
+
+        const response = await api.post(`/jogos/${jogoId}/pecas/E1/move/G1`, undefined, { lado: WHITE });
+        expect(response.body.success).toBe(false);
+    });
+
+    it("the king does not get queenside castling when it would land on an attacked C1", async () => {
+        const jogoId = await createGame(api, {
+            tipoJogo: 0,
+            tabuleiroCasas: boardWith({ E1: "Rei-0", A1: "Torre-0", C8: "Torre-1", H8: "Rei-1" }),
+        });
+        await seatBothHumans(api, jogoId);
+
+        const { body } = await api.get(`/jogos/${jogoId}/pecas/E1/possiveis-jogadas`, { lado: WHITE });
+        expect(body.data.find((jogada: any) => jogada.casaDestino.casa === "C1")).toBeUndefined();
+
+        const response = await api.post(`/jogos/${jogoId}/pecas/E1/move/C1`, undefined, { lado: WHITE });
+        expect(response.body.success).toBe(false);
+    });
+});

@@ -203,6 +203,47 @@ describe("characterization: game lifecycle", () => {
         expect(body.data.tabuleiro.casas).toHaveLength(8);
     });
 
+    it("the time per side is sent as tempoTotalPorLadoEmMilisegundos and, deprecated, as tempoDeTurnoEmMilisegundos: same value on the game and the summary", async () => {
+        const jogoId = await createGame(api, { tipoJogo: 0, tempoDeTurnoEmMilisegundos: 60000 });
+        const { body } = await api.get(`/jogos/${jogoId}`);
+        expect(body.data.tempoTotalPorLadoEmMilisegundos).toBe(60000);
+        expect(body.data.tempoDeTurnoEmMilisegundos).toBe(60000);
+        const resumo = await api.get(`/jogos/${jogoId}/simples`);
+        expect(resumo.body.data.tempoTotalPorLadoEmMilisegundos).toBe(60000);
+        expect(resumo.body.data.tempoDeTurnoEmMilisegundos).toBe(60000);
+    });
+
+    it("GET /jogos/:id, its summary and POST /jogos report each side's clock in ms; time left is null without a limit", async () => {
+        const semLimite = await api.post("/jogos", { tipoJogo: 0 });
+        expect(semLimite.body.data.ladoBrancoTempoMilisegundosRestante).toBeNull();
+        expect(semLimite.body.data.ladoBrancoTempoMilisegundosGasto).toBe(0);
+        const { body: lido } = await api.get(`/jogos/${semLimite.body.data.id}`);
+        expect(lido.data.ladoPretoTempoMilisegundosRestante).toBeNull();
+        expect(lido.data.ladoPretoTempoMilisegundosGasto).toBe(0);
+
+        const comLimite = await api.post("/jogos", { tipoJogo: 0, tempoTotalPorLadoEmMilisegundos: 60000 });
+        expect(comLimite.body.data.ladoBrancoTempoMilisegundosRestante).toBe(60000);
+        expect(comLimite.body.data.ladoPretoTempoMilisegundosRestante).toBe(60000);
+    });
+
+    it("with both sides seated, the time left and the time used of each side add up to the limit in every read", async () => {
+        const jogoId = await createGameWithHumans(api, { tipoJogo: 0, tempoDeTurnoEmMilisegundos: 60000 });
+        for (const caminho of [`/jogos/${jogoId}`, `/jogos/${jogoId}/simples`]) {
+            const { body } = await api.get(caminho);
+            const dados = body.data;
+            expect(dados.ladoBrancoTempoMilisegundosRestante + dados.ladoBrancoTempoMilisegundosGasto).toBe(60000);
+            expect(dados.ladoPretoTempoMilisegundosRestante + dados.ladoPretoTempoMilisegundosGasto).toBe(60000);
+        }
+    });
+
+    it("POST /jogos accepts the new name tempoTotalPorLadoEmMilisegundos, and -1 is the default for no limit", async () => {
+        const comLimite = await api.post("/jogos", { tipoJogo: 0, tempoTotalPorLadoEmMilisegundos: 5000 });
+        expect(comLimite.body.data.tempoTotalPorLadoEmMilisegundos).toBe(5000);
+        expect(comLimite.body.data.tempoDeTurnoEmMilisegundos).toBe(5000);
+        const semLimite = await api.post("/jogos", { tipoJogo: 0 });
+        expect(semLimite.body.data.tempoTotalPorLadoEmMilisegundos).toBe(-1);
+    });
+
     it("GET /jogos/:id/simples returns the summary view with the Human X Human label", async () => {
         const jogoId = await createGameWithHumans(api);
         const { body } = await api.get(`/jogos/${jogoId}/simples`);

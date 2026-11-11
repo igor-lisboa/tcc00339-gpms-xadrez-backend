@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createApiClient, type ApiClient } from "./helpers/api";
 import { startServer, type RunningServer } from "./helpers/server";
+import { BLACK, WHITE, createGameWithHumans, move } from "./helpers/game";
 
 describe("characterization: messages in the language of Accept-Language", () => {
     let server: RunningServer;
@@ -45,5 +46,29 @@ describe("characterization: messages in the language of Accept-Language", () => 
     it("GET /jogos/:id with an unknown language keeps the Portuguese refusal", async () => {
         const { body } = await api.get("/jogos/999", { "Accept-Language": "ja" });
         expect(body.message).toBe("Jogo não encontrado");
+    });
+
+    it("the ending, its reason and the winner are never translated, whatever the language", async () => {
+        const jogoId = await createGameWithHumans(api);
+        await move(api, jogoId, WHITE, "F2", "F3");
+        await move(api, jogoId, BLACK, "E7", "E5");
+        await move(api, jogoId, WHITE, "G2", "G4");
+        await move(api, jogoId, BLACK, "D8", "H4");
+
+        for (const language of ["en", "fr", "it", "de"]) {
+            const { body } = await api.get(`/jogos/${jogoId}`, { "Accept-Language": language });
+            expect(body.data.finalizado).toEqual({ id: 1, tipo: "Vitória: Preto" });
+            expect(body.data.motivoFinalizacao).toBe("xequeMate");
+            expect(body.data.ladoIdVencedor).toBe(1);
+        }
+        const summary = await api.get(`/jogos/${jogoId}/simples`, { "Accept-Language": "en" });
+        expect(summary.body.data.finalizado).toBe("Vitória: Preto");
+        expect(summary.body.data.motivoFinalizacao).toBe("xequeMate");
+    });
+
+    it("GET /enumeracoes keeps the wire values of motivosFinalizacao in every language", async () => {
+        const pt = await api.get("/enumeracoes");
+        const de = await api.get("/enumeracoes", { "Accept-Language": "de" });
+        expect(de.body.data.motivosFinalizacao).toEqual(pt.body.data.motivosFinalizacao);
     });
 });

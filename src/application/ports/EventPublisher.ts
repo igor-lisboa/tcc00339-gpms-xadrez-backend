@@ -9,7 +9,7 @@ import type { EndingReason } from "../../shared/constants";
 export type GameEvent =
     | { readonly type: "gameCreated" }
     | { readonly type: "gameReset"; readonly gameId: number }
-    | { readonly type: "gameFinished"; readonly gameId: number; readonly ending: string; readonly reason: EndingReason | null; readonly winnerSideId: number | null; readonly sides: Side[] }
+    | { readonly type: "gameFinished"; readonly gameId: number; readonly ending: string; readonly reason: EndingReason | null; readonly winnerSideId: number | null; readonly resignedSideId: number | null; readonly game: Game; readonly sides: Side[] }
     | { readonly type: "playerJoined"; readonly gameId: number; readonly opponent: Side }
     | { readonly type: "moveMade"; readonly gameId: number; readonly played: PlayedMove; readonly game: Game; readonly promotion: PromotedPawn | null; readonly opponent: Side }
     | { readonly type: "drawOffered"; readonly gameId: number; readonly opponent: Side }

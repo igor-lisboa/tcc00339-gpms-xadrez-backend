@@ -31,6 +31,8 @@ export class Game {
     ending: EndingInfo | null = null;
     endingReason: EndingReason | null = null;
     winnerSideId: number | null = null;
+    /** The side that resigned, when a resignation ended the game (ladoIdDesistente); null for every other ending. */
+    resignedSideId: number | null = null;
     requestedActions: RequestedAction[] = [];
     promotion: { readonly pawnSquare: Square; readonly move: MoveRecord } | null = null;
     drawOfferedBy: number | null = null;
@@ -110,7 +112,7 @@ export class Game {
         }
     }
 
-    /** Ends the game once; later calls do nothing. A win names its side; a resignation passes the winner, if any. */
+    /** Ends the game once. A win names its side; only a resignation may pass a winner, and a draw never has one. */
     finish(endingId: GameEnding, winnerSideId: number | null = null, reason = DEFAULT_ENDING_REASON[endingId]): void {
         const ending = this.catalog.endings.find((item) => item.id === endingId);
         if (this.ending !== null || ending === undefined) {
@@ -119,7 +121,8 @@ export class Game {
         this.ending = ending;
         this.endingReason = reason;
         const wins: Record<number, number> = { [GameEnding.WhiteWins]: this.white.id, [GameEnding.BlackWins]: this.black.id };
-        this.winnerSideId = wins[endingId] ?? winnerSideId;
+        const namedByCaller = endingId === GameEnding.Resignation ? winnerSideId : null;
+        this.winnerSideId = wins[endingId] ?? namedByCaller;
         // the clocks stop here: the side on turn keeps the time it had when the game ended
         this.turns.filter((turn) => turn.totalMs === null).forEach((turn) => turn.end());
         // an open draw offer lapses once the game is over (FIDE 9.1.2.3)

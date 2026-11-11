@@ -3,6 +3,8 @@ import type { RequestedAction } from "../../domain/game/RequestedAction";
 import type { Piece } from "../../domain/pieces/Piece";
 import type { EndingInfo } from "../../domain/catalog";
 import { canClaimDraw } from "../../domain/game/drawClaims";
+import { clocksOf } from "../../domain/game/clock";
+import { clocksWire } from "./clockPresenter";
 import { endingReasonWire } from "./catalogPresenter";
 import { pieceWire, sideMoveWire, squareWire } from "./movePresenter";
 import { sideWire, turnWire } from "./sidePresenter";
@@ -28,6 +30,8 @@ export const gameWire = (game: Game) => ({
     tabuleiro: boardWire(game),
     turnos: game.turns.map(turnWire),
     tempoDeTurnoEmMilisegundos: game.timeLimitMs,
+    tempoTotalPorLadoEmMilisegundos: game.timeLimitMs,
+    ...clocksWire(clocksOf(game)),
     ladoIdAtual: game.currentSideId,
     enPassantCasaCaptura: game.enPassant === null
         ? null
@@ -35,6 +39,7 @@ export const gameWire = (game: Game) => ({
     finalizado: endingWire(game.ending),
     motivoFinalizacao: endingReasonWire(game.endingReason),
     ladoIdVencedor: game.winnerSideId,
+    ladoIdDesistente: game.resignedSideId,
     acoesSolicitadas: game.requestedActions.map(requestedActionWire),
     casaPeaoPromocao: game.promotion === null
         ? null
@@ -50,9 +55,9 @@ export const gameWire = (game: Game) => ({
 export const summaryWire = (game: Game, superSimplified: boolean) => ({
     id: game.id,
     ladoIdAtual: game.currentSideId,
-    ladoBrancoTempoMilisegundosRestante: game.white.remainingMs,
-    ladoPretoTempoMilisegundosRestante: game.black.remainingMs,
+    ...clocksWire(clocksOf(game)),
     tempoDeTurnoEmMilisegundos: game.timeLimitMs,
+    tempoTotalPorLadoEmMilisegundos: game.timeLimitMs,
     chequeLadoAtual: game.currentInCheck,
     acoesSolicitadas: game.requestedActions.map(requestedActionWire),
     casaPeaoPromocao: game.promotion === null
@@ -68,6 +73,7 @@ export const summaryWire = (game: Game, superSimplified: boolean) => ({
     finalizado: game.ending === null ? null : game.ending.tipo,
     motivoFinalizacao: endingReasonWire(game.endingReason),
     ladoIdVencedor: game.winnerSideId,
+    ladoIdDesistente: game.resignedSideId,
     tipoJogo: game.gameType.integranteLadoTipo.map((type) => type.nome).join(" X "),
     tabuleiro: summaryBoardWire(game, superSimplified),
 });

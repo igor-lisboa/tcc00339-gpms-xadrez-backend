@@ -35,7 +35,7 @@ Status: **Phase 1 complete for names used by the API.** Lookup data values are t
 | Desistência | Resignation | |
 | Finalizado | Finished | |
 | Proposta de reset / empate | Reset / draw offer | |
-| Tempo de turno | Turn time limit | `tempoDeTurnoEmMilisegundos` becomes `turnTimeLimitMs` |
+| Tempo total por lado | Total time per side | `tempoTotalPorLadoEmMilisegundos` (the whole game, not a turn). The old name `tempoDeTurnoEmMilisegundos` is deprecated and has the same value (see [turn-clock](specs/turn-clock.md)) |
 
 ## Identifiers in code (examples)
 
@@ -92,7 +92,9 @@ These are the response fields the API returns today. The legacy adapter keeps th
 | `ladoBranco` / `ladoPreto` | `whiteSide` / `blackSide` | game |
 | `tabuleiro` | `board` | game |
 | `turnos` | `turns` | game |
-| `tempoDeTurnoEmMilisegundos` | `turnTimeLimitMs` | game |
+| `tempoTotalPorLadoEmMilisegundos` | `timeLimitMs` (the game's total time per side) | game, summary |
+| `tempoDeTurnoEmMilisegundos` | `timeLimitMs` (deprecated name, same value) | game, summary |
+| `ladoIdDesistente` | `resignedSideId` | game, summary, event payload |
 | `ladoIdAtual` | `currentSideId` | game |
 | `enPassantCasaCaptura` | `enPassantSquare` | game |
 | `finalizado` | `ending` | game |

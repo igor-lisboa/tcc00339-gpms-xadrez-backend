@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import request from "supertest";
 import type { Express } from "express";
 import spec from "../../../src/http/docs/openapi.json";
@@ -71,5 +73,57 @@ describe("API description", () => {
         expect(response.headers["content-type"]).toMatch(/text\/html/);
         expect(response.text).toContain("SwaggerUIBundle");
         expect(response.text).toContain('url: "/openapi.json"');
+    });
+});
+
+describe("socket events description (x-socket-events)", () => {
+    /** The part of each documented event this test reads. */
+    interface SocketEventDoc {
+        readonly sentTo?: string;
+        readonly sentWhen?: string;
+        readonly payload: { readonly required?: readonly string[] } | null;
+    }
+    const events = (spec as unknown as { "x-socket-events": { events: Record<string, SocketEventDoc> } })["x-socket-events"].events;
+    const serverSource = [
+        "../../../src/infrastructure/socket/SocketHub.ts",
+        "../../../src/domain/game/RequestedAction.ts",
+    ]
+        .map((file) => readFileSync(path.resolve(__dirname, file), "utf8"))
+        .join("\n");
+    const RECIPIENT_GROUPS = ["everyone", "bothSides", "opponent", "proposer", "actingSide", "aiPlayer"];
+    const EVENT_NAMES = [
+        "jogoCriado",
+        "jogoResetado",
+        "jogoFinalizado",
+        "adversarioEntrou",
+        "jogadaRealizada",
+        "promocaoPeao",
+        "responderPropostaEmpate",
+        "empateProposto",
+        "empatePropostoResposta",
+        "responderPropostaReset",
+        "resetProposto",
+        "resetPropostoResposta",
+        "forcaIa",
+    ];
+
+    it("documents every event the server sends, and nothing else", () => {
+        expect(Object.keys(events).sort()).toEqual([...EVENT_NAMES].sort());
+    });
+
+    it("every documented event name is written in the server source", () => {
+        const notInSource = Object.keys(events).filter((name) => !serverSource.includes(`"${name}"`));
+        expect(notInSource).toEqual([]);
+    });
+
+    it("every event names a known recipient group and says when it is sent", () => {
+        const incomplete = Object.entries(events)
+            .filter(([, doc]) => !RECIPIENT_GROUPS.includes(doc.sentTo ?? "") || !doc.sentWhen)
+            .map(([name]) => name);
+        expect(incomplete).toEqual([]);
+    });
+
+    it("jogoFinalizado documents ladoIdDesistente as a required field of its payload", () => {
+        expect(events.jogoFinalizado?.payload?.required).toContain("ladoIdDesistente");
     });
 });

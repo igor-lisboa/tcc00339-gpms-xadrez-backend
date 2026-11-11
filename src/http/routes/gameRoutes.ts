@@ -35,7 +35,7 @@ export const gameRoutes = (service: GameService): Router => {
         const body = req.body ?? {};
         const game = service.createGame({
             tipoJogo: body.tipoJogo,
-            tempoDeTurnoEmMilisegundos: body.tempoDeTurnoEmMilisegundos,
+            tempoDeTurnoEmMilisegundos: body.tempoDeTurnoEmMilisegundos ?? body.tempoTotalPorLadoEmMilisegundos,
             tabuleiroCasas: body.tabuleiroCasas,
             ladoId: body.ladoId,
         });

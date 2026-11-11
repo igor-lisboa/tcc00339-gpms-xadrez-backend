@@ -22,16 +22,21 @@ export const applyGameType = (game: Game, gameType: GameTypeInfo): void => {
  * moves; then the game is a draw. With the other seat empty there is nobody to win.
  */
 const resign = (game: Game, side: Side): void => {
+    const running = game.ending === null;
     const opponent = game.opponentOf(side.id);
     if (opponent.playerType === null) {
         game.finish(GameEnding.Resignation);
-        return;
-    }
-    game.refresh();
-    if (canEverMate(opponent.pieces, side.pieces)) {
-        game.finish(GameEnding.Resignation, opponent.id);
     } else {
-        game.finish(GameEnding.InsufficientMaterial, null, EndingReason.Resignation);
+        game.refresh();
+        if (canEverMate(opponent.pieces, side.pieces)) {
+            game.finish(GameEnding.Resignation, opponent.id);
+        } else {
+            game.finish(GameEnding.InsufficientMaterial, null, EndingReason.Resignation);
+        }
+    }
+    // only the resignation that actually ends the game is recorded; one sent to a finished game changes nothing
+    if (running) {
+        game.resignedSideId = side.id;
     }
 };
 

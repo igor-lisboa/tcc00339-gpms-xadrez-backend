@@ -3,6 +3,18 @@ import { canEverMate } from "../rules/material";
 import type { Game } from "./Game";
 import { Turn } from "./Turn";
 
+/** The time one side has used and has left. remainingMs is null when the game has no time limit. */
+export interface SideClock {
+    readonly spentMs: number;
+    readonly remainingMs: number | null;
+}
+
+/** Both sides' clocks, read at one instant. */
+export interface GameClocks {
+    readonly white: SideClock;
+    readonly black: SideClock;
+}
+
 /** Starts a new turn for the side on the move, unless the game has already ended. */
 export const startTurn = (game: Game): void => {
     checkClocks(game);
@@ -17,16 +29,30 @@ export const checkClocks = (game: Game): void => {
     checkClock(game, game.black.id);
 };
 
-const checkClock = (game: Game, sideId: number): void => {
-    const spent = game.turns
+/**
+ * The time each side has used and has left, read at one instant. Both sides use the same instant, so while a
+ * limit lasts, spentMs + remainingMs is the limit for each side.
+ */
+export const clocksOf = (game: Game, nowMs: number = Date.now()): GameClocks => ({
+    white: sideClockOf(game, game.white.id, nowMs),
+    black: sideClockOf(game, game.black.id, nowMs),
+});
+
+const sideClockOf = (game: Game, sideId: number, nowMs: number): SideClock => {
+    const spentMs = game.turns
         .filter((turn) => turn.sideId === sideId)
-        .reduce((total, turn) => total + turn.elapsedMs(), 0);
-    const remaining = game.timeLimitMs - spent;
-    const limited = game.timeLimitMs !== -1;
-    if (remaining <= 0 && game.currentSideId === sideId && limited) {
+        .reduce((total, turn) => total + turn.elapsedMs(nowMs), 0);
+    const remainingMs = game.timeLimitMs === -1 ? null : Math.max(game.timeLimitMs - spentMs, 0);
+    return { spentMs, remainingMs };
+};
+
+const checkClock = (game: Game, sideId: number): void => {
+    const clock = sideClockOf(game, sideId, Date.now());
+    // remaining 0 is the time being gone: the side on turn loses it
+    if (clock.remainingMs === 0 && game.currentSideId === sideId) {
         judgeTimeout(game, sideId);
     }
-    game.sideById(sideId).remainingMs = limited ? Math.max(remaining, 0) : remaining;
+    game.sideById(sideId).remainingMs = clock.remainingMs;
 };
 
 /**

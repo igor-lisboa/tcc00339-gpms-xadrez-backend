@@ -7,6 +7,8 @@ import type { AiListener } from "../../application/ports/AiListener";
 import { endingReasonWire } from "../../http/presenters/catalogPresenter";
 import { sideMoveWire } from "../../http/presenters/movePresenter";
 import { logger } from "../../shared/logger";
+import { clocksOf } from "../../domain/game/clock";
+import { clocksWire } from "../../http/presenters/clockPresenter";
 
 /** Identifier the AI player uses when it connects. */
 const AI_IDENTIFIER = "I.A.";
@@ -58,6 +60,8 @@ export class SocketHub implements EventPublisher {
                     jogoFinalizacao: event.ending,
                     motivoFinalizacao: endingReasonWire(event.reason),
                     ladoIdVencedor: event.winnerSideId,
+                    ladoIdDesistente: event.resignedSideId,
+                    ...clocksWire(clocksOf(event.game)),
                 });
                 return;
             case "playerJoined":
@@ -70,6 +74,7 @@ export class SocketHub implements EventPublisher {
                     promocaoPara: event.promotion ? event.promotion.piece.type : null,
                     // the receiver is the side now on turn: the one that could claim
                     empateReivindicavel: canClaimDraw(event.game),
+                    ...clocksWire(clocksOf(event.game)),
                 });
                 return;
             case "drawOffered":

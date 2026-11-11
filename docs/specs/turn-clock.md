@@ -4,7 +4,7 @@
 Each turn can have a time limit. The game tracks the time each side has left.
 
 ## Rules
-- The game's time limit is `tempoDeTurnoEmMilisegundos`. -1 (the default) means no limit.
+- The game's time limit is `tempoTotalPorLadoEmMilisegundos`: the time per side for the whole game, in milliseconds. -1 (the default) means no limit. It is not a limit per turn; a side's time is spent across all its turns together. Its deprecated name `tempoDeTurnoEmMilisegundos` carries the same value.
 - Each side's remaining time is the limit minus the time it has used across all its turns. The current turn counts up to "now".
 - `GET /jogos/:id/simples` returns `ladoBrancoTempoMilisegundosRestante` and `ladoPretoTempoMilisegundosRestante`.
 - A turn starts when a move passes the turn, or when both sides are seated.
@@ -13,6 +13,7 @@ Each turn can have a time limit. The game tracks the time each side has left.
   - the opponent could never mate (for example a bare king, or a lone bishop against a bare king or king and rook): a draw, type 8 "Empate: Tempo esgotado sem material".
 - When a game ends, for any reason, the turn that is running is closed. Both clocks then stay at their final values: a `GET` after the ending returns the same remaining time as before.
 - The remaining time shown for a side that ran out is 0, never negative.
+- Each side's clock is also given in ms as `ladoBrancoTempoMilisegundosRestante` (time left) and `ladoBrancoTempoMilisegundosGasto` (time used), and the `ladoPreto...` pair, on the game (`GET /jogos/:id`, `POST /jogos`), the summary (`GET /jogos/:id/simples`), and the `jogadaRealizada` and `jogoFinalizado` events. Time left is null when the game has no limit; time used is always given. Left and used are read at one instant, so for a limited game they add up to the limit.
 - A read (`GET`) shows a timeout that has already happened. The ending is saved and announced by the next change to that game, before the change is applied.
 
 ## Tests
@@ -41,3 +42,18 @@ Each turn can have a time limit. The game tracks the time each side has left.
 - Before: a win on time looked the same as a checkmate (type 0 or 1), so a client could not say why a side won.
 - Now: the game carries `motivoFinalizacao`; a timeout sets it to `tempoEsgotado`, for the win and for the draw of type 8. See [game-lifecycle.md](game-lifecycle.md).
 - `tempoDeTurnoEmMilisegundos` is the time each side has for the whole game, not a limit per turn. The name is kept for the frontend.
+
+## Changed in the clock fields
+- Before: the time left was only inside the side objects and the summary. For a game with no limit it was a negative number (-1 minus the time used), which a client could show by mistake. The time used was not exposed at all, and the move and end events did not carry any clock.
+- Now: the four clock fields above, on the game, the summary and the `jogadaRealizada` and `jogoFinalizado` events. For a game with no limit the time left is null, and the side objects' `tempoMilisegundosRestante` is null too.
+- Tests: `tests/unit/domain/clock.test.ts`; `catalog-and-lifecycle.test.ts` ("GET /jogos/:id, its summary and POST /jogos report each side's clock"); `realtime-events.test.ts` ("tells the other side the clock of each side after a move", "sends the clocks with the ending").
+
+## Naming the time field
+Decided: option 2 of the options below. `tempoTotalPorLadoEmMilisegundos` is sent next to `tempoDeTurnoEmMilisegundos` on the game and on the summary, with the same value, and `POST /jogos` accepts either name. When both are sent, `tempoDeTurnoEmMilisegundos` wins unless it is null. The old name is deprecated and will be removed in a future major version, once the frontend has moved.
+
+The options that were considered:
+1. Keep the name and the description (current; no breaking change).
+2. Add `tempoTotalPorLadoEmMilisegundos` next to the old field, with the same value, and mark the old one as deprecated. Not breaking; the frontend moves when it is ready.
+3. Rename the field outright. Breaking: `POST /jogos`, `GET /jogos/:id` and `GET /jogos/:id/simples` change shape, so the frontend must change in the same release.
+
+Option 2 was chosen, so the frontend can move at its own pace. Option 3 is not planned.

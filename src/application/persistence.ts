@@ -53,6 +53,8 @@ export const saveGame = (context: GameContext, game: Game): void => {
             ending,
             reason: game.endingReason,
             winnerSideId: game.winnerSideId,
+            resignedSideId: game.resignedSideId,
+            game,
             sides: game.sides(),
         });
     });

@@ -11,7 +11,8 @@ Castling, en passant and the pawn's double step.
 
 ## Tests
 - `moves-and-special-moves.test.ts`: "castles kingside for White...", "does not offer castling when the square the king crosses is attacked, and refuses the move", "does not offer castling once the rook has moved...", "captures en passant...", "plays a move, passes the turn..." (checks the double-step name)
-- `tests/unit/domain/endings.test.ts` (describe "castling across an attacked square"): F1 attacked, D1 attacked, and B1 attacked (still allowed).
+- `tests/unit/domain/endings.test.ts` (describe "castling across an attacked square"): F1 attacked, D1 attacked, B1 attacked (still allowed), G1 attacked (the landing square) and C1 attacked (the landing square).
+- `moves-and-special-moves.test.ts` (describe "legal moves of one piece"): G1 and C1 attacked, not offered through the endpoint.
 
 ## Known deviations
 - The en passant check compares square objects by identity. It works only because the lookup table is shared. Fragile.

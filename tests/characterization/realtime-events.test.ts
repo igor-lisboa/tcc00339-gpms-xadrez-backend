@@ -2,7 +2,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { io, type Socket } from "socket.io-client";
 import { createApiClient, type ApiClient } from "./helpers/api";
 import { startServer, type RunningServer } from "./helpers/server";
-import { BLACK, WHITE, createGame, move, seatBothHumans } from "./helpers/game";
+import { BLACK, WHITE, boardWith, createGame, move, seatBothHumans } from "./helpers/game";
 
 const connect = (url: string, jogador: string): Promise<Socket> =>
     new Promise((resolve, reject) => {
@@ -102,11 +102,85 @@ describe("characterization: real-time events", () => {
         await api.delete(`/jogos/${jogoId}/jogadores/${BLACK}`, { lado: BLACK });
         const payload = await recebido;
 
-        expect(payload).toEqual({
+        expect(payload).toMatchObject({
             jogoFinalizacao: "Desistência: Um jogador deixou a partida",
             motivoFinalizacao: "desistencia",
             ladoIdVencedor: 0,
+            ladoIdDesistente: 1,
         });
+    });
+
+    it("sends the resigning side with a resignation that ends as a draw, and null for other endings", async () => {
+        const jogoId = await createGame(api, {
+            tipoJogo: 0,
+            tabuleiroCasas: boardWith({ E1: "Rei-0", D1: "Rainha-0", A8: "Rei-1", C6: "Cavalo-1" }),
+        });
+        const brancas = await track(server.url, `${jogoId}-${WHITE}`);
+        await seatBothHumans(api, jogoId);
+
+        const recebido = nextEvent(brancas, "jogoFinalizado");
+        await api.delete(`/jogos/${jogoId}/jogadores/${WHITE}`, { lado: WHITE });
+        const payload = await recebido;
+
+        expect(payload).toMatchObject({
+            jogoFinalizacao: "Empate: Insuficiência material",
+            motivoFinalizacao: "desistencia",
+            ladoIdVencedor: null,
+            ladoIdDesistente: 0,
+        });
+    });
+
+    it("sends no resigning side when the game ends by checkmate", async () => {
+        const jogoId = await createGame(api);
+        const brancas = await track(server.url, `${jogoId}-${WHITE}`);
+        await seatBothHumans(api, jogoId);
+        await move(api, jogoId, WHITE, "F2", "F3");
+        await move(api, jogoId, BLACK, "E7", "E5");
+        await move(api, jogoId, WHITE, "G2", "G4");
+
+        const recebido = nextEvent(brancas, "jogoFinalizado");
+        await move(api, jogoId, BLACK, "D8", "H4");
+        const payload = await recebido;
+
+        expect(payload).toMatchObject({
+            jogoFinalizacao: "Vitória: Preto",
+            motivoFinalizacao: "xequeMate",
+            ladoIdVencedor: 1,
+            ladoIdDesistente: null,
+        });
+    });
+
+    it("tells the other side the clock of each side after a move: time left and time used, in ms", async () => {
+        const jogoId = await createGame(api, { tipoJogo: 0, tempoDeTurnoEmMilisegundos: 60000 });
+        const pretas = await track(server.url, `${jogoId}-${BLACK}`);
+        await seatBothHumans(api, jogoId);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        const recebido = nextEvent(pretas, "jogadaRealizada");
+        await move(api, jogoId, WHITE, "E2", "E4");
+        const payload = await recebido;
+
+        // time left and time used are read at the same instant, so together they are the limit
+        expect(payload.ladoBrancoTempoMilisegundosGasto).toBeGreaterThanOrEqual(0);
+        expect(payload.ladoBrancoTempoMilisegundosRestante + payload.ladoBrancoTempoMilisegundosGasto).toBe(60000);
+        expect(payload.ladoPretoTempoMilisegundosRestante + payload.ladoPretoTempoMilisegundosGasto).toBe(60000);
+    });
+
+    it("sends the clocks with the ending, frozen at the end, so the review page shows the time each side used", async () => {
+        const jogoId = await createGame(api, { tipoJogo: 0, tempoDeTurnoEmMilisegundos: 60000 });
+        const brancas = await track(server.url, `${jogoId}-${WHITE}`);
+        await seatBothHumans(api, jogoId);
+
+        const recebido = nextEvent(brancas, "jogoFinalizado");
+        await api.delete(`/jogos/${jogoId}/jogadores/${BLACK}`, { lado: BLACK });
+        const payload = await recebido;
+
+        expect(payload.ladoBrancoTempoMilisegundosGasto + payload.ladoBrancoTempoMilisegundosRestante).toBe(60000);
+        expect(payload.ladoPretoTempoMilisegundosGasto + payload.ladoPretoTempoMilisegundosRestante).toBe(60000);
+        // the clocks stopped with the game: a later read shows the same time as the event
+        const { body } = await api.get(`/jogos/${jogoId}`);
+        expect(body.data.ladoBrancoTempoMilisegundosGasto).toBe(payload.ladoBrancoTempoMilisegundosGasto);
+        expect(body.data.ladoPretoTempoMilisegundosGasto).toBe(payload.ladoPretoTempoMilisegundosGasto);
     });
 
     it("notifies the AI player when the game it plays in is created", async () => {

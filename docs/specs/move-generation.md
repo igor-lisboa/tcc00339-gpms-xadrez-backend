@@ -16,6 +16,7 @@ Which moves a piece can make, and which of them are legal.
 
 ## Tests
 - `moves-and-special-moves.test.ts`: "lists the two pawn moves from E2...", "lists the knight moves from B1...", "perft: White has 20 legal moves in the opening position", "perft: Black has 20 legal moves after 1.e4", "refuses an illegal destination...", "refuses a move from the side that is not on turn", "refuses a move while the other side has not been seated"
+- `moves-and-special-moves.test.ts` (describe "legal moves of one piece"): a pinned knight has no moves, a pinned rook moves only along the pin, and a stalemated side and a checkmated side get an empty list (200, not an error).
 
 ## Known deviations
-- Legality is checked by playing the move on the board and reverting it through a JSON copy of the whole board. Correct, but slow. The refactor replaces this with make/unmake.
+- Legality is checked by playing each candidate move on a copy of the board (`Board.clone`) and asking whether the own king is attacked. The copy is made per move, so large move lists are slow. Make/unmake would be faster.

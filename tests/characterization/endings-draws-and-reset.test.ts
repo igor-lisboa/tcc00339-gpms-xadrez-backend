@@ -45,6 +45,8 @@ describe("characterization: how a game ends", () => {
         const { body } = await api.get(`/jogos/${jogoId}`);
         expect(body.data.finalizado).toEqual({ id: 4, tipo: "Empate: Rei afogado" });
         expect(body.data.motivoFinalizacao).toBe("reiAfogado");
+        expect(body.data.ladoIdVencedor).toBeNull();
+        expect(body.data.ladoIdDesistente).toBeNull();
         // a stalemated side has no move to show
         expect(body.data.ladoPreto.possiveisJogadas).toEqual([]);
     });
@@ -91,6 +93,7 @@ describe("characterization: how a game ends", () => {
 
         const { body } = await api.get(`/jogos/${jogoId}`);
         expect(body.data.finalizado).toEqual({ id: 6, tipo: "Empate: Regra das 3 posições" });
+        expect(body.data.motivoFinalizacao).toBe("repeticao3Posicoes");
         expect(body.data.ladoIdVencedor).toBeNull();
         expect(body.data.acoesSolicitadas).toEqual([]);
     });
@@ -146,6 +149,8 @@ describe("characterization: how a game ends", () => {
         });
         const { body } = await api.get(`/jogos/${deadId}`);
         expect(body.data.finalizado).toEqual({ id: 11, tipo: "Empate: Posição morta" });
+        expect(body.data.motivoFinalizacao).toBe("posicaoMorta");
+        expect(body.data.ladoIdVencedor).toBeNull();
     });
 
     it("the fifth appearance of a position ends the game without a claim", async () => {
@@ -159,6 +164,8 @@ describe("characterization: how a game ends", () => {
 
         const { body } = await api.get(`/jogos/${jogoId}`);
         expect(body.data.finalizado).toEqual({ id: 9, tipo: "Empate: Regra das 5 posições" });
+        expect(body.data.motivoFinalizacao).toBe("repeticao5Posicoes");
+        expect(body.data.ladoIdVencedor).toBeNull();
     });
 
     it("ends as a draw for insufficient material when the last rook is captured", async () => {
@@ -175,8 +182,10 @@ describe("characterization: how a game ends", () => {
 
         const { body } = await api.get(`/jogos/${jogoId}`);
         expect(body.data.finalizado).toEqual({ id: 3, tipo: "Empate: Insuficiência material" });
+        expect(body.data.motivoFinalizacao).toBe("insuficienciaMaterial");
+        expect(body.data.ladoIdVencedor).toBeNull();
+        expect(body.data.ladoIdDesistente).toBeNull();
     });
-
 
     it("after 50 moves each without a capture or a pawn move, the side on turn claims a draw and no offer is sent", async () => {
         const jogoId = await createGame(api, {
@@ -202,6 +211,8 @@ describe("characterization: how a game ends", () => {
 
         const { body } = await api.get(`/jogos/${jogoId}`);
         expect(body.data.finalizado).toEqual({ id: 2, tipo: "Empate: Regra 50 movimentos" });
+        expect(body.data.motivoFinalizacao).toBe("regra50Movimentos");
+        expect(body.data.ladoIdVencedor).toBeNull();
         expect(body.data.empateReivindicavel).toBe(false);
         expect(body.data.acoesSolicitadas).toEqual([]);
         expect(body.data.empatePropostoPeloLadoId).toBeNull();
@@ -214,6 +225,34 @@ describe("characterization: how a game ends", () => {
         expect(body.data.finalizado.id).toBe(7);
         expect(body.data.motivoFinalizacao).toBe("desistencia");
         expect(body.data.ladoIdVencedor).toBe(0);
+        expect(body.data.ladoIdDesistente).toBe(1);
+        const resumo = await api.get(`/jogos/${jogoId}/simples`);
+        expect(resumo.body.data.ladoIdDesistente).toBe(1);
+        expect(resumo.body.data.ladoIdVencedor).toBe(0);
+    });
+
+    it("the resigning side is named on the game and its summary only for a resignation", async () => {
+        const jogoId = await createGameWithHumans(api);
+        const { body: andamento } = await api.get(`/jogos/${jogoId}`);
+        expect(andamento.data.ladoIdDesistente).toBeNull();
+
+        await api.delete(`/jogos/${jogoId}/jogadores/${WHITE}`, { lado: WHITE });
+
+        const { body } = await api.get(`/jogos/${jogoId}`);
+        expect(body.data.ladoIdDesistente).toBe(0);
+        expect(body.data.ladoIdVencedor).toBe(1);
+    });
+
+    it("a checkmate names no resigning side", async () => {
+        const jogoId = await createGameWithHumans(api);
+        await move(api, jogoId, WHITE, "F2", "F3");
+        await move(api, jogoId, BLACK, "E7", "E5");
+        await move(api, jogoId, WHITE, "G2", "G4");
+        await move(api, jogoId, BLACK, "D8", "H4");
+
+        const { body } = await api.get(`/jogos/${jogoId}`);
+        expect(body.data.motivoFinalizacao).toBe("xequeMate");
+        expect(body.data.ladoIdDesistente).toBeNull();
     });
 
     it("resigning against a side that could never mate is a draw (FIDE 5.1.2)", async () => {
@@ -229,6 +268,11 @@ describe("characterization: how a game ends", () => {
         expect(body.data.finalizado).toEqual({ id: 3, tipo: "Empate: Insuficiência material" });
         expect(body.data.motivoFinalizacao).toBe("desistencia");
         expect(body.data.ladoIdVencedor).toBeNull();
+        // the frontend tells who resigned from this field, even though the result is a draw
+        expect(body.data.ladoIdDesistente).toBe(0);
+        const resumo = await api.get(`/jogos/${jogoId}/simples`);
+        expect(resumo.body.data.ladoIdDesistente).toBe(0);
+        expect(resumo.body.data.ladoIdVencedor).toBeNull();
     });
 
     it("a time out is a win for the opponent when the opponent has a rook", async () => {
@@ -245,6 +289,7 @@ describe("characterization: how a game ends", () => {
         // same ending as a checkmate: the reason tells them apart
         expect(body.data.motivoFinalizacao).toBe("tempoEsgotado");
         expect(body.data.ladoIdVencedor).toBe(1);
+        expect(body.data.ladoIdDesistente).toBeNull();
         const simples = await api.get(`/jogos/${jogoId}/simples`);
         expect(simples.body.data.motivoFinalizacao).toBe("tempoEsgotado");
         // the side that ran out stays on turn: the frontend reads it as the side that lost on time
@@ -263,6 +308,8 @@ describe("characterization: how a game ends", () => {
         const { body } = await api.get(`/jogos/${jogoId}`);
         expect(body.data.finalizado).toEqual({ id: 8, tipo: "Empate: Tempo esgotado sem material" });
         expect(body.data.motivoFinalizacao).toBe("tempoEsgotado");
+        expect(body.data.ladoIdVencedor).toBeNull();
+        expect(body.data.ladoIdDesistente).toBeNull();
         expect(body.data.ladoIdAtual).toBe(0);
     });
 
@@ -376,6 +423,9 @@ describe("characterization: draw offers", () => {
 
         const jogo = await api.get(`/jogos/${jogoId}`);
         expect(jogo.body.data.finalizado).toEqual({ id: 5, tipo: "Empate: Comum acordo" });
+        expect(jogo.body.data.motivoFinalizacao).toBe("comumAcordo");
+        expect(jogo.body.data.ladoIdVencedor).toBeNull();
+        expect(jogo.body.data.ladoIdDesistente).toBeNull();
     });
 
     it("responding when nothing was offered is refused", async () => {

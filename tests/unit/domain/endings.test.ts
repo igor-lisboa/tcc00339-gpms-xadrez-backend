@@ -300,6 +300,179 @@ describe("castling across an attacked square (FIDE 3.8.2.2.2)", () => {
 
         expect(game.white.legalMoves.some((move) => move.to.name === "C1" && move.from.name === "E1")).toBe(true);
     });
+
+    it("Given a rook attacking G1, When White's moves are listed, Then kingside castling is not offered: the king would land on G1", () => {
+        const game = gameWith({ E1: "Rei-0", H1: "Torre-0", G8: "Torre-1", A8: "Rei-1" });
+
+        expect(game.white.legalMoves.some((move) => move.from.name === "E1" && move.to.name === "G1")).toBe(false);
+        expect(() => playMove(game, 0, "E1", "G1")).toThrow();
+    });
+
+    it("Given a rook attacking C1, When White's moves are listed, Then queenside castling is not offered: the king would land on C1", () => {
+        const game = gameWith({ E1: "Rei-0", A1: "Torre-0", C8: "Torre-1", H8: "Rei-1" });
+
+        expect(game.white.legalMoves.some((move) => move.from.name === "E1" && move.to.name === "C1")).toBe(false);
+        expect(() => playMove(game, 0, "E1", "C1")).toThrow();
+    });
+});
+
+describe("a draw never names a winner (FIDE 9 and 6.9)", () => {
+    it("Given the fifty-move count reached, When the side on turn claims, Then the draw has no winner", () => {
+        const game = gameWith({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1" });
+        game.board.halfMoveClock = 100;
+
+        offerDraw(game, 0);
+
+        expect(game.endingReason).toBe(EndingReason.FiftyMoveRule);
+        expect(game.winnerSideId).toBeNull();
+    });
+
+    it("Given 149 quiet plies, When one more is played, Then the 75-move draw has no winner", () => {
+        const game = gameWith({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1" });
+        game.board.halfMoveClock = 149;
+
+        playMove(game, 0, "H1", "H2");
+
+        expect(game.endingReason).toBe(EndingReason.SeventyFiveMoveRule);
+        expect(game.winnerSideId).toBeNull();
+    });
+
+    it("Given a position seen three times, When the side on turn claims, Then the draw has no winner", () => {
+        const game = gameWith({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1" });
+        play(game, repeat(kingShuffle, 3));
+
+        offerDraw(game, 0);
+
+        expect(game.endingReason).toBe(EndingReason.ThreefoldRepetition);
+        expect(game.winnerSideId).toBeNull();
+    });
+
+    it("Given the fifth appearance of a position, When it happens, Then the draw has no winner", () => {
+        const game = gameWith({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1" });
+        play(game, repeat(kingShuffle, 4));
+
+        playMove(game, 0, "E1", "E2");
+
+        expect(game.endingReason).toBe(EndingReason.FivefoldRepetition);
+        expect(game.winnerSideId).toBeNull();
+    });
+
+    it("Given the last rook captured, When the position is dead by material, Then the draw has no winner", () => {
+        const game = gameWith({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1", G3: "Cavalo-1" });
+
+        playMove(game, 0, "E1", "D2");
+        playMove(game, 1, "G3", "H1");
+
+        expect(game.endingReason).toBe(EndingReason.InsufficientMaterial);
+        expect(game.winnerSideId).toBeNull();
+    });
+
+    it("Given a stalemate, When it happens, Then the draw has no winner", () => {
+        const game = gameWith({ G5: "Rei-0", F5: "Bispo-0", G6: "Peão-0", D7: "Torre-0", G8: "Rei-1" });
+        play(game, [[0, "D7", "D8"], [1, "G8", "G7"]]);
+
+        playMove(game, 0, "D8", "E8");
+
+        expect(game.endingReason).toBe(EndingReason.Stalemate);
+        expect(game.winnerSideId).toBeNull();
+    });
+
+    it("Given a draw by agreement, When it is accepted, Then the draw has no winner", () => {
+        const game = gameWith({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1" });
+        offerDraw(game, 0);
+
+        answerDraw(game, 1, true);
+
+        expect(game.endingReason).toBe(EndingReason.MutualAgreement);
+        expect(game.winnerSideId).toBeNull();
+    });
+
+    it("Given kings behind fully blocked pawns, When the position is set up, Then the dead-position draw has no winner", () => {
+        const game = gameWith({
+            A1: "Rei-0", A3: "Peão-0", B4: "Peão-0", C3: "Peão-0", D4: "Peão-0", E3: "Peão-0", F4: "Peão-0", G3: "Peão-0", H4: "Peão-0",
+            A8: "Rei-1", A4: "Peão-1", B5: "Peão-1", C4: "Peão-1", D5: "Peão-1", E4: "Peão-1", F5: "Peão-1", G4: "Peão-1", H5: "Peão-1",
+        });
+
+        expect(game.endingReason).toBe(EndingReason.DeadPosition);
+        expect(game.winnerSideId).toBeNull();
+    });
+
+    it("Given a draw ending, When a winner is passed by mistake, Then the game still has no winner", () => {
+        const game = gameWith({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1" });
+
+        game.finish(GameEnding.MutualAgreement, 0);
+
+        expect(game.winnerSideId).toBeNull();
+    });
+
+    it("Given a win by checkmate, When the game ends, Then the mating side is the winner, not the one named", () => {
+        const game = gameWith({ B6: "Rei-0", H1: "Torre-0", A8: "Rei-1" });
+
+        playMove(game, 0, "H1", "H8");
+
+        expect(game.winnerSideId).toBe(0);
+    });
+});
+
+describe("resigning side (ladoIdDesistente)", () => {
+    it("Given a running game, When read, Then no side has resigned", () => {
+        expect(gameWith({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1" }).resignedSideId).toBeNull();
+    });
+
+    it("Given both sides seated, When Black resigns, Then Black is the resigning side and White wins", () => {
+        const game = gameWith({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1" });
+
+        seatPlayer(game, 1, null);
+
+        expect(game.resignedSideId).toBe(1);
+        expect(game.winnerSideId).toBe(0);
+    });
+
+    it("Given a resignation that is a draw, When read, Then the side that resigned is still named and there is no winner", () => {
+        const game = gameWith({ E1: "Rei-0", D1: "Rainha-0", A8: "Rei-1", C6: "Cavalo-1" });
+
+        seatPlayer(game, 0, null);
+
+        expect(game.endingReason).toBe(EndingReason.Resignation);
+        expect(game.resignedSideId).toBe(0);
+        expect(game.winnerSideId).toBeNull();
+    });
+
+    it("Given the opponent's seat is empty, When a side leaves, Then that side is named as the resigning side", () => {
+        const game = gameWith({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1" });
+        game.white.removeType();
+
+        seatPlayer(game, 1, null);
+
+        expect(game.resignedSideId).toBe(1);
+    });
+
+    it("Given a game ended by checkmate, When a side later leaves, Then no resigning side is recorded", () => {
+        const game = gameWith({ B6: "Rei-0", H1: "Torre-0", A8: "Rei-1" });
+        playMove(game, 0, "H1", "H8");
+
+        seatPlayer(game, 1, null);
+
+        expect(game.endingReason).toBe(EndingReason.Checkmate);
+        expect(game.resignedSideId).toBeNull();
+    });
+
+    it("Given a game already ended by a resignation, When the other side also leaves, Then the first resigning side stays", () => {
+        const game = gameWith({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1" });
+        seatPlayer(game, 1, null);
+
+        seatPlayer(game, 0, null);
+
+        expect(game.resignedSideId).toBe(1);
+    });
+
+    it("Given a draw by agreement, When read, Then no side is named as resigning", () => {
+        const game = gameWith({ E1: "Rei-0", H1: "Torre-0", A8: "Rei-1" });
+        offerDraw(game, 0);
+        answerDraw(game, 1, true);
+
+        expect(game.resignedSideId).toBeNull();
+    });
 });
 
 describe("resignation (FIDE 5.1.2)", () => {
